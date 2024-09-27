@@ -104,7 +104,7 @@ function AuthProvider({ children }) {
   }, []);
 
   const login = async ({ email, password }, callback) => {
-    const response = await apiService.post("api/auth/login", { email, password });
+    const response = await apiService.post("/auth/login", { email, password });
     const { user, accessToken } = response.data;
 
     setSession(accessToken);
