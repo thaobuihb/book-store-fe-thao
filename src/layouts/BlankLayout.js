@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { styled } from "@mui/material/styles";
-import Logo from "../components/logo";
 import { Stack } from "@mui/material";
+import LogoB from "../components/LogoB";
 
 const HeaderStyle = styled("header")(({ theme }) => ({
   top: "10%",
@@ -14,7 +14,7 @@ function BlankLayout() {
   return (
     <Stack minHeight="100vh" justifyContent="center" alignItems="center">
       <HeaderStyle>
-        <Logo sx={{ width: 80, height: 80 }}/>
+        <LogoB sx={{ width: 80, height: 80 }}/>
       </HeaderStyle>
       <Outlet />
     </Stack>

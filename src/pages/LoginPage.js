@@ -53,7 +53,7 @@ function LoginPage() {
 
     try {
       await auth.login({ email, password }, () => {
-        navigate(from, { replace: true });
+        navigate(from, { replace: true });// đẩy người dùng về nơi họ muốn đến
       });
     } catch (error) {
       reset();

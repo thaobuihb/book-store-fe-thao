@@ -10,6 +10,7 @@ import RegisterPage from "../pages/RegisterPage";
 import UserProfilePage from "../pages/UserProfilePage";
 import HomePage from "../pages/homePage";
 import AdminPage from "../pages/adminPage";
+import WishlistPage from "../pages/WishlistPage";
 
 import MainLayout from "../layouts/MainLayout";
 import BlankLayout from "../layouts/BlankLayout";
@@ -32,6 +33,8 @@ function Router() {
       <Route path="user/:userId" element={<UserProfilePage />}/>
       <Route path="/help" element={<HelpCenter />}/>
       <Route path="admin/:userId" element={<AdminPage />}/>
+      <Route path="wishlist/:userId" element={<WishlistPage />}/>
+
 
     </Routes>
   );
