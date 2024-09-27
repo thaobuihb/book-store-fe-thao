@@ -4,7 +4,7 @@ import {
   createTheme,
   ThemeProvider as MUIThemeProvider,
 } from "@mui/material/styles";
-// import customizeComponents from "./customizations";
+import customizeComponents from "./customizations";
 
 const PRIMARY = {
   lighter: "#1f3c34", 
@@ -82,7 +82,7 @@ function ThemeProvider({ children }) {
   };
 
   const theme = createTheme(themeOptions);
-//   theme.components = customizeComponents(theme);
+  theme.components = customizeComponents(theme);
 
   return (
     <MUIThemeProvider theme={theme}>
