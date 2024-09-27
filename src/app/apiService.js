@@ -1,7 +1,8 @@
 import axios from "axios";
+import { BASE_URL } from "./config";
 
 const apiService = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_API,
+  baseURL: BASE_URL,
 });
 
 apiService.interceptors.request.use(
@@ -18,12 +19,13 @@ apiService.interceptors.request.use(
 apiService.interceptors.response.use(
   (response) => {
     console.log("Response", response);
-    return response.data; 
+    return response.data;
   },
   function (error) {
-    console.log("RESPONSE ERROR", error.response);
+    console.log("RESPONSE ERROR", { error });
+    const message = error.response?.data?.errors?.message || "Unknown Error";
+    return Promise.reject({ message });
   }
 );
-
 
 export default apiService;

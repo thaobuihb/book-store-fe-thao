@@ -14,7 +14,7 @@ function BlankLayout() {
   return (
     <Stack minHeight="100vh" justifyContent="center" alignItems="center">
       <HeaderStyle>
-        <Logo sx={{ width: 70, height: 70 }}/>
+        <Logo sx={{ width: 80, height: 80 }}/>
       </HeaderStyle>
       <Outlet />
     </Stack>

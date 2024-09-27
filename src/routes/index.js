@@ -12,20 +12,25 @@ import HomePage from "../pages/homePage";
 import AdminPage from "../pages/adminPage";
 
 import MainLayout from "../layouts/MainLayout";
+import BlankLayout from "../layouts/BlankLayout";
+
 function Router() {
   return (
     <Routes>
     <Route element={<MainLayout />}>
       <Route path="/" element={<HomePage />}/>
       </Route>
-      <Route path="/login" element={<LoginPage />}/>
-      <Route path="/register" element={<RegisterPage />}/>
+
+     <Route element={<BlankLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
       <Route path="book/:bookId" element={<DetailPage />}/>
       <Route path="cart/:userId" element={<CartPage />}/>
       <Route path="order/:userId" element={<OrderPage />}/>
       <Route path="user/:userId" element={<UserProfilePage />}/>
       <Route path="/help" element={<HelpCenter />}/>
-      <Route path="*" element={<NotFoundPage />}/>
       <Route path="admin/:userId" element={<AdminPage />}/>
 
     </Routes>
