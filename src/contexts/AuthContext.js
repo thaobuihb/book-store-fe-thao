@@ -117,11 +117,13 @@ function AuthProvider({ children }) {
   };
 
   const register = async ({ name, email, password }, callback) => {
+    console.log("Bắt đầu đăng ký:", { name, email });
     const response = await apiService.post("/users", {
       name,
       email,
       password,
     });
+    console.log("Phản hồi từ server:", response);
 
     const { user, accessToken } = response.data;
     setSession(accessToken);
