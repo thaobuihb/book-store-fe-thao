@@ -5,7 +5,7 @@ import orderReducer from "../features/order/orderSlice";
 import wishlistReducer from "../features/wishlist/wishlistSlice";
 import adminReducer from "../features/admin/adminSlice";
 import userReducer from "../features/user/userSlice";
-
+import categoryReducer from "../features/category/categorySlice"
 const rootReducer = combineReducers({
   book: bookReducer,
   cart: cartReducer,
@@ -13,6 +13,7 @@ const rootReducer = combineReducers({
   wishlist: wishlistReducer,
   user: userReducer,
   admin: adminReducer,
+  category: categoryReducer
 });
 
 const store = configureStore({
