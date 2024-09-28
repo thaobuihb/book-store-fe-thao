@@ -4,8 +4,6 @@
   "private": true,
   "dependencies": {
     "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.4",
-    "@babel/preset-react": "^7.24.7",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^3.9.0",
@@ -19,6 +17,7 @@
     "axios": "^1.7.7",
     "babel-loader": "^9.2.1",
     "cloudinary": "^2.5.0",
+    "jest": "^27.5.1",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "numeral": "^2.0.6",
@@ -30,6 +29,8 @@
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.5",
+    "redux-mock-store": "^1.5.4",
+    "redux-thunk": "^3.1.0",
     "web-vitals": "^2.1.4",
     "yup": "^1.4.0"
   },
@@ -58,6 +59,9 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "babel-jest": "^29.7.0"
   }
 }
