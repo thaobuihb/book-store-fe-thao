@@ -20,13 +20,6 @@ function Router() {
     <Routes>
     <Route element={<MainLayout />}>
       <Route path="/" element={<HomePage />}/>
-      </Route>
-
-     <Route element={<BlankLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
       <Route path="book/:bookId" element={<DetailPage />}/>
       <Route path="cart/:userId" element={<CartPage />}/>
       <Route path="order/:userId" element={<OrderPage />}/>
@@ -34,8 +27,13 @@ function Router() {
       <Route path="/help" element={<HelpCenter />}/>
       <Route path="admin/:userId" element={<AdminPage />}/>
       <Route path="wishlist/:userId" element={<WishlistPage />}/>
+      </Route>
 
-
+     <Route element={<BlankLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
     </Routes>
   );
 }

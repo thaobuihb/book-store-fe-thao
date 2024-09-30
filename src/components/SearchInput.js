@@ -12,12 +12,12 @@ function SearchInput({ handleSubmit }) {
   };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} style={{ width: "100%" }}>
       <TextField
         value={searchQuery}
         placeholder="Search by name"
         onChange={(event) => setSearchQuery(event.target.value)}
-        sx={{ width: 300 }}
+        sx={{ width: "100%" }}
         size="small"
         InputProps={{
           endAdornment: (

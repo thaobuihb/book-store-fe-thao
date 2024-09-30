@@ -10,9 +10,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-
 import { useNavigate, useLocation, Link as RouterLink } from "react-router-dom";
-
 import { FCheckbox, FormProvider, FTextField } from "../components/form";
 import useAuth from "../hooks/useAuth";
 import { useForm } from "react-hook-form";
@@ -30,7 +28,7 @@ const defaultValues = {
   remember: true,
 };
 
-function LoginPage() {
+function LoginPage({ setUserProfile }) { 
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
@@ -50,10 +48,16 @@ function LoginPage() {
   const onSubmit = async (data) => {
     const from = location.state?.from?.pathname || "/";
     let { email, password } = data;
-
+  
     try {
-      await auth.login({ email, password }, () => {
-        navigate(from, { replace: true });// đẩy người dùng về nơi họ muốn đến
+      const user = await auth.login({ email, password }, () => {
+        navigate(from, { replace: true });
+      });
+      
+      // Lưu thông tin người dùng sau khi đăng nhập thành công
+      setUserProfile({
+        name: user.name,
+        avatar: user.avatar || null, // Avatar nếu có, nếu không thì null
       });
     } catch (error) {
       reset();

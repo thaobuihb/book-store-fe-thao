@@ -11,7 +11,8 @@ const PRIMARY = {
   light: "#0d3e31",   
   main: "#0a5b46",    
   dark: "#08473d",    
-  darker: "#062e2a",  
+  darker: "#062e2a",
+  lightest: alpha("#0a5b46", 0.05), 
   contrastText: "#FFF", 
 };
 

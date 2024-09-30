@@ -11,21 +11,26 @@ import {
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import PersonIcon from "@mui/icons-material/Person"; // Import the person icon
+import PersonIcon from "@mui/icons-material/Person";
 import LogoB from "../components/LogoB";
 import SearchInput from "../components/SearchInput";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth"; // Import hook auth
 
 const handleSearch = (query) => {
   console.log("Search query:", query);
-  // Logic xử lý tìm kiếm
 };
 
 function MainHeader() {
-  const isAuthenticated = false; // Thiết lập là false để mô phỏng trạng thái chưa đăng nhập
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
   const cartItemCount = 3;
 
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [userProfile, setUserProfile] = useState({
+    name: "",
+  });
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -35,19 +40,25 @@ function MainHeader() {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    logout();
+    setUserProfile({ name: "", avatar: null }); 
+    navigate("/", { replace: true }); 
+  };
+
   return (
     <Box>
       <AppBar position="static" color="primary">
-        <Toolbar sx={{ justifyContent: "center", alignItems: "center" }}>
+        <Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
           {/* LogoB */}
           <IconButton
             size="large"
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ mr: 2 }}
+            sx={{ mr: 1, ml: 5, marginTop: 5 }}
           >
-            <LogoB sx={{ width: 80, height: 80 }} />
+            <LogoB sx={{ width: 100, height: 100 }} />
           </IconButton>
 
           {/* Search Box */}
@@ -58,6 +69,9 @@ function MainHeader() {
               flexGrow: 1,
               maxWidth: "400px",
               mx: 2,
+              backgroundColor: "white",
+              borderRadius: 1,
+              marginRight: 80,
             }}
           >
             <SearchInput handleSubmit={handleSearch} />
@@ -68,7 +82,6 @@ function MainHeader() {
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
               mx: 2,
             }}
           >
@@ -115,33 +128,30 @@ function MainHeader() {
               </IconButton>
             </RouterLink>
             {!isAuthenticated ? (
-              <>
-                <RouterLink
-                  to={"/login"}
-                  sx={{ textDecoration: "none", color: "white", mx: 1 }}
-                >
+              <RouterLink
+                to={"/login"}
+                sx={{ textDecoration: "none", color: "white", mx: 1 }}
+              >
+                <Typography sx={{ color: "white", textDecoration: "none" }}>
                   Login
-                </RouterLink>
-              </>
+                </Typography>
+              </RouterLink>
             ) : (
               <div>
                 <Typography
                   onClick={handleMenu}
                   variant="h6"
-                  component="div"
                   sx={{
                     flexGrow: 1,
                     fontFamily: "Arial",
                     fontSize: "16px",
                     fontWeight: "bold",
-                    "&:hover": {
-                      opacity: 0.8,
-                      cursor: "pointer",
-                    },
                     color: "white",
+                    cursor: "pointer",
+                    "&:hover": { opacity: 0.8 },
                   }}
                 >
-                  User Name
+                  {userProfile.name || "User"}
                 </Typography>
 
                 <Menu
@@ -154,7 +164,7 @@ function MainHeader() {
                   sx={{ mr: 0 }}
                 >
                   <MenuItem onClick={handleClose}>Profile</MenuItem>
-                  <MenuItem onClick={handleClose}>Log out</MenuItem>
+                  <MenuItem onClick={() => handleLogout()}>Log out</MenuItem>
                 </Menu>
               </div>
             )}
@@ -173,7 +183,7 @@ function MainHeader() {
           <RouterLink to={"#"}>
             <Typography
               sx={{
-                mx: 5,
+                mx: 3,
                 color: "white",
                 fontSize: "16px",
                 fontWeight: "bold",
@@ -186,7 +196,7 @@ function MainHeader() {
           <RouterLink to={"#"}>
             <Typography
               sx={{
-                mx: 5,
+                mx: 3,
                 color: "white",
                 fontSize: "16px",
                 fontWeight: "bold",
@@ -199,7 +209,7 @@ function MainHeader() {
           <RouterLink to={"/help"}>
             <Typography
               sx={{
-                mx: 5,
+                mx: 3,
                 color: "white",
                 fontSize: "16px",
                 fontWeight: "bold",

@@ -1,162 +1,413 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getDiscountedBooks, getNewlyReleasedBooks } from "../features/book/bookSlice";
-import { Container, Typography, Grid, Card, CardContent, CardMedia, IconButton } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import React, { useEffect, useState, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getBooks,
+  getDiscountedBooks,
+  getNewlyReleasedBooks,
+  getBooksByCategory,
+} from "../features/book/bookSlice";
+import { getPopularCategories } from "../features/category/categorySlice"; // Import getPopularCategories
+import {
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardMedia,
+  IconButton,
+  CardActionArea,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import { useNavigate } from "react-router-dom";
 
 // Styled component cho Slideshow
-const SlideshowContainer = styled('div')({
-  width: '100%',
-  height: '300px',
-  backgroundColor: '#f0f0f0',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: '20px',
+const SlideshowContainer = styled("div")({
+  width: "100%",
+  height: "100%",
+  backgroundColor: "#f0f0f0",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: "20px",
 });
-
-// Styled component cho Book Card
-const BookCard = styled(Card)({
-  maxWidth: 200,
-  margin: '10px',
-});
-
-// Dữ liệu giả lập cho slideshow
-const slideshowData = [
-  { id: 1, image: 'https://via.placeholder.com/300x300', title: 'Sách Giới thiệu 1' },
-  { id: 2, image: 'https://via.placeholder.com/300x300', title: 'Sách Giới thiệu 2' },
-  { id: 3, image: 'https://via.placeholder.com/300x300', title: 'Sách Giới thiệu 3' },
-];
 
 const Home = () => {
   const dispatch = useDispatch();
-  const { discountedBooks, newlyReleasedBooks } = useSelector((state) => state.book);
-  const [currentPage, setCurrentPage] = useState(1);
-  const booksPerPage = 5; 
-  const totalPages = Math.ceil(discountedBooks.length / booksPerPage);
+  const navigate = useNavigate();
+  const { books, discountedBooks, newlyReleasedBooks, booksByCategory } =
+    useSelector((state) => state.book);
+  const { popularCategories } = useSelector((state) => state.category); // Lấy danh mục phổ biến từ Redux
+  const [slideshowBooks, setSlideshowBooks] = useState([]);
+  
+
+  const booksPerPage = 5;
+  const totalDiscountedPages = Math.ceil(discountedBooks.length / booksPerPage);
+  const totalNewReleasePages = Math.ceil(
+    newlyReleasedBooks.length / booksPerPage
+  );
+  const totalCategoryPages = Math.ceil(booksByCategory.length / booksPerPage); // Tính tổng số trang cho danh mục
+  const [currentDiscountedPage, setCurrentDiscountedPage] = useState(1);
+  const [currentNewReleasePage, setCurrentNewReleasePage] = useState(1);
+  const [currentCategoryPage, setCurrentCategoryPage] = useState(1); // Trạng thái cho trang của danh mục
+
+  // Hàm để chọn 3 sách ngẫu nhiên cho slideshow
+  const getRandomBooks = useCallback(() => {
+    const randomBooks = [];
+    const bookSet = new Set();
+
+    while (bookSet.size < 3 && books.length > 0) {
+      const randomIndex = Math.floor(Math.random() * books.length);
+      bookSet.add(books[randomIndex]);
+    }
+
+    randomBooks.push(...bookSet);
+    setSlideshowBooks(randomBooks);
+  }, [books]);
 
   useEffect(() => {
+    dispatch(getBooks());
     dispatch(getDiscountedBooks());
-    dispatch(getNewlyReleasedBooks());
+    dispatch(getNewlyReleasedBooks()); // Lấy sách mới phát hành
+    dispatch(getPopularCategories()); // Lấy danh mục phổ biến
   }, [dispatch]);
 
+  // Cập nhật sách ngẫu nhiên sau mỗi 30 giây
+  useEffect(() => {
+    if (books.length > 0) {
+      getRandomBooks(); // Chọn 3 sách ngẫu nhiên khi có dữ liệu
+      const interval = setInterval(() => {
+        getRandomBooks(); // Cập nhật sách ngẫu nhiên sau mỗi 30 giây
+      }, 10000);
+
+      return () => clearInterval(interval); // Xóa interval khi component unmount
+    }
+  }, [books, getRandomBooks]);
+
+  useEffect(() => {
+    dispatch(getBooksByCategory("66ee3a6f1191f821c77c5708"));
+  }, [dispatch]);
+
+  const handleNextDiscountedPage = () => {
+    if (currentDiscountedPage < totalDiscountedPages) {
+      setCurrentDiscountedPage(currentDiscountedPage + 1);
+    }
+  };
+
+  const handlePrevDiscountedPage = () => {
+    if (currentDiscountedPage > 1) {
+      setCurrentDiscountedPage(currentDiscountedPage - 1);
+    }
+  };
+
+  const handleNextNewReleasePage = () => {
+    if (currentNewReleasePage < totalNewReleasePages) {
+      setCurrentNewReleasePage(currentNewReleasePage + 1);
+    }
+  };
+
+  const handlePrevNewReleasePage = () => {
+    if (currentNewReleasePage > 1) {
+      setCurrentNewReleasePage(currentNewReleasePage - 1);
+    }
+  };
+
+  const handleNextCategoryPage = () => {
+    // Hàm cho trang danh mục
+    if (currentCategoryPage < totalCategoryPages) {
+      setCurrentCategoryPage(currentCategoryPage + 1);
+    }
+  };
+
+  const handlePrevCategoryPage = () => {
+    // Hàm cho trang danh mục
+    if (currentCategoryPage > 1) {
+      setCurrentCategoryPage(currentCategoryPage - 1);
+    }
+  };
+
+  // Điều hướng tới trang chi tiết sách
+  const handleBookClick = (bookId) => {
+    navigate(`/book/${bookId}`);
+  };
+
   // Tính toán sách giảm giá hiển thị theo trang
-  const indexOfLastBook = currentPage * booksPerPage;
-  const indexOfFirstBook = indexOfLastBook - booksPerPage;
-  const currentDiscountedBooks = discountedBooks.slice(indexOfFirstBook, indexOfLastBook);
+  const indexOfLastDiscountedBook = currentDiscountedPage * booksPerPage;
+  const indexOfFirstDiscountedBook = indexOfLastDiscountedBook - booksPerPage;
+  const currentDiscountedBooks = discountedBooks.slice(
+    indexOfFirstDiscountedBook,
+    indexOfLastDiscountedBook
+  );
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  // Tính toán sách mới phát hành hiển thị theo trang
+  const indexOfLastNewReleaseBook = currentNewReleasePage * booksPerPage;
+  const indexOfFirstNewReleaseBook = indexOfLastNewReleaseBook - booksPerPage;
+  const currentNewlyReleasedBooks = newlyReleasedBooks.slice(
+    indexOfFirstNewReleaseBook,
+    indexOfLastNewReleaseBook
+  );
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  // Tính toán sách theo danh mục hiển thị theo trang
+  const indexOfLastCategoryBook = currentCategoryPage * booksPerPage;
+  const indexOfFirstCategoryBook = indexOfLastCategoryBook - booksPerPage;
+  const currentCategoryBooks = booksByCategory.slice(
+    indexOfFirstCategoryBook,
+    indexOfLastCategoryBook
+  );
 
   return (
     <Container>
       {/* Slide giới thiệu sách */}
       <SlideshowContainer>
-        {slideshowData.map((slide) => (
-          <img key={slide.id} src={slide.image} alt={slide.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ))}
+        <Grid container spacing={2}>
+          {slideshowBooks.map((book) => (
+            <Grid item xs={12} sm={4} key={book.id}>
+              <Card
+                sx={{
+                  maxWidth: 300,
+                  height: 300,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignSelf: "center",
+                  m: 3,
+                }}
+              >
+                <CardActionArea onClick={() => handleBookClick(book.id)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt="Book Cover"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </SlideshowContainer>
 
       {/* Sách mới phát hành */}
       <section>
         <Typography variant="h4" gutterBottom>
-          Sách mới phát hành
+        New Releases
         </Typography>
-        <Grid container spacing={2}>
-          {newlyReleasedBooks.map((book) => (
-            <Grid item xs={12} sm={6} md={4} key={book.id}>
-              <BookCard>
-                <CardMedia
-                  component="img"
-                  alt={book.title}
-                  height="140"
-                  image={book.image}
-                />
-                <CardContent>
-                  <Typography variant="h6">{book.title}</Typography>
-                  <Typography variant="body2" color="textSecondary">{book.author}</Typography>
-                </CardContent>
-              </BookCard>
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
+          {currentNewlyReleasedBooks.map((book) => (
+            <Grid item key={book.id}>
+              <Card
+                sx={{
+                  maxWidth: 250,
+                  height: 200,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignSelf: "center",
+                  m: 3,
+                }}
+              >
+                <CardActionArea onClick={() => handleBookClick(book.id)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt="Book Cover"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </CardActionArea>
+              </Card>
             </Grid>
           ))}
+        </Grid>
+
+        {/* Phân trang cho sách mới phát hành */}
+        <Grid
+          container
+          justifyContent="space-between"
+          alignItems="center"
+          item
+          xs={12}
+        >
+          <Grid item>
+            <IconButton
+              onClick={handlePrevNewReleasePage}
+              disabled={currentNewReleasePage === 1}
+            >
+              <KeyboardArrowLeft />
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <IconButton
+              onClick={handleNextNewReleasePage}
+              disabled={currentNewReleasePage === totalNewReleasePages}
+            >
+              <KeyboardArrowRight />
+            </IconButton>
+          </Grid>
         </Grid>
       </section>
 
       {/* Sách giảm giá */}
       <section>
         <Typography variant="h4" gutterBottom>
-          Sách giảm giá
+        Discount
         </Typography>
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {currentDiscountedBooks.map((book) => (
             <Grid item key={book.id}>
-              <BookCard>
-                <CardMedia
-                  component="img"
-                  alt={book.title}
-                  height="140"
-                  image={book.image}
-                />
-                <CardContent>
-                  <Typography variant="h6">{book.title}</Typography>
-                  <Typography variant="body2" color="textSecondary">{book.author}</Typography>
-                </CardContent>
-              </BookCard>
+              <Card
+                sx={{
+                  maxWidth: 250,
+                  height: 200,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignSelf: "center",
+                  m: 3,
+                }}
+              >
+                <CardActionArea onClick={() => handleBookClick(book.id)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt="Book Cover"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </CardActionArea>
+              </Card>
             </Grid>
           ))}
+        </Grid>
 
-          {/* Phân trang cho sách giảm giá */}
-          <Grid container justifyContent="space-between" alignItems="center" item xs={12}>
-            <Grid item>
-              <IconButton onClick={handlePrevPage} disabled={currentPage === 1}>
-                <KeyboardArrowLeft />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton onClick={handleNextPage} disabled={currentPage === totalPages}>
-                <KeyboardArrowRight />
-              </IconButton>
-            </Grid>
+        {/* Phân trang cho sách giảm giá */}
+        <Grid
+          container
+          justifyContent="space-between"
+          alignItems="center"
+          item
+          xs={12}
+        >
+          <Grid item>
+            <IconButton
+              onClick={handlePrevDiscountedPage}
+              disabled={currentDiscountedPage === 1}
+            >
+              <KeyboardArrowLeft />
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <IconButton
+              onClick={handleNextDiscountedPage}
+              disabled={currentDiscountedPage === totalDiscountedPages}
+            >
+              <KeyboardArrowRight />
+            </IconButton>
           </Grid>
         </Grid>
       </section>
-
-      {/* Các danh mục phổ biến trong sách */}
+      {/* Phần Danh mục Phổ Biến */}
       <section>
         <Typography variant="h4" gutterBottom>
-          Các danh mục phổ biến
+        Popular Categories in Books
         </Typography>
-        <Typography variant="body1">Danh mục sách phổ biến sẽ được hiển thị ở đây.</Typography>
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
+          {popularCategories.map((category) => (
+            <Grid item key={category.id} xs={2}>
+              <Card
+                sx={{
+                  maxWidth: 250,
+                  height: 100,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  m: 3,
+                }}
+              >
+                <CardActionArea
+                  onClick={() => navigate(`/categories/${category.id}`)}
+                >
+                  <Typography variant="h6" align="center">
+                    {category.name}
+                  </Typography>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </section>
-
-      {/* Sách dành cho thanh thiếu niên & tuổi trẻ */}
+      {/* Sách theo danh mục Teens & YA */}
       <section>
         <Typography variant="h4" gutterBottom>
-          Sách dành cho thanh thiếu niên & tuổi trẻ
+          Teens & YA Books
         </Typography>
-        <Typography variant="body1">Danh sách sách dành cho thanh thiếu niên sẽ được hiển thị ở đây.</Typography>
-      </section>
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
+          {currentCategoryBooks.map((book) => (
+            <Grid item key={book.id} xs={2}>
+              <Card
+                sx={{
+                  maxWidth: 200,
+                  height: 200,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignSelf: "center",
+                  m: 3,
+                }}
+              >
+                <CardActionArea onClick={() => handleBookClick(book.id)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt="Book Cover"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
 
-      {/* Giới thiệu về trang sách */}
-      <div>
-        <Typography variant="h5" gutterBottom>
-          Giới thiệu
-        </Typography>
-        <Typography>
-          Đây là trang sách của tôi, nơi bạn có thể tìm thấy nhiều sách hay và thông tin về các danh mục sách khác nhau.
-        </Typography>
-      </div>
+        {/* Phân trang cho danh mục Teens & YA */}
+        <Grid
+          container
+          justifyContent="space-between"
+          alignItems="center"
+          item
+          xs={12}
+        >
+          <Grid item>
+            <IconButton
+              onClick={handlePrevCategoryPage}
+              disabled={currentCategoryPage === 1}
+            >
+              <KeyboardArrowLeft />
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <IconButton
+              onClick={handleNextCategoryPage}
+              disabled={currentCategoryPage === totalCategoryPages}
+            >
+              <KeyboardArrowRight />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </section>
     </Container>
   );
 };
