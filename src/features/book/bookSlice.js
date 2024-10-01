@@ -114,6 +114,7 @@ export const getBooks =
     dispatch(bookSlice.actions.startLoading());
     try {
       const response = await apiService.get(`/books`);
+      console.log("*****", response)
       dispatch(bookSlice.actions.getBooksSuccess(response.data));
       dispatch(bookSlice.actions.endLoading());
     } catch (error) {
