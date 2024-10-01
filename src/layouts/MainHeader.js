@@ -23,14 +23,11 @@ const handleSearch = (query) => {
 
 function MainHeader() {
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const cartItemCount = 3;
 
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [userProfile, setUserProfile] = useState({
-    name: "",
-  });
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -40,19 +37,10 @@ function MainHeader() {
     setAnchorEl(null);
   };
 
-  const handleLogin = (user) => {
-    setUserProfile({ name: user.name, avatar: user.avatar });
-  };
-
   const handleLogout = () => {
     logout(() => {
-      setUserProfile({ name: "", avatar: null });
       navigate("/", { replace: true });
     });
-  };
-
-  const handleSuccessfulLogin = (user) => {
-    handleLogin(user);
   };
 
   return (
@@ -121,7 +109,7 @@ function MainHeader() {
               </IconButton>
             </RouterLink>
 
-            {/* User Account */}
+            {/* User Account
             <RouterLink
               to={"/admin/:userId"}
               style={{ textDecoration: "none", color: "black" }}
@@ -135,7 +123,7 @@ function MainHeader() {
               >
                 <PersonIcon />
               </IconButton>
-            </RouterLink>
+            </RouterLink> */}
             {!isAuthenticated ? (
               <RouterLink
                 to={"/login"}
@@ -160,7 +148,7 @@ function MainHeader() {
                     "&:hover": { opacity: 0.8 },
                   }}
                 >
-                  {userProfile.name || "User"} 
+                  {user.name || "User"} 
                 </Typography>
 
                 <Menu
