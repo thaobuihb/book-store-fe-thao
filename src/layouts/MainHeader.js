@@ -56,7 +56,7 @@ function MainHeader() {
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ mr: 1, ml: 5, marginTop: 5 }}
+            sx={{ mr: 1, ml: 2, marginTop: 2 }}
           >
             <LogoB sx={{ width: 100, height: 100 }} />
           </IconButton>
