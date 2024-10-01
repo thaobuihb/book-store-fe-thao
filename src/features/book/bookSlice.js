@@ -144,15 +144,22 @@ export const getDiscountedBooks = () => async (dispatch) => {
 export const getSingleBook = (id, userId) => async (dispatch) => {
   dispatch(bookSlice.actions.startLoading());
   try {
-    const response = await apiService.get(`/books/${id}`);
-    const responseCart = await apiService.get(`/carts/${userId}`);
-    dispatch(bookSlice.actions.getCart(responseCart.data));
-    dispatch(bookSlice.actions.getBookDetailSuccess(response.data));
+    // Gọi API lấy thông tin sách
+    const bookResponse = await apiService.get(`/books/66f9e74bf25e569c8a723072`);
+    console.log("Book Response:", bookResponse.data); // Kiểm tra phản hồi từ API
+    dispatch(bookSlice.actions.getBookDetailSuccess(bookResponse.data));
+
+    // Gọi API lấy thông tin giỏ hàng nếu có userId
+    if (userId) {
+      const cartResponse = await apiService.get(`/carts/${userId}`);
+      dispatch(bookSlice.actions.getCart(cartResponse.data));
+    }
   } catch (error) {
     dispatch(bookSlice.actions.hasError(error));
     toast.error(error.message);
   }
 };
+
 
 export const getBookDetailAgain = (id) => async (dispatch) => {
   try {
