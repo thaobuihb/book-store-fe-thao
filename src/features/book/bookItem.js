@@ -22,40 +22,65 @@ const BookItem = ({
   handleNextPage,
   handlePrevPage,
 }) => {
+
+  const bookList = Array.isArray(books) ? books : [];
+
   return (
     <section>
       <Typography variant="h4" gutterBottom>
         {title}
       </Typography>
       <Grid container spacing={2}>
-        {books.map((book) => (
-          <Grid item xs={2.4} sm={2.4} md={2.4} key={book._id}>
-            <Card>
-              <CardActionArea onClick={() => handleBookClick(book._id)}>
-                <CardMedia
-                  component="img"
-                  image={book.img}
-                  alt={book.title}
-                  sx={{
-                    height: 200,
-                    objectFit: "cover",
+        {bookList.length === 0 ? (
+          <Typography variant="body1" color="textSecondary">
+            No books available.
+          </Typography>
+        ) : (
+          bookList.map((book) => (
+            <Grid item xs={2.4} sm={2.4} md={2.4} key={book._id}>
+              <Card>
+                <CardActionArea onClick={() => handleBookClick(book._id)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt={book.title}
+                    sx={{
+                      height: 200,
+                      objectFit: "cover",
+                    }}
+                  />
+                  <Typography variant="h6" component="h2" sx={{ p: 1 }}>
+                    {book.title}
+                  </Typography>
+                </CardActionArea>
+                <div
+                  style={{
+                    padding: "2px",
+                    display: "flex",
+                    justifyContent: "center",
                   }}
-                />
-                <Typography variant="h6" component="h2" sx={{ p: 1 }}>
-                  {book.title}
-                </Typography>
-              </CardActionArea>
-              <div style={{ padding: "2px", display: "flex", justifyContent: "center" }}>
-                <IconButton color="primary" onClick={() => {/* logic để thêm vào giỏ hàng */}}>
-                  <AddShoppingCartIcon />
-                </IconButton>
-                <IconButton color="secondary" onClick={() => {/* logic để thêm vào wishlist */}}>
-                  <FavoriteIcon />
-                </IconButton>
-              </div>
-            </Card>
-          </Grid>
-        ))}
+                >
+                  <IconButton
+                    color="primary"
+                    onClick={() => {
+                      // logic để thêm vào giỏ hàng
+                    }}
+                  >
+                    <AddShoppingCartIcon />
+                  </IconButton>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => {
+                      // logic để thêm vào wishlist
+                    }}
+                  >
+                    <FavoriteIcon />
+                  </IconButton>
+                </div>
+              </Card>
+            </Grid>
+          ))
+        )}
       </Grid>
 
       {/* Nút phân trang với biểu tượng */}
@@ -69,9 +94,12 @@ const BookItem = ({
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="body1">
-         {currentPage} of {totalPages}
+          {currentPage} of {totalPages}
         </Typography>
-        <IconButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
           <ArrowForwardIcon />
         </IconButton>
       </Box>

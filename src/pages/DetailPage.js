@@ -115,7 +115,7 @@ const DetailPage = () => {
         <Typography variant="h5" sx={{ mb: 2 }}>
           Books from the Same Category
         </Typography>
-        {/* Thêm component hiển thị danh sách sách ở đây */}
+        <BookItem/>
       </Box>
     </Box>
   );

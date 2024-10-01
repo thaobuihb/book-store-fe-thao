@@ -7,7 +7,14 @@ import {
   getBooksByCategory,
   getCategoryOfBooks,
 } from "../features/book/bookSlice";
-import { Container, Grid, Card, CardMedia, CardActionArea, Typography } from "@mui/material"; // Import các thành phần cần thiết
+import {
+  Container,
+  Grid,
+  Card,
+  CardMedia,
+  CardActionArea,
+  Typography,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import BookItem from "../features/book/bookItem";
@@ -26,15 +33,22 @@ const SlideshowContainer = styled("div")({
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { books, discountedBooks, newlyReleasedBooks, booksByCategory, categoryOfBooks } = useSelector((state) => state.book);
+  const {
+    books,
+    discountedBooks,
+    newlyReleasedBooks,
+    booksByCategory,
+    categoryOfBooks,
+  } = useSelector((state) => state.book);
   console.log("12345#", categoryOfBooks);
   const [slideshowBooks, setSlideshowBooks] = useState([]);
 
   const booksPerPage = 5;
   const totalDiscountedPages = Math.ceil(discountedBooks.length / booksPerPage);
-  const totalNewReleasePages = Math.ceil(newlyReleasedBooks.length / booksPerPage);
+  const totalNewReleasePages = Math.ceil(
+    newlyReleasedBooks.length / booksPerPage
+  );
   const totalCategoryPages = Math.ceil(booksByCategory.length / booksPerPage);
-  const totalCategoryBook = Math.ceil(categoryOfBooks.length/ booksPerPage);
   const [currentDiscountedPage, setCurrentDiscountedPage] = useState(1);
   const [currentNewReleasePage, setCurrentNewReleasePage] = useState(1);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(1);
@@ -57,6 +71,7 @@ const Home = () => {
     dispatch(getDiscountedBooks());
     dispatch(getNewlyReleasedBooks());
     dispatch(getCategoryOfBooks());
+    dispatch(getBooksByCategory("66ee3a6f1191f821c77c5708"));
   }, [dispatch]);
 
   useEffect(() => {
@@ -69,9 +84,6 @@ const Home = () => {
     }
   }, [books, getRandomBooks]);
 
-  useEffect(() => {
-    dispatch(getBooksByCategory("66ee3a6f1191f821c77c5708"));
-  }, [dispatch]);
 
   const handleNextDiscountedPage = () => {
     if (currentDiscountedPage < totalDiscountedPages) {
@@ -112,7 +124,9 @@ const Home = () => {
   const handleBookClick = (bookId) => {
     navigate(`/book/${bookId}`);
   };
-
+  const handleCategoryOfBookClick = (categoryId) => {
+    navigate(`/catalogbooks?category=${categoryId}`);
+  };
   // Tính toán sách hiển thị theo trang
   const currentDiscountedBooks = discountedBooks.slice(
     (currentDiscountedPage - 1) * booksPerPage,
@@ -128,7 +142,7 @@ const Home = () => {
     (currentCategoryPage - 1) * booksPerPage,
     currentCategoryPage * booksPerPage
   );
-console.log(slideshowBooks)
+  console.log(slideshowBooks);
   return (
     <Container>
       <SlideshowContainer>
@@ -185,53 +199,55 @@ console.log(slideshowBooks)
       />
 
       {/* Phần Danh mục Phổ Biến */}
-{/* Phần Danh mục Phổ Biến */}
-{/* Phần Danh mục Phổ Biến */}
-<section>
-  <Typography variant="h4" gutterBottom>
-    Popular Categories in Books
-  </Typography>
-  <Grid container spacing={2} justifyContent="center" alignItems="center">
-    {Array.isArray(categoryOfBooks) && categoryOfBooks.slice(0, 6).map((category) => (
-      <Grid item key={category._id} xs={2}>
-        <Card
-          sx={{
-            maxWidth: 250,
-            height: 250, 
-            display: "flex",
-            justifyContent: "space-between",
-            flexDirection: "column",
-            alignSelf: "center",
-            m: 3,
-          }}
-        >
-          <CardActionArea>
-            <Typography variant="h6" align="center">
-              {category.name}
-            </Typography>
-            {/* Nếu có ảnh danh mục, hiển thị nó */}
-            {category.sampleBookImage && (
-              <CardMedia
-                component="img"
-                image={category.sampleBookImage}
-                alt={category.name} // Thêm mô tả hình ảnh
-                sx={{
-                  width: "100%",
-                  height: "60%", // Đặt chiều cao để hình ảnh chiếm một phần của thẻ
-                  objectFit: "cover",
-                }}
-              />
-            )}
-            {/* Hiển thị số lượng sách trong danh mục */}
-            <Typography variant="body2" align="center" color="text.secondary">
-              {category.count} books
-            </Typography>
-          </CardActionArea>
-        </Card>
-      </Grid>
-    ))}
-  </Grid>
-</section>
+      <section>
+        <Typography variant="h4" gutterBottom>
+          Popular Categories in Books
+        </Typography>
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
+          {Array.isArray(categoryOfBooks) &&
+            categoryOfBooks.slice(0, 6).map((category) => (
+              <Grid item key={category._id} xs={2}>
+                <Card
+                  sx={{
+                    maxWidth: 250,
+                    height: 250,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    flexDirection: "column",
+                    alignSelf: "center",
+                    m: 3,
+                  }}
+                >
+                  <CardActionArea onClick={() => handleCategoryOfBookClick(category._id)}>
+                    <Typography variant="h6" align="center" sx={{fontSize:'15px'}}>
+                      {category.name}
+                    </Typography>
+                    {category.sampleBookImage && (
+                      <CardMedia
+                        component="img"
+                        image={category.sampleBookImage}
+                        alt={category.name} 
+                        sx={{
+                          width: "100%",
+                          height: "60%", 
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
+                    {/* Hiển thị số lượng sách trong danh mục */}
+                    <Typography
+                      variant="body2"
+                      align="center"
+                      color="text.secondary"
+                    >
+                      {category.count} books
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            ))}
+        </Grid>
+      </section>
 
       <BookItem
         title="Teens & YA Books"

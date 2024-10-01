@@ -15,7 +15,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoB from "../components/LogoB";
 import SearchInput from "../components/SearchInput";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth"; // Import hook auth
+import useAuth from "../hooks/useAuth"; 
 
 const handleSearch = (query) => {
   console.log("Search query:", query);
@@ -40,10 +40,19 @@ function MainHeader() {
     setAnchorEl(null);
   };
 
+  const handleLogin = (user) => {
+    setUserProfile({ name: user.name, avatar: user.avatar });
+  };
+
   const handleLogout = () => {
-    logout();
-    setUserProfile({ name: "", avatar: null }); 
-    navigate("/", { replace: true }); 
+    logout(() => {
+      setUserProfile({ name: "", avatar: null });
+      navigate("/", { replace: true });
+    });
+  };
+
+  const handleSuccessfulLogin = (user) => {
+    handleLogin(user);
   };
 
   return (
@@ -151,7 +160,7 @@ function MainHeader() {
                     "&:hover": { opacity: 0.8 },
                   }}
                 >
-                  {userProfile.name || "User"}
+                  {userProfile.name || "User"} 
                 </Typography>
 
                 <Menu
@@ -164,7 +173,7 @@ function MainHeader() {
                   sx={{ mr: 0 }}
                 >
                   <MenuItem onClick={handleClose}>Profile</MenuItem>
-                  <MenuItem onClick={() => handleLogout()}>Log out</MenuItem>
+                  <MenuItem onClick={handleLogout}>Log out</MenuItem>
                 </Menu>
               </div>
             )}

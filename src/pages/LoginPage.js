@@ -54,10 +54,9 @@ function LoginPage({ setUserProfile }) {
         navigate(from, { replace: true });
       });
       
-      // Lưu thông tin người dùng sau khi đăng nhập thành công
       setUserProfile({
         name: user.name,
-        avatar: user.avatar || null, // Avatar nếu có, nếu không thì null
+        avatar: user.avatar || null, 
       });
     } catch (error) {
       reset();
