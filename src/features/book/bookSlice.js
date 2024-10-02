@@ -120,12 +120,16 @@ export const getBooks = (page, search, minPrice, maxPrice, category) => async (d
       category: category || "",
     }).toString();
 
-    console.log("Fetching books with URL:", `/books?${queryParams}`);  // In URL gọi API ra để kiểm tra
-
+    console.log("Fetching books with URL:", `/books?${queryParams}`);
+    
     const response = await apiService.get(`/books?${queryParams}`);
+    
+    console.log("Books API response:", response.data);
     dispatch(bookSlice.actions.getBooksSuccess(response.data));
     dispatch(bookSlice.actions.endLoading());
   } catch (error) {
+    console.log("Axios Error:", error);  
+    console.log("Error response data:", error.response?.data);  
     dispatch(bookSlice.actions.hasError(error));
     toast.error(error.message);
   }
