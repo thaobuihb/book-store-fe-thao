@@ -9,6 +9,7 @@ import {
   Box,
 } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -22,7 +23,6 @@ const BookItem = ({
   handleNextPage,
   handlePrevPage,
 }) => {
-
   const bookList = Array.isArray(books) ? books : [];
 
   return (
@@ -66,7 +66,7 @@ const BookItem = ({
                       // logic để thêm vào giỏ hàng
                     }}
                   >
-                    <AddShoppingCartIcon />
+                    <AddShoppingCartIcon sx={{ color: "#0000FF" }}/>
                   </IconButton>
                   <IconButton
                     color="secondary"
@@ -74,7 +74,7 @@ const BookItem = ({
                       // logic để thêm vào wishlist
                     }}
                   >
-                    <FavoriteIcon />
+                    <FavoriteIcon sx={{ color: "#0000FF" }}/>
                   </IconButton>
                 </div>
               </Card>
@@ -83,7 +83,6 @@ const BookItem = ({
         )}
       </Grid>
 
-      {/* Nút phân trang với biểu tượng */}
       <Box
         display="flex"
         justifyContent="space-between"

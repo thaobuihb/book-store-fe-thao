@@ -1,36 +1,37 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBooks } from "../features/book/bookSlice";
-import BookItem from "../features/book/bookItem";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Container } from "@mui/material";
+import BookItem from "../features/book/bookItem";
 
 function BookPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams(); 
+  const [searchParams] = useSearchParams();
 
   const { books, totalPages, currentPage } = useSelector((state) => state.book);
-  const allBooks = books.flat();
 
-  const handleBookClick = (bookId) => {
-    navigate(`/book/${bookId}`);
-  };
+  // Lấy các tham số từ URL, nếu không có thì gán mặc định là chuỗi rỗng
+  const category = searchParams.get("category") || "";
+  const search = searchParams.get("search") || "";
+  const page = parseInt(searchParams.get("page")) || 1;
 
   useEffect(() => {
-    dispatch(getBooks());
-  }, [dispatch]);
+    // Gọi API với các tham số hiện có
+    dispatch(getBooks(page, search, "", "", category));
+    console.log("Fetching books for category:", category);
+  }, [dispatch, page, search, category]);
 
   return (
     <Container>
       <BookItem
         title="Anna & Susu Books"
         books={books}
-        handleBookClick={handleBookClick}
         currentPage={currentPage}
         totalPages={totalPages}
-        handleNextPage={() => dispatch(getBooks(currentPage + 1))}
-        handlePrevPage={() => dispatch(getBooks(currentPage - 1))}
+        handleNextPage={() => navigate(`?page=${page + 1}&category=${category}&search=${search}`)}
+        handlePrevPage={() => navigate(`?page=${page - 1}&category=${category}&search=${search}`)}
       />
     </Container>
   );

@@ -109,19 +109,27 @@ const bookSlice = createSlice({
 });
 
 // Action creators
-export const getBooks =
-  (page, search, minPrice, maxPrice) => async (dispatch) => {
-    dispatch(bookSlice.actions.startLoading());
-    try {
-      const response = await apiService.get(`/books`);
-      console.log("*****", response)
-      dispatch(bookSlice.actions.getBooksSuccess(response.data));
-      dispatch(bookSlice.actions.endLoading());
-    } catch (error) {
-      dispatch(bookSlice.actions.hasError(error));
-      toast.error(error.message);
-    }
-  };
+export const getBooks = (page, search, minPrice, maxPrice, category) => async (dispatch) => {
+  dispatch(bookSlice.actions.startLoading());
+  try {
+    const queryParams = new URLSearchParams({
+      page: page || 1,
+      search: search || "",
+      minPrice: minPrice || 0,
+      maxPrice: maxPrice || Number.MAX_SAFE_INTEGER,
+      category: category || "",
+    }).toString();
+
+    console.log("Fetching books with URL:", `/books?${queryParams}`);  // In URL gọi API ra để kiểm tra
+
+    const response = await apiService.get(`/books?${queryParams}`);
+    dispatch(bookSlice.actions.getBooksSuccess(response.data));
+    dispatch(bookSlice.actions.endLoading());
+  } catch (error) {
+    dispatch(bookSlice.actions.hasError(error));
+    toast.error(error.message);
+  }
+};
 
 export const getNewlyReleasedBooks = () => async (dispatch) => {
   dispatch(bookSlice.actions.startLoading());

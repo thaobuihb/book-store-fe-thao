@@ -125,8 +125,14 @@ const Home = () => {
     navigate(`/book/${bookId}`);
   };
   const handleCategoryOfBookClick = (categoryId) => {
-    navigate(`/catalogbooks?category=${categoryId}`);
+    console.log("handleCategoryOfBookClick - Clicked categoryId:", categoryId);  // Kiểm tra xem categoryId có được truyền đúng không
+    if (categoryId) {
+      navigate(`/books?category=${categoryId}`);
+    } else {
+      navigate(`/books`); 
+    }
   };
+
   // Tính toán sách hiển thị theo trang
   const currentDiscountedBooks = discountedBooks.slice(
     (currentDiscountedPage - 1) * booksPerPage,
@@ -206,7 +212,8 @@ const Home = () => {
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {Array.isArray(categoryOfBooks) &&
             categoryOfBooks.slice(0, 6).map((category) => (
-              <Grid item key={category._id} xs={2}>
+              <Grid item key={category.id} xs={2}>
+                {console.log("Category ID:", category.id)} 
                 <Card
                   sx={{
                     maxWidth: 250,
@@ -218,7 +225,7 @@ const Home = () => {
                     m: 3,
                   }}
                 >
-                  <CardActionArea onClick={() => handleCategoryOfBookClick(category._id)}>
+                  <CardActionArea onClick={() => handleCategoryOfBookClick(category.id)}>
                     <Typography variant="h6" align="center" sx={{fontSize:'15px'}}>
                       {category.name}
                     </Typography>
