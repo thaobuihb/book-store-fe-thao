@@ -128,8 +128,6 @@ export const getBooks = (page, search, minPrice, maxPrice, category) => async (d
     dispatch(bookSlice.actions.getBooksSuccess(response.data));
     dispatch(bookSlice.actions.endLoading());
   } catch (error) {
-    console.log("Axios Error:", error);  
-    console.log("Error response data:", error.response?.data);  
     dispatch(bookSlice.actions.hasError(error));
     toast.error(error.message);
   }
