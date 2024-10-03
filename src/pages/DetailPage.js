@@ -1,21 +1,28 @@
-// DetailPage.js
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom"; // Nhập khẩu useParams
-import { useDispatch, useSelector } from "react-redux"; // Nhập khẩu useDispatch và useSelector
-import { getSingleBook } from "../features/book/bookSlice"; // Nhập khẩu hành động getSingleBook
-import { Box, Typography, Button, IconButton, TextField } from "@mui/material"; // Nhập khẩu Box và các thành phần khác từ Material UI
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined"; // Nhập khẩu ShoppingCartOutlinedIcon
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom"; 
+import { useDispatch, useSelector } from "react-redux"; 
+import { getSingleBook, getBooks } from "../features/book/bookSlice"; 
+import { Box, Typography, Button, IconButton, TextField } from "@mui/material"; 
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined"; 
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import BookItem from "../features/book/bookItem"; // Nhập khẩu component BookItem (nếu cần sử dụng)
+import BookItem from "../features/book/bookItem"; 
 
 const DetailPage = () => {
-  const { bookId } = useParams(); // Lấy bookId từ URL
+  const { bookId } = useParams(); 
   const dispatch = useDispatch();
-  const { book } = useSelector((state) => state.book); // Lấy thông tin sách từ Redux
+  const { book, books } = useSelector((state) => state.book); 
 
   useEffect(() => {
-    dispatch(getSingleBook(bookId)); // Gọi API để lấy thông tin sách theo ID
-  }, [dispatch, bookId]);
+    
+    const fetchBookData = async () => {
+      await dispatch(getSingleBook(bookId));  
+      if (book?.category) {
+        dispatch(getBooks(1, "", "", "", book.category)); 
+      }
+    };
+
+    fetchBookData();
+  }, [dispatch, bookId, book?.category]);
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -32,17 +39,14 @@ const DetailPage = () => {
           <Box component="a" sx={{ mt: 2 }}>
             <Typography variant="h5">{book.name}</Typography> 
             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Author: {book.author}</Typography>{" "}
-            {/* Tác giả */}
             <Typography sx={{ fontSize: "1.1rem" }} variant="body2">
               Descriptions: {book.description}
             </Typography>{" "}
-            {/* Mô tả sách */}
             <Box sx={{ mt: 2 }}>
               <Typography variant="h6">Reviews: {book.review}</Typography>
-              <Typography  variant="h6">
+              <Typography variant="h6">
                 Rating: {book.rating}
               </Typography>{" "}
-              {/* Đánh giá tạm */}
               <Button variant="outlined" sx={{ mt: 1 }}>
                 Write a Review
               </Button>
@@ -68,7 +72,6 @@ const DetailPage = () => {
             <Typography sx={{ m: 5 }} variant="h6">
               Discount: ${book.discountedPrice}
             </Typography>{" "}
-            {/* Giá sách */}
             <Typography variant="body2">Publisher: {book.publisher}</Typography> 
             <Typography sx={{ m: 5 }} variant="body2">
               Publication Date: {book.publicationDate}
@@ -76,22 +79,17 @@ const DetailPage = () => {
             <Typography sx={{ m: 5 }} variant="body2">
               ISBN: {book.isbn}
             </Typography>{" "}
-            {/* ISBN */}
             <Typography sx={{ m: 5 }} variant="body2">
               Category: {book.category}
             </Typography>{" "}
-            {/* Thể loại */}
           </Box>
 
           {/* Các nút thao tác */}
           <Box sx={{ mt: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", m: 5 }}>
               <IconButton sx={{ color: "black" }}>-</IconButton>{" "}
-              {/* Nút giảm số lượng */}
               <TextField value="1" sx={{ width: "50px", mx: 1 }} />{" "}
-              {/* Trường nhập số lượng */}
               <IconButton sx={{ color: "black" }}>+</IconButton>{" "}
-              {/* Nút tăng số lượng */}
             </Box>
             <Button
               variant="contained"
@@ -110,12 +108,9 @@ const DetailPage = () => {
         </Box>
       </Box>
 
-      {/* Phần dưới */}
+      {/* Phần dưới: Sách cùng thể loại */}
       <Box>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Books from the Same Category
-        </Typography>
-        <BookItem/>
+        <BookItem books={books} title="Books from the Same Category" />
       </Box>
     </Box>
   );

@@ -162,7 +162,7 @@ export const getSingleBook = (id, userId) => async (dispatch) => {
   try {
     // Gọi API lấy thông tin sách
     const bookResponse = await apiService.get(`/books/${id}`);
-    console.log("Book Response:", bookResponse.data); // Kiểm tra phản hồi từ API
+    // console.log("Book Response:", bookResponse.data); // Kiểm tra phản hồi từ API
     dispatch(bookSlice.actions.getBookDetailSuccess(bookResponse.data));
 
     // Gọi API lấy thông tin giỏ hàng nếu có userId
@@ -262,6 +262,7 @@ export const getBooksByCategory = (categoryId) => async (dispatch) => {
   dispatch(bookSlice.actions.startLoading());
   try {
     const response = await apiService.get(`/books/category/${categoryId}`);
+    console.log("%%%%%%", response.data)
     dispatch(bookSlice.actions.getBooksByCategorySuccess(response.data));
     dispatch(bookSlice.actions.endLoading());
   } catch (error) {

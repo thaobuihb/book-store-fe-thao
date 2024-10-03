@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBooks } from "../features/book/bookSlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -18,10 +18,13 @@ function BookPage() {
 
   const [categoryName, setCategoryName] = useState("");
 
-
   useEffect(() => {
-    if (category) {
-      dispatch(getBooks(page, search, "", "", category));
+    // Ưu tiên tìm kiếm theo search query trước
+    if (search) {
+      dispatch(getBooks(page, search, "", "", ""));
+    } else if (category) {
+      // Nếu không có search query, tìm theo category
+      dispatch(getBooks(page, "", "", "", category));
 
       const categoryMap = {
         "66ee3a6f1191f821c77c5704": "Medical",  
@@ -46,14 +49,26 @@ function BookPage() {
 
   return (
     <Container>
-      <BookItem
-        title={`Books in ${categoryName}`} 
-        books={books}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        handleNextPage={() => navigate(`?page=${page + 1}&category=${category}&search=${search}`)}
-        handlePrevPage={() => navigate(`?page=${page - 1}&category=${category}&search=${search}`)}
-      />
+      {/* Hiển thị kết quả tìm kiếm nếu có search query */}
+      {search ? (
+        <BookItem
+          title={`Search results for "${search}"`}
+          books={books}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handleNextPage={() => navigate(`?page=${page + 1}&search=${search}`)}
+          handlePrevPage={() => navigate(`?page=${page - 1}&search=${search}`)}
+        />
+      ) : (
+        <BookItem
+          title={`Books in ${categoryName}`}
+          books={books}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handleNextPage={() => navigate(`?page=${page + 1}&category=${category}`)}
+          handlePrevPage={() => navigate(`?page=${page - 1}&category=${category}`)}
+        />
+      )}
     </Container>
   );
 }

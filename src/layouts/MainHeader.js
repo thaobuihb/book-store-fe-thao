@@ -13,13 +13,9 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoB from "../components/LogoB";
-import SearchInput from "../components/SearchInput";
+import SearchInput from "../components/SearchInput"; // Sử dụng đúng đường dẫn
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth"; 
-
-const handleSearch = (query) => {
-  console.log("Search query:", query);
-};
+import useAuth from "../hooks/useAuth";
 
 function MainHeader() {
   const navigate = useNavigate();
@@ -27,7 +23,6 @@ function MainHeader() {
   const cartItemCount = 3;
 
   const [anchorEl, setAnchorEl] = useState(null);
-
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -43,7 +38,11 @@ function MainHeader() {
     });
   };
 
-  
+  const handleSearch = (query) => {
+    if (query.trim()) {
+      navigate(`/books?search=${query.trim()}`); // Điều hướng đến trang BookPage với từ khóa tìm kiếm
+    }
+  };
 
   return (
     <Box>
@@ -73,6 +72,7 @@ function MainHeader() {
               marginRight: 80,
             }}
           >
+            {/* Gọi component SearchInput và truyền handleSearch */}
             <SearchInput handleSubmit={handleSearch} />
           </Box>
 
@@ -111,21 +111,6 @@ function MainHeader() {
               </IconButton>
             </RouterLink>
 
-            {/* User Account
-            <RouterLink
-              to={"/admin/:userId"}
-              style={{ textDecoration: "none", color: "black" }}
-            >
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                sx={{ mr: 2 }}
-              >
-                <PersonIcon />
-              </IconButton>
-            </RouterLink> */}
             {!isAuthenticated ? (
               <RouterLink
                 to={"/login"}
@@ -150,7 +135,7 @@ function MainHeader() {
                     "&:hover": { opacity: 0.8 },
                   }}
                 >
-                  {user.name || "User"} 
+                  {user.name || "User"}
                 </Typography>
 
                 <Menu
