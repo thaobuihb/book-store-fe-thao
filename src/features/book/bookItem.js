@@ -3,7 +3,6 @@ import {
   Grid,
   Card,
   CardMedia,
-  CardActionArea,
   IconButton,
   Typography,
   Box,
@@ -22,7 +21,7 @@ const BookItem = ({
   handleNextPage,
   handlePrevPage,
 }) => {
-  console.log("BOOk", books)
+  // console.log("BOOk", books)
   const bookList = Array.isArray(books) ? books : [];
 
   const navigate = useNavigate();
@@ -41,7 +40,7 @@ const BookItem = ({
       >
         {title}
       </Typography>
-      <Grid container spacing={6} justifyContent="center">
+      <Grid container spacing={5} justifyContent="center">
         {bookList.length === 0 ? (
           <Typography variant="body1" color="textSecondary">
             No books available.
@@ -72,7 +71,7 @@ const BookItem = ({
                   alt={book.title}
                   onClick={() => handleBookClick(book._id)}
                   sx={{
-                    height: 300,
+                    height: 220,
                     objectFit: "cover",
                     cursor: "pointer",
                   }}

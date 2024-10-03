@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom"; 
 import { useDispatch, useSelector } from "react-redux"; 
 import { getSingleBook, getBooks } from "../features/book/bookSlice"; 
@@ -13,17 +13,15 @@ const DetailPage = () => {
   const { book, books } = useSelector((state) => state.book); 
 
   useEffect(() => {
-    
     const fetchBookData = async () => {
-      await dispatch(getSingleBook(bookId));  
-      if (book?.category) {
-        dispatch(getBooks(1, "", "", "", book.category)); 
+      await dispatch(getSingleBook(bookId));  // Lấy chi tiết sách
+      if (book?.category) {  // Kiểm tra nếu có category ID
+        dispatch(getBooks(1, "", "", "", book.category));  // Lấy sách cùng danh mục theo category ID
       }
     };
 
     fetchBookData();
   }, [dispatch, bookId, book?.category]);
-
   return (
     <Box sx={{ padding: 4 }}>
       {/* Phần trên */}
@@ -80,7 +78,7 @@ const DetailPage = () => {
               ISBN: {book.isbn}
             </Typography>{" "}
             <Typography sx={{ m: 5 }} variant="body2">
-              Category: {book.category}
+              Category: {book.categoryName}
             </Typography>{" "}
           </Box>
 
