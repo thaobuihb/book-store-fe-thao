@@ -10,8 +10,11 @@ import {
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { useNavigate } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
+import { toggleBookInWishlist } from "../wishlist/wishlistSlice";
 
 const BookItem = ({
   title,
@@ -21,13 +24,22 @@ const BookItem = ({
   handleNextPage,
   handlePrevPage,
 }) => {
-  // console.log("BOOk", books)
+  const dispatch = useDispatch();
+  const { wishlist } = useSelector((state) => state.wishlist); // Lấy wishlist từ Redux store
   const bookList = Array.isArray(books) ? books : [];
 
   const navigate = useNavigate();
 
   const handleBookClick = (bookId) => {
     navigate(`/book/${bookId}`);
+  };
+
+  const handleAddToWishlist = (bookId) => {
+    dispatch(toggleBookInWishlist(bookId));
+  };
+
+  const isBookInWishlist = (bookId) => {
+    return wishlist.some((item) => item._id === bookId);
   };
 
   return (
@@ -128,11 +140,15 @@ const BookItem = ({
                   </IconButton>
                   <IconButton
                     color="secondary"
-                    onClick={() => {
-                      // Logic để thêm vào wishlist
-                    }}
+                    onClick={() => handleAddToWishlist(book._id)}
                   >
-                    <FavoriteIcon sx={{ color: "#0000FF" }} />
+                    <FavoriteIcon
+                      sx={{
+                        color: isBookInWishlist(book._id)
+                          ? "secondary.main"
+                          : "#0000FF",
+                      }} // Đổi màu icon nếu sách đã ở trong wishlist
+                    />
                   </IconButton>
                 </Box>
               </Card>

@@ -13,9 +13,10 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 // import PersonIcon from "@mui/icons-material/Person";
 import LogoB from "../components/LogoB";
-import SearchInput from "../components/SearchInput"; 
+import SearchInput from "../components/SearchInput";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { useSelector } from "react-redux";
 
 function MainHeader() {
   const navigate = useNavigate();
@@ -40,9 +41,12 @@ function MainHeader() {
 
   const handleSearch = (query) => {
     if (query.trim()) {
-      navigate(`/books?search=${query.trim()}`); 
+      navigate(`/books?search=${query.trim()}`);
     }
   };
+
+  const wishlistCount = useSelector((state) => state.wishlist.wishlist.length);
+
 
   return (
     <Box>
@@ -84,7 +88,7 @@ function MainHeader() {
             }}
           >
             {/* Wishlist */}
-            <RouterLink to={"/wishlist/:userId"}>
+            <RouterLink to={"/wishlist"}>
               <IconButton
                 size="large"
                 edge="start"
@@ -92,7 +96,9 @@ function MainHeader() {
                 aria-label="wishlist"
                 sx={{ mr: 2 }}
               >
-                <FavoriteBorderIcon />
+                <Badge badgeContent={wishlistCount} color="secondary">
+                  <FavoriteBorderIcon />
+                </Badge>
               </IconButton>
             </RouterLink>
             {/* Cart */}

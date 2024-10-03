@@ -28,7 +28,7 @@ function Router() {
       <Route path="user/:userId" element={<UserProfilePage />}/>
       <Route path="/help" element={<HelpCenter />}/>
       <Route path="admin/:userId" element={<AdminPage />}/>
-      <Route path="wishlist/:userId" element={<WishlistPage />}/>
+      <Route path="wishlist" element={<WishlistPage />}/>
       </Route>
 
      <Route element={<BlankLayout />}>
