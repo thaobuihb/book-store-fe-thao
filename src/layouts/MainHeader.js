@@ -11,9 +11,9 @@ import {
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import PersonIcon from "@mui/icons-material/Person";
+// import PersonIcon from "@mui/icons-material/Person";
 import LogoB from "../components/LogoB";
-import SearchInput from "../components/SearchInput"; // Sử dụng đúng đường dẫn
+import SearchInput from "../components/SearchInput"; 
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
@@ -40,7 +40,7 @@ function MainHeader() {
 
   const handleSearch = (query) => {
     if (query.trim()) {
-      navigate(`/books?search=${query.trim()}`); // Điều hướng đến trang BookPage với từ khóa tìm kiếm
+      navigate(`/books?search=${query.trim()}`); 
     }
   };
 
@@ -72,7 +72,6 @@ function MainHeader() {
               marginRight: 80,
             }}
           >
-            {/* Gọi component SearchInput và truyền handleSearch */}
             <SearchInput handleSubmit={handleSearch} />
           </Box>
 
