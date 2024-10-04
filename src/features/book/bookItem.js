@@ -25,7 +25,7 @@ const BookItem = ({
   handlePrevPage,
 }) => {
   const dispatch = useDispatch();
-  const { wishlist } = useSelector((state) => state.wishlist); // Lấy wishlist từ Redux store
+  const { wishlist } = useSelector((state) => state.wishlist); 
   const bookList = Array.isArray(books) ? books : [];
 
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ const BookItem = ({
   };
 
   const isBookInWishlist = (bookId) => {
-    return wishlist.some((item) => item._id === bookId);
+    return wishlist.includes(bookId); 
   };
 
   return (

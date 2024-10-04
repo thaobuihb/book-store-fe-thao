@@ -1,12 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit';
-import apiService from '../../app/apiService';
-import { toast } from 'react-toastify';
+import { createSlice } from "@reduxjs/toolkit";
+import apiService from "../../app/apiService";
+import { toast } from "react-toastify";
 
-// Helper functions for localStorage
 const loadWishlistFromLocalStorage = () => {
   try {
-    const serializedState = localStorage.getItem('wishlist');
-    return serializedState ? JSON.parse(serializedState) : [];
+    const serializedState = localStorage.getItem("wishlist");
+    let wishlist = serializedState ? JSON.parse(serializedState) : [];
+
+    wishlist = wishlist.filter((item) => item && typeof item === "string");
+    return wishlist;
   } catch (e) {
     return [];
   }
@@ -14,24 +16,27 @@ const loadWishlistFromLocalStorage = () => {
 
 const saveWishlistToLocalStorage = (wishlist) => {
   try {
-    const serializedState = JSON.stringify(wishlist);
-    localStorage.setItem('wishlist', serializedState);
+    const filteredWishlist = wishlist.filter(
+      (item) => item && typeof item === "string"
+    );
+    const serializedState = JSON.stringify(filteredWishlist);
+    localStorage.setItem("wishlist", serializedState);
   } catch (e) {
-    console.error('Could not save wishlist to localStorage', e);
+    console.error("Không thể lưu wishlist vào localStorage", e);
   }
 };
 
 // Initial state
 const initialState = {
-  books: [], // Optional, can store general book list if needed
-  wishlist: loadWishlistFromLocalStorage(), // Load wishlist from localStorage
+  wishlist: loadWishlistFromLocalStorage(),
+  detailedWishlist: [],
   isLoading: false,
   error: null,
 };
 
 // Slice
 const wishlistSlice = createSlice({
-  name: 'wishlist',
+  name: "wishlist",
   initialState,
   reducers: {
     startLoading(state) {
@@ -42,23 +47,30 @@ const wishlistSlice = createSlice({
       state.error = action.payload;
     },
     addBookToWishlistSuccess(state, action) {
-      state.wishlist.push(action.payload);  
+      if (!state.wishlist.includes(action.payload)) {
+        state.wishlist.push(action.payload);
+        saveWishlistToLocalStorage(state.wishlist);
+      }
       state.isLoading = false;
-      saveWishlistToLocalStorage(state.wishlist);  // Save wishlist to localStorage
     },
     removeBookFromWishlistSuccess(state, action) {
-      state.wishlist = state.wishlist.filter((item) => item._id !== action.payload); 
+      state.wishlist = state.wishlist.filter(
+        (bookId) => bookId !== action.payload
+      );
+      saveWishlistToLocalStorage(state.wishlist);
+      state.detailedWishlist = state.detailedWishlist.filter(
+        (book) => book._id !== action.payload
+      );
       state.isLoading = false;
-      saveWishlistToLocalStorage(state.wishlist);  // Update wishlist in localStorage
     },
-    loadWishlistFromServer(state, action) {
-      state.wishlist = action.payload;  // Sync with server
-      saveWishlistToLocalStorage(state.wishlist);  // Save to localStorage
+    loadWishlistDetailsSuccess(state, action) {
+      state.detailedWishlist = action.payload;
       state.isLoading = false;
     },
     clearWishlist(state) {
-      state.wishlist = [];  
-      localStorage.removeItem('wishlist');  // Clear wishlist from localStorage
+      state.wishlist = [];
+      state.detailedWishlist = [];
+      localStorage.removeItem("wishlist");
       state.isLoading = false;
     },
   },
@@ -70,69 +82,60 @@ export const {
   hasError,
   addBookToWishlistSuccess,
   removeBookFromWishlistSuccess,
-  loadWishlistFromServer,
+  loadWishlistDetailsSuccess,
   clearWishlist,
 } = wishlistSlice.actions;
 
-// Toggle book in wishlist (add/remove)
+export const fetchWishlistDetails = () => async (dispatch, getState) => {
+  dispatch(startLoading());
+
+  const state = getState();
+  const { wishlist } = state.wishlist;
+
+  if (wishlist.length === 0) {
+    dispatch(loadWishlistDetailsSuccess([]));
+    return;
+  }
+
+  try {
+    console.log("Book IDs to fetch details:", wishlist);
+
+    const validBookIds = wishlist.filter((id) => id);
+
+    const response = await apiService.post("/books/wishlist", {
+      bookIds: validBookIds,
+    });
+    console.log("Books wishlist from API:", response.data);
+    dispatch(loadWishlistDetailsSuccess(response.data));
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Không thể lấy thông tin sách");
+  }
+};
+
 export const toggleBookInWishlist = (bookId) => (dispatch, getState) => {
   dispatch(startLoading());
 
   const state = getState();
-  const { wishlist } = state.wishlist || { wishlist: [] };
+  const { wishlist } = state.wishlist;
 
-  const isAlreadyInWishlist = wishlist.some((item) => item._id === bookId);
+  const isAlreadyInWishlist = wishlist.includes(bookId);
 
   if (isAlreadyInWishlist) {
-    dispatch(removeBookFromWishlist(bookId));  // Remove book from wishlist if it exists
-  } else {
-    const book = { _id: bookId };  // Add basic book info (you can add more if needed)
-    dispatch(addBookToWishlistSuccess(book));
-    toast.success('Book added to wishlist');
-  }
-};
-
-// Remove book from wishlist
-export const removeBookFromWishlist = (bookId) => async (dispatch) => {
-  dispatch(startLoading());
-  try {
     dispatch(removeBookFromWishlistSuccess(bookId));
-    toast.success('Book removed from wishlist');
-  } catch (error) {
-    dispatch(hasError(error));
-    toast.error('Failed to remove book from wishlist');
+    toast.success("Đã xóa sách khỏi danh sách yêu thích");
+  } else {
+    dispatch(addBookToWishlistSuccess(bookId));
+    toast.success("Đã thêm sách vào danh sách yêu thích");
   }
 };
 
-// Sync wishlist after user logs in
-export const syncWishlistAfterLogin = (userId) => async (dispatch, getState) => {
-  const state = getState();
-  const localWishlist = state.wishlist.wishlist;  // Get wishlist from localStorage
-
-  dispatch(startLoading());
-  try {
-    await apiService.post(`/wishlist/sync`, { userId, localWishlist });
-
-    const response = await apiService.get(`/wishlist/${userId}`);
-    dispatch(loadWishlistFromServer(response.data));  // Sync wishlist from server
-    toast.success('Wishlist synced with server');
-  } catch (error) {
-    dispatch(hasError(error));
-    toast.error('Failed to sync wishlist');
-  }
+export const loadWishlist = () => (dispatch) => {
+  dispatch(fetchWishlistDetails());
 };
 
-// Clear wishlist from localStorage and server 
-export const clearWishlistFromServer = (userId) => async (dispatch) => {
-  dispatch(startLoading());
-  try {
-    await apiService.delete(`/wishlist/${userId}`);  // Clear wishlist from server
-    dispatch(clearWishlist());  // Clear local wishlist
-    toast.success('Wishlist cleared');
-  } catch (error) {
-    dispatch(hasError(error));
-    toast.error('Failed to clear wishlist');
-  }
+export const clearWishlistFromLocal = () => (dispatch) => {
+  dispatch(clearWishlist());
 };
 
 export default wishlistSlice.reducer;

@@ -1,84 +1,80 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Box, Grid, Typography, IconButton, Card, CardMedia, CardContent, Button } from "@mui/material";
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import DeleteIcon from '@mui/icons-material/Delete'; // Thêm biểu tượng xóa
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
-import { toggleBookInWishlist } from "../features/wishlist/wishlistSlice"; // Thêm action để xóa khỏi wishlist
+import { toggleBookInWishlist, loadWishlist } from "../features/wishlist/wishlistSlice"; 
 
 const WishlistPage = () => {
-  // Lấy danh sách wishlist từ Redux store
-  const { wishlist } = useSelector((state) => state.wishlist);
+  
+  const { detailedWishlist } = useSelector((state) => state.wishlist);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Hàm xử lý thêm vào giỏ hàng và điều hướng
+  
+  useEffect(() => {
+    dispatch(loadWishlist()); 
+  }, [dispatch]);
+
+  
   const handleAddToCart = (bookId) => {
-    // Logic thêm vào giỏ hàng
-    navigate("/cart"); // Điều hướng đến trang giỏ hàng
+    navigate("/cart"); 
   };
 
-  // Hàm xử lý xóa sách khỏi wishlist
+  
   const handleRemoveFromWishlist = (bookId) => {
-    dispatch(toggleBookInWishlist(bookId)); // Xóa sách khỏi wishlist
+    dispatch(toggleBookInWishlist(bookId)); 
   };
 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Your Wishlist
+        Your wishlist
       </Typography>
 
-      {/* Nếu không có sách trong wishlist */}
-      {wishlist.length === 0 ? (
+      {detailedWishlist.length === 0 ? (
         <Typography variant="h6" color="textSecondary">
-          No books in your wishlist.
+          No books in yours wishlist.
         </Typography>
       ) : (
         <Grid container spacing={3}>
-          {/* Hiển thị danh sách sách yêu thích */}
-          {wishlist.map((book) => (
-            <Grid item xs={12} sm={6} md={4} key={book._id}>
+          {detailedWishlist.map((book) => (
+            <Grid item xs={12} sm={6} md={3} key={book._id}>
               <Card sx={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 350 }}>
-                {/* Biểu tượng xóa ở góc trên bên phải */}
-                <IconButton 
-                  onClick={() => handleRemoveFromWishlist(book._id)} 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
-                    right: 8,
-                    color: 'red' // Màu đỏ để người dùng dễ nhận diện
-                  }}>
+                {/* Nút xóa */}
+                <IconButton onClick={() => handleRemoveFromWishlist(book._id)} sx={{ position: 'absolute', top: 8, right: 8, color: 'red' }}>
                   <DeleteIcon />
                 </IconButton>
 
-                <CardMedia
-                  component="img"
-                  image={book.img}
-                  alt={book.name}
-                  sx={{ height: 200, objectFit: "cover" }}
-                />
-                <CardContent>
+                {/* Ảnh bìa sách */}
+                <CardMedia component="img" image={book.img} alt={book.name} sx={{ height: 200, objectFit: "cover" }} />
+
+                {/* Nội dung chi tiết */}
+                <CardContent sx={{ textAlign: 'center' }}>
                   <Typography variant="h6">{book.name}</Typography>
-                  <Typography variant="subtitle1">by {book.author}</Typography>
+                  <Typography variant="subtitle1">Author: {book.author}</Typography>
+
+                  {/* Giá sách */}
                   <Typography variant="body2">
                     {book.discountedPrice ? (
                       <>
-                        <span style={{ textDecoration: 'line-through' }}>${book.price}</span>{' '}
-                        <span>${book.discountedPrice}</span>
+                        <span style={{ textDecoration: 'line-through', color: 'gray' }}>${book.price}</span>{' '}
+                        <span style={{ fontWeight: 'bold', color: 'green' }}>${book.discountedPrice}</span>
                       </>
                     ) : (
-                      `$${book.price}`
+                      <span style={{ fontWeight: 'bold' }}>${book.price}</span>
                     )}
                   </Typography>
-                  {/* Nút ADD TO CART */}
+
+                  {/* Nút Thêm vào giỏ hàng */}
                   <Button 
                     variant="contained" 
                     color="primary" 
-                    sx={{ marginTop: 2 }}
+                    sx={{ marginTop: 2, display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
                     onClick={() => handleAddToCart(book._id)}
                   >
                     ADD TO CART
