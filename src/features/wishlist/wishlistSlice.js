@@ -2,13 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 import apiService from "../../app/apiService";
 import { toast } from "react-toastify";
 
+// Helper functions cho localStorage
 const loadWishlistFromLocalStorage = () => {
   try {
     const serializedState = localStorage.getItem("wishlist");
     let wishlist = serializedState ? JSON.parse(serializedState) : [];
-
-    wishlist = wishlist.filter((item) => item && typeof item === "string");
-    return wishlist;
+    return wishlist.filter((item) => item && typeof item === "string");
   } catch (e) {
     return [];
   }
@@ -16,20 +15,18 @@ const loadWishlistFromLocalStorage = () => {
 
 const saveWishlistToLocalStorage = (wishlist) => {
   try {
-    const filteredWishlist = wishlist.filter(
-      (item) => item && typeof item === "string"
-    );
-    const serializedState = JSON.stringify(filteredWishlist);
-    localStorage.setItem("wishlist", serializedState);
+    const wishlistArray = Array.isArray(wishlist) ? wishlist.slice() : [];
+    console.log("Saving to localStorage:", wishlistArray);
+    const serializedState = JSON.stringify(wishlist);
+    localStorage.setItem("wishlist", serializedState); // Lưu danh sách sách yêu thích vào localStorage
   } catch (e) {
     console.error("Không thể lưu wishlist vào localStorage", e);
   }
 };
-
 // Initial state
 const initialState = {
-  wishlist: loadWishlistFromLocalStorage(),
-  detailedWishlist: [],
+  wishlist: loadWishlistFromLocalStorage(), // Lưu ID sách
+  detailedWishlist: [], // Để lưu thông tin chi tiết của sách
   isLoading: false,
   error: null,
 };
@@ -48,8 +45,8 @@ const wishlistSlice = createSlice({
     },
     addBookToWishlistSuccess(state, action) {
       if (!state.wishlist.includes(action.payload)) {
-        state.wishlist.push(action.payload);
-        saveWishlistToLocalStorage(state.wishlist);
+        state.wishlist.push(action.payload); // Thêm ID sách vào localStorage
+        saveWishlistToLocalStorage(state.wishlist); // Lưu danh sách vào localStorage
       }
       state.isLoading = false;
     },
@@ -57,6 +54,7 @@ const wishlistSlice = createSlice({
       state.wishlist = state.wishlist.filter(
         (bookId) => bookId !== action.payload
       );
+      // Lưu lại danh sách mới vào localStorage
       saveWishlistToLocalStorage(state.wishlist);
       state.detailedWishlist = state.detailedWishlist.filter(
         (book) => book._id !== action.payload
@@ -64,15 +62,22 @@ const wishlistSlice = createSlice({
       state.isLoading = false;
     },
     loadWishlistDetailsSuccess(state, action) {
-      state.detailedWishlist = action.payload;
+      state.detailedWishlist = action.payload; // Lưu thông tin chi tiết của sách
       state.isLoading = false;
     },
     clearWishlist(state) {
       state.wishlist = [];
       state.detailedWishlist = [];
-      localStorage.removeItem("wishlist");
+      localStorage.removeItem("wishlist"); // Xóa wishlist từ localStorage
       state.isLoading = false;
     },
+    syncWishlistFromBackendSuccess(state, action) {
+      state.wishlist = action.payload.map((book) => book.bookId);
+      state.detailedWishlist = action.payload;
+      saveWishlistToLocalStorage(state.wishlist);
+      state.isLoading = false;
+    },
+    
   },
 });
 
@@ -84,9 +89,28 @@ export const {
   removeBookFromWishlistSuccess,
   loadWishlistDetailsSuccess,
   clearWishlist,
+  syncWishlistFromBackendSuccess, // Đảm bảo action này có mặt
 } = wishlistSlice.actions;
 
-export const fetchWishlistDetails = () => async (dispatch, getState) => {
+// Thêm hoặc xóa sách khỏi wishlist (toggle)
+export const toggleBookInWishlist = (bookId) => (dispatch, getState) => {
+  dispatch(startLoading());
+  const state = getState();
+  const { wishlist } = state.wishlist;
+
+  const isAlreadyInWishlist = wishlist.includes(bookId);
+
+  if (isAlreadyInWishlist) {
+    dispatch(removeBookFromWishlistSuccess(bookId)); // Xóa sách khỏi wishlist
+    toast.success("Đã xóa sách khỏi danh sách yêu thích");
+  } else {
+    dispatch(addBookToWishlistSuccess(bookId)); // Thêm ID sách vào wishlist
+    toast.success("Đã thêm sách vào danh sách yêu thích");
+  }
+};
+
+// Tải thông tin chi tiết wishlist khi người dùng mở trang
+export const loadWishlist = () => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const state = getState();
@@ -98,14 +122,8 @@ export const fetchWishlistDetails = () => async (dispatch, getState) => {
   }
 
   try {
-    console.log("Book IDs to fetch details:", wishlist);
-
     const validBookIds = wishlist.filter((id) => id);
-
-    const response = await apiService.post("/books/wishlist", {
-      bookIds: validBookIds,
-    });
-    console.log("Books wishlist from API:", response.data);
+    const response = await apiService.post("/books/wishlist", { bookIds: validBookIds });
     dispatch(loadWishlistDetailsSuccess(response.data));
   } catch (error) {
     dispatch(hasError(error.message));
@@ -113,29 +131,22 @@ export const fetchWishlistDetails = () => async (dispatch, getState) => {
   }
 };
 
-export const toggleBookInWishlist = (bookId) => (dispatch, getState) => {
-  dispatch(startLoading());
-
-  const state = getState();
-  const { wishlist } = state.wishlist;
-
-  const isAlreadyInWishlist = wishlist.includes(bookId);
-
-  if (isAlreadyInWishlist) {
-    dispatch(removeBookFromWishlistSuccess(bookId));
-    toast.success("Đã xóa sách khỏi danh sách yêu thích");
-  } else {
-    dispatch(addBookToWishlistSuccess(bookId));
-    toast.success("Đã thêm sách vào danh sách yêu thích");
-  }
-};
-
-export const loadWishlist = () => (dispatch) => {
-  dispatch(fetchWishlistDetails());
-};
-
-export const clearWishlistFromLocal = () => (dispatch) => {
+// Xóa wishlist khi người dùng logout (chỉ trên local)
+export const clearWishlistOnLogout = () => (dispatch) => {
   dispatch(clearWishlist());
+};
+
+// Đồng bộ wishlist sau khi người dùng đăng nhập
+export const syncWishlistAfterLogin = (userId) => async (dispatch) => {
+  dispatch(startLoading());
+  try {
+    const response = await apiService.get(`/wishlist/${userId}`);
+    dispatch(syncWishlistFromBackendSuccess(response.data));
+    toast.success("Đồng bộ wishlist thành công");
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Không thể đồng bộ wishlist từ backend");
+  }
 };
 
 export default wishlistSlice.reducer;

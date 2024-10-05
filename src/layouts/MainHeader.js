@@ -16,10 +16,12 @@ import LogoB from "../components/LogoB";
 import SearchInput from "../components/SearchInput";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
 
 function MainHeader() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { isAuthenticated, logout, user } = useAuth();
   const cartItemCount = 3;
 
@@ -34,6 +36,7 @@ function MainHeader() {
   };
 
   const handleLogout = () => {
+    dispatch(clearWishlistOnLogout())
     logout(() => {
       navigate("/", { replace: true });
     });
