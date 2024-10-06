@@ -1,6 +1,8 @@
 import { createContext, useReducer, useEffect } from "react";
 import apiService from "../app/apiService";
 import { isValidToken } from "../utils/jwt";
+import { syncWishlistAfterLogin, clearWishlist } from "../features/wishlist/wishlistSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const initialState = {
   isInitialized: false,
@@ -12,7 +14,6 @@ const INITIALIZE = "AUTH.INITIALIZE";
 const LOGIN_SUCCESS = "AUTH.LOGIN_SUCCESS";
 const REGISTER_SUCCESS = "AUTH.REGISTER_SUCCESS";
 const LOGOUT = "AUTH.LOGOUT";
-// const UPDATE_PROFILE = "AUTH.UPDATE_PROFILE";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -42,7 +43,6 @@ const reducer = (state, action) => {
         isAuthenticated: false,
         user: null,
       };
-
     default:
       return state;
   }
@@ -62,6 +62,8 @@ const AuthContext = createContext({ ...initialState });
 
 function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const reduxDispatch = useDispatch();
+  const wishlist = useSelector((state) => state.wishlist.wishlist); // Lấy wishlist từ Redux store
 
   useEffect(() => {
     const initialize = async () => {
@@ -113,17 +115,17 @@ function AuthProvider({ children }) {
       payload: { user },
     });
 
+    reduxDispatch(syncWishlistAfterLogin(user._id));
+
     callback();
   };
 
   const register = async ({ name, email, password }, callback) => {
-    console.log("Bắt đầu đăng ký:", { name, email });
     const response = await apiService.post("/users", {
       name,
       email,
       password,
     });
-    console.log("Phản hồi từ server:", response);
 
     const { user, accessToken } = response.data;
     setSession(accessToken);
@@ -135,11 +137,29 @@ function AuthProvider({ children }) {
     callback();
   };
 
-  const logout = async (callback) => {
-    setSession(null);
-    dispatch({ type: LOGOUT });
-    callback();
+  const logout = async (wishlist, user, callback) => {
+    try {
+      if (user && wishlist.length > 0) {
+        await apiService.post(`/wishlist/sync`, {
+          userId: user._id,
+          localWishlist: wishlist,
+        });
+      }
+  
+      reduxDispatch(clearWishlist());
+  
+      setSession(null);
+      dispatch({ type: LOGOUT });
+  
+      if (callback) callback();
+    } catch (error) {
+      console.error("Lỗi khi đồng bộ wishlist và đăng xuất:", error);
+  
+      if (callback) callback();
+    }
   };
+  
+  
 
   return (
     <AuthContext.Provider

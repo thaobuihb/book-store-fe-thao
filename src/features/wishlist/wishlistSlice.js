@@ -51,9 +51,11 @@ const wishlistSlice = createSlice({
       state.isLoading = false;
     },
     removeBookFromWishlistSuccess(state, action) {
+      console.log("Before removing:", state.wishlist);
       state.wishlist = state.wishlist.filter(
         (bookId) => bookId !== action.payload
       );
+      console.log("After removing:", state.wishlist);
       // Lưu lại danh sách mới vào localStorage
       saveWishlistToLocalStorage(state.wishlist);
       state.detailedWishlist = state.detailedWishlist.filter(
@@ -131,22 +133,34 @@ export const loadWishlist = () => async (dispatch, getState) => {
   }
 };
 
-// Xóa wishlist khi người dùng logout (chỉ trên local)
-export const clearWishlistOnLogout = () => (dispatch) => {
-  dispatch(clearWishlist());
-};
 
 // Đồng bộ wishlist sau khi người dùng đăng nhập
-export const syncWishlistAfterLogin = (userId) => async (dispatch) => {
+export const syncWishlistAfterLogin = (userId) => async (dispatch, getState) => {
   dispatch(startLoading());
   try {
-    const response = await apiService.get(`/wishlist/${userId}`);
+    const { detailedWishlist } = getState().wishlist;
+
+    console.log("Syncing wishlist to server:", detailedWishlist);
+
+    const response = await apiService.post(`/wishlist/sync`, {
+      userId,
+      localWishlist: detailedWishlist,  // Đảm bảo đây là một mảng chứa các đối tượng sách đầy đủ
+    });
+
+    console.log("Response from server after syncing:", response.data);
+
     dispatch(syncWishlistFromBackendSuccess(response.data));
     toast.success("Đồng bộ wishlist thành công");
   } catch (error) {
     dispatch(hasError(error.message));
     toast.error("Không thể đồng bộ wishlist từ backend");
   }
+};
+
+
+export const clearWishlistOnLogout = () => (dispatch) => {
+  dispatch(clearWishlist()); // Xóa trên Redux store
+  localStorage.removeItem("wishlist"); // Xóa khỏi localStorage
 };
 
 export default wishlistSlice.reducer;
