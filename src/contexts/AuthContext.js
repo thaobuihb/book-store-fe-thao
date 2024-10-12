@@ -1,7 +1,7 @@
 import { createContext, useReducer, useEffect } from "react";
 import apiService from "../app/apiService";
 import { isValidToken } from "../utils/jwt";
-import { syncWishlistAfterLogin, clearWishlist, loadWishlistFromLocalStorage } from "../features/wishlist/wishlistSlice";
+import { syncWishlistAfterLogin, clearWishlist } from "../features/wishlist/wishlistSlice";
 import { useDispatch } from "react-redux";
 
 const initialState = {
@@ -116,7 +116,6 @@ function AuthProvider({ children }) {
       payload: { user },
     });
   
-    // Đồng bộ wishlist từ localStorage sau khi đăng nhập
     reduxDispatch(syncWishlistAfterLogin(user._id));
   
     callback();

@@ -148,10 +148,10 @@ export const syncWishlistAfterLogin = (userId) => async (dispatch, getState) => 
     // Gửi localWishlist lên server để đồng bộ
     const response = await apiService.post(`/wishlist/sync`, {
       userId,
-      localWishlist, // Đồng bộ wishlist từ localStorage lên server
+      localWishlist, 
     });
 
-    console.log("Response from server after syncing:", response.data);
+    console.log("Response from server after syncing:3333333", response.userId);
 
     // Cập nhật Redux store với wishlist được trả về từ server
     dispatch(syncWishlistFromBackendSuccess(response.data));
@@ -185,5 +185,20 @@ export const clearWishlistOnLogout = (userId) => async (dispatch, getState) => {
     console.error("Lỗi khi đồng bộ wishlist trước khi logout:", error);
   }
 };
+
+export const deleteBookInWishlist = () => async(dispatch, getState) => {
+  try {
+    const {detailedWishlist} = getState().wishlist;
+    await apiService.delete(`wishlist/remove`, {
+      localWishlist: detailedWishlist,
+    })
+    dispatch(clearWishlist()); 
+    localStorage.removeItem("wishlist"); 
+    
+  } catch (error) {
+    console.error("không thể xoá sách khỏi danh sách yêu thích", error)
+    
+  }
+}
 
 export default wishlistSlice.reducer;
