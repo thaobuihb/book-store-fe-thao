@@ -3,7 +3,7 @@ import apiService from "../../app/apiService";
 import { toast } from "react-toastify";
 
 // Helper functions cho localStorage
-const loadWishlistFromLocalStorage = () => {
+export const loadWishlistFromLocalStorage = () => {
   try {
     const serializedState = localStorage.getItem("wishlist");
     let wishlist = serializedState ? JSON.parse(serializedState) : [];
@@ -18,15 +18,16 @@ const saveWishlistToLocalStorage = (wishlist) => {
     const wishlistArray = Array.isArray(wishlist) ? wishlist.slice() : [];
     console.log("Saving to localStorage:", wishlistArray);
     const serializedState = JSON.stringify(wishlist);
-    localStorage.setItem("wishlist", serializedState); // Lưu danh sách sách yêu thích vào localStorage
+    localStorage.setItem("wishlist", serializedState); 
   } catch (e) {
     console.error("Không thể lưu wishlist vào localStorage", e);
   }
 };
+
 // Initial state
 const initialState = {
-  wishlist: loadWishlistFromLocalStorage(), // Lưu ID sách
-  detailedWishlist: [], // Để lưu thông tin chi tiết của sách
+  wishlist: loadWishlistFromLocalStorage(), 
+  detailedWishlist: [], 
   isLoading: false,
   error: null,
 };
@@ -45,8 +46,8 @@ const wishlistSlice = createSlice({
     },
     addBookToWishlistSuccess(state, action) {
       if (!state.wishlist.includes(action.payload)) {
-        state.wishlist.push(action.payload); // Thêm ID sách vào localStorage
-        saveWishlistToLocalStorage(state.wishlist); // Lưu danh sách vào localStorage
+        state.wishlist.push(action.payload); 
+        saveWishlistToLocalStorage(state.wishlist); 
       }
       state.isLoading = false;
     },
@@ -56,7 +57,6 @@ const wishlistSlice = createSlice({
         (bookId) => bookId !== action.payload
       );
       console.log("After removing:", state.wishlist);
-      // Lưu lại danh sách mới vào localStorage
       saveWishlistToLocalStorage(state.wishlist);
       state.detailedWishlist = state.detailedWishlist.filter(
         (book) => book._id !== action.payload
@@ -64,13 +64,13 @@ const wishlistSlice = createSlice({
       state.isLoading = false;
     },
     loadWishlistDetailsSuccess(state, action) {
-      state.detailedWishlist = action.payload; // Lưu thông tin chi tiết của sách
+      state.detailedWishlist = action.payload; 
       state.isLoading = false;
     },
     clearWishlist(state) {
       state.wishlist = [];
       state.detailedWishlist = [];
-      localStorage.removeItem("wishlist"); // Xóa wishlist từ localStorage
+      localStorage.removeItem("wishlist"); 
       state.isLoading = false;
     },
     syncWishlistFromBackendSuccess(state, action) {
@@ -79,7 +79,6 @@ const wishlistSlice = createSlice({
       saveWishlistToLocalStorage(state.wishlist);
       state.isLoading = false;
     },
-    
   },
 });
 
@@ -91,10 +90,9 @@ export const {
   removeBookFromWishlistSuccess,
   loadWishlistDetailsSuccess,
   clearWishlist,
-  syncWishlistFromBackendSuccess, // Đảm bảo action này có mặt
+  syncWishlistFromBackendSuccess, 
 } = wishlistSlice.actions;
 
-// Thêm hoặc xóa sách khỏi wishlist (toggle)
 export const toggleBookInWishlist = (bookId) => (dispatch, getState) => {
   dispatch(startLoading());
   const state = getState();
@@ -103,13 +101,18 @@ export const toggleBookInWishlist = (bookId) => (dispatch, getState) => {
   const isAlreadyInWishlist = wishlist.includes(bookId);
 
   if (isAlreadyInWishlist) {
-    dispatch(removeBookFromWishlistSuccess(bookId)); // Xóa sách khỏi wishlist
+    dispatch(removeBookFromWishlistSuccess(bookId)); 
     toast.success("Đã xóa sách khỏi danh sách yêu thích");
   } else {
-    dispatch(addBookToWishlistSuccess(bookId)); // Thêm ID sách vào wishlist
+    dispatch(addBookToWishlistSuccess(bookId)); 
     toast.success("Đã thêm sách vào danh sách yêu thích");
   }
+
+  // Đồng bộ ngay lập tức với localStorage sau khi click vào yêu thích
+  const updatedWishlist = getState().wishlist.wishlist;
+  saveWishlistToLocalStorage(updatedWishlist);
 };
+
 
 // Tải thông tin chi tiết wishlist khi người dùng mở trang
 export const loadWishlist = () => async (dispatch, getState) => {
@@ -133,23 +136,29 @@ export const loadWishlist = () => async (dispatch, getState) => {
   }
 };
 
-
 // Đồng bộ wishlist sau khi người dùng đăng nhập
 export const syncWishlistAfterLogin = (userId) => async (dispatch, getState) => {
   dispatch(startLoading());
   try {
-    const { detailedWishlist } = getState().wishlist;
+    // Lấy wishlist từ localStorage
+    const localWishlist = loadWishlistFromLocalStorage();
 
-    console.log("Syncing wishlist to server:", detailedWishlist);
+    console.log("Syncing wishlist to server:", localWishlist);
 
+    // Gửi localWishlist lên server để đồng bộ
     const response = await apiService.post(`/wishlist/sync`, {
       userId,
-      localWishlist: detailedWishlist,  // Đảm bảo đây là một mảng chứa các đối tượng sách đầy đủ
+      localWishlist, // Đồng bộ wishlist từ localStorage lên server
     });
 
     console.log("Response from server after syncing:", response.data);
 
+    // Cập nhật Redux store với wishlist được trả về từ server
     dispatch(syncWishlistFromBackendSuccess(response.data));
+
+    // Cập nhật lại localStorage với wishlist từ server
+    saveWishlistToLocalStorage(response.data.map((book) => book.bookId));
+
     toast.success("Đồng bộ wishlist thành công");
   } catch (error) {
     dispatch(hasError(error.message));
@@ -158,9 +167,23 @@ export const syncWishlistAfterLogin = (userId) => async (dispatch, getState) => 
 };
 
 
-export const clearWishlistOnLogout = () => (dispatch) => {
-  dispatch(clearWishlist()); // Xóa trên Redux store
-  localStorage.removeItem("wishlist"); // Xóa khỏi localStorage
+
+export const clearWishlistOnLogout = (userId) => async (dispatch, getState) => {
+  try {
+    const { detailedWishlist } = getState().wishlist;
+
+    await apiService.post(`/wishlist/sync`, {
+      userId,
+      localWishlist: detailedWishlist,
+    });
+
+    dispatch(clearWishlist()); 
+    localStorage.removeItem("wishlist"); 
+
+    console.log("Wishlist đã được đồng bộ và xóa khi logout.");
+  } catch (error) {
+    console.error("Lỗi khi đồng bộ wishlist trước khi logout:", error);
+  }
 };
 
 export default wishlistSlice.reducer;

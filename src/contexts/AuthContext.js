@@ -1,8 +1,8 @@
 import { createContext, useReducer, useEffect } from "react";
 import apiService from "../app/apiService";
 import { isValidToken } from "../utils/jwt";
-import { syncWishlistAfterLogin, clearWishlist } from "../features/wishlist/wishlistSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { syncWishlistAfterLogin, clearWishlist, loadWishlistFromLocalStorage } from "../features/wishlist/wishlistSlice";
+import { useDispatch } from "react-redux";
 
 const initialState = {
   isInitialized: false,
@@ -58,12 +58,13 @@ const setSession = (accessToken) => {
   }
 };
 
+
+
 const AuthContext = createContext({ ...initialState });
 
 function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const reduxDispatch = useDispatch();
-  const wishlist = useSelector((state) => state.wishlist.wishlist); // Lấy wishlist từ Redux store
 
   useEffect(() => {
     const initialize = async () => {
@@ -108,17 +109,19 @@ function AuthProvider({ children }) {
   const login = async ({ email, password }, callback) => {
     const response = await apiService.post("/auth/login", { email, password });
     const { user, accessToken } = response.data;
-
+  
     setSession(accessToken);
     dispatch({
       type: LOGIN_SUCCESS,
       payload: { user },
     });
-
+  
+    // Đồng bộ wishlist từ localStorage sau khi đăng nhập
     reduxDispatch(syncWishlistAfterLogin(user._id));
-
+  
     callback();
   };
+  
 
   const register = async ({ name, email, password }, callback) => {
     const response = await apiService.post("/users", {

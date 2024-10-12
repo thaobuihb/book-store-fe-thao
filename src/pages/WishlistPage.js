@@ -26,7 +26,7 @@ const WishlistPage = () => {
   const navigate = useNavigate();
 
   // Lấy danh sách chi tiết wishlist từ Redux store
-  const { detailedWishlist } = useSelector((state) => state.wishlist);
+  const { detailedWishlist, isLoading } = useSelector((state) => state.wishlist);
 
   // Dùng useEffect để gọi loadWishlist khi component được render
   useEffect(() => {
@@ -36,13 +36,12 @@ const WishlistPage = () => {
 
   // Hàm xử lý thêm vào giỏ hàng
   const handleAddToCart = (bookId) => {
-    navigate("/cart");
+    navigate("/cart"); // Điều hướng sang trang giỏ hàng
   };
 
   // Hàm xử lý xóa sách khỏi wishlist
   const handleRemoveFromWishlist = (bookId) => {
-    console.log("Removing book with ID:", bookId);
-    dispatch(toggleBookInWishlist(bookId));
+    dispatch(toggleBookInWishlist(bookId)); // Gọi action để xóa sách khỏi wishlist
   };
 
   return (
@@ -51,7 +50,12 @@ const WishlistPage = () => {
         Your Wishlist
       </Typography>
 
-      {detailedWishlist.length === 0 ? (
+      {/* Hiển thị thông báo khi đang tải dữ liệu */}
+      {isLoading ? (
+        <Typography variant="h6" color="textSecondary" sx={{ textAlign: "center" }}>
+          Loading your wishlist...
+        </Typography>
+      ) : detailedWishlist.length === 0 ? (
         <Typography
           variant="h6"
           color="textSecondary"
@@ -84,10 +88,10 @@ const WishlistPage = () => {
                     top: 8,
                     right: 8,
                     color: "red",
-                    zIndex: 1, 
-                    visibility: "visible", 
+                    zIndex: 1,
+                    visibility: "visible",
                     "&:hover": {
-                      opacity: 1, 
+                      opacity: 1,
                     },
                   }}
                 >

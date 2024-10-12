@@ -262,7 +262,7 @@ export const getBooksByCategory = (categoryId) => async (dispatch) => {
   dispatch(bookSlice.actions.startLoading());
   try {
     const response = await apiService.get(`/books/category/${categoryId}`);
-    console.log("%%%%%%", response.data)
+    // console.log("%%%%%%", response.data)
     dispatch(bookSlice.actions.getBooksByCategorySuccess(response.data));
     dispatch(bookSlice.actions.endLoading());
   } catch (error) {
@@ -276,7 +276,7 @@ export const getCategoryOfBooks = () => async (dispatch) => {
   try {
     const response = await apiService.get('books/categories');
     dispatch(bookSlice.actions.getCategoryOfBooksSuccess(response.data));
-    console.log("56789", response)
+    // console.log("56789", response)
   } catch (error) {
     dispatch(bookSlice.actions.hasError(error));
     toast.error(error.message);
