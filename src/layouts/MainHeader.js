@@ -11,19 +11,24 @@ import {
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-// import PersonIcon from "@mui/icons-material/Person";
 import LogoB from "../components/LogoB";
 import SearchInput from "../components/SearchInput";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useSelector, useDispatch } from "react-redux";
-// import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
+import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
+import { logoutSuccess } from "../features/user/userSlice";
 
 function MainHeader() {
   const navigate = useNavigate();
-  // const dispatch = useDispatch();
-  const { isAuthenticated, logout, user } = useAuth();
-  const cartItemCount = 3;
+  const dispatch = useDispatch();
+  // const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const { logout } = useAuth();
+  const cartItemCount = 3; 
+  
+  const wishlist = useSelector((state) => state.wishlist.wishlist);
+  const wishlistCount = wishlist.length; 
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -36,9 +41,11 @@ function MainHeader() {
   };
 
   const handleLogout = () => {
-    // dispatch(clearWishlistOnLogout())
-    logout(() => {
-      navigate("/", { replace: true });
+    // Gọi hàm logout và xử lý đăng xuất người dùng
+    logout(wishlist, user, () => {
+      dispatch(logoutSuccess());  // Cập nhật Redux với trạng thái isAuthenticated về false
+      dispatch(clearWishlistOnLogout());  // Xóa wishlist trong Redux
+      navigate("/", { replace: true });  // Điều hướng về trang chủ sau khi đăng xuất
     });
   };
 
@@ -48,14 +55,11 @@ function MainHeader() {
     }
   };
 
-  const wishlistCount = useSelector((state) => state.wishlist.wishlist.length);
-
-
   return (
     <Box>
       <AppBar position="static" color="primary">
         <Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
-          {/* LogoB */}
+          {/* Logo */}
           <IconButton
             size="large"
             edge="start"
@@ -83,47 +87,28 @@ function MainHeader() {
           </Box>
 
           {/* User Menu, Wishlist, Cart */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              mx: 2,
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", mx: 2 }}>
             {/* Wishlist */}
             <RouterLink to={"/wishlist"}>
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="wishlist"
-                sx={{ mr: 2 }}
-              >
+              <IconButton size="large" color="inherit" aria-label="wishlist" sx={{ mr: 2 }}>
                 <Badge badgeContent={wishlistCount} color="secondary">
                   <FavoriteBorderIcon />
                 </Badge>
               </IconButton>
             </RouterLink>
+
             {/* Cart */}
-            <RouterLink to={"/cart/:userId"}>
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                sx={{ mr: 2 }}
-              >
+            <RouterLink to={"/cart"}>
+              <IconButton size="large" color="inherit" aria-label="cart" sx={{ mr: 2 }}>
                 <Badge badgeContent={cartItemCount} color="primary">
                   <ShoppingCartOutlinedIcon />
                 </Badge>
               </IconButton>
             </RouterLink>
 
+            {/* User Login/Logout */}
             {!isAuthenticated ? (
-              <RouterLink
-                to={"/login"}
-                sx={{ textDecoration: "none", color: "white", mx: 1 }}
-              >
+              <RouterLink to={"/login"} style={{ textDecoration: "none", color: "white", margin: '0 8px' }}>
                 <Typography sx={{ color: "white", textDecoration: "none" }}>
                   Login
                 </Typography>
@@ -172,42 +157,18 @@ function MainHeader() {
             mt: 1,
           }}
         >
-          <RouterLink to={"#"}>
-            <Typography
-              sx={{
-                mx: 3,
-                color: "white",
-                fontSize: "16px",
-                fontWeight: "bold",
-                textDecoration: "none",
-              }}
-            >
+          <RouterLink to={"/categories"} style={{ textDecoration: "none" }}>
+            <Typography sx={{ mx: 3, color: "white", fontSize: "16px", fontWeight: "bold" }}>
               Shop by Category
             </Typography>
           </RouterLink>
-          <RouterLink to={"#"}>
-            <Typography
-              sx={{
-                mx: 3,
-                color: "white",
-                fontSize: "16px",
-                fontWeight: "bold",
-                textDecoration: "none",
-              }}
-            >
+          <RouterLink to={"/best-seller"} style={{ textDecoration: "none" }}>
+            <Typography sx={{ mx: 3, color: "white", fontSize: "16px", fontWeight: "bold" }}>
               Best Seller
             </Typography>
           </RouterLink>
-          <RouterLink to={"/help"}>
-            <Typography
-              sx={{
-                mx: 3,
-                color: "white",
-                fontSize: "16px",
-                fontWeight: "bold",
-                textDecoration: "none",
-              }}
-            >
+          <RouterLink to={"/help"} style={{ textDecoration: "none" }}>
+            <Typography sx={{ mx: 3, color: "white", fontSize: "16px", fontWeight: "bold" }}>
               Contact Us
             </Typography>
           </RouterLink>

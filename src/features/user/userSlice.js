@@ -1,56 +1,25 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { toast } from "react-toastify";
-import apiService from "../../app/apiService";
+import { createSlice } from '@reduxjs/toolkit'; 
 
 const initialState = {
-  isLoading: false,
-  user: [],
-  errors: null,
+  user: null,
+  isAuthenticated: false,
 };
 
-const slice = createSlice({
-  name: "user",
+const userSlice = createSlice({
+  name: 'user',
   initialState,
   reducers: {
-    startLoading(state) {
-      state.isLoading = true;
-    },
-    hasError(state, action) {
-      state.isLoading = false;
-      state.errors = action.payload;
-    },
-    getUserSuccess(state, action) {
-      state.isLoading = false;
+    loginSuccess: (state, action) => {
+      console.log("User payload in loginSuccess:", action.payload); 
       state.user = action.payload;
+      state.isAuthenticated = true;
     },
-    changData(state, action) {
-      state.user = action.payload;
+    logoutSuccess: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
     },
   },
 });
 
-export const getUser = (userId) => async (dispatch) => {
-  dispatch(slice.actions.startLoading());
-  try {
-    const response = await apiService.get(`/users/${userId}`);
-    dispatch(slice.actions.getUserSuccess(response.data));
-  } catch (error) {
-    dispatch(slice.actions.hasError(error));
-    toast.error(error.message);
-  }
-};
-
-export const updateUser = (userData, userId) => async (dispatch) => {
-  dispatch(slice.actions.startLoading());
-  try {
-    await apiService.put(`/users/${userId}`, userData);
-    toast.success("Update user profile successfully");
-    const response = await apiService.get(`/users/${userId}`);
-    dispatch(slice.actions.getUserSuccess(response.data));
-  } catch (error) {
-    dispatch(slice.actions.hasError(error));
-    toast.error(error.message);
-  }
-};
-
-export default slice.reducer;
+export const { loginSuccess, logoutSuccess } = userSlice.actions;
+export default userSlice.reducer;

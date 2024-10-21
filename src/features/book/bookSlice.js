@@ -120,11 +120,11 @@ export const getBooks = (page, search, minPrice, maxPrice, category) => async (d
       category: category || "",
     }).toString();
 
-    console.log("Fetching books with URL:", `/books?${queryParams}`);
+    // console.log("Fetching books with URL:", `/books?${queryParams}`);
     
     const response = await apiService.get(`/books?${queryParams}`);
     
-    console.log("Books API response:", response.data);
+    // console.log("Books API response:", response.data);
     dispatch(bookSlice.actions.getBooksSuccess(response.data));
     dispatch(bookSlice.actions.endLoading());
   } catch (error) {
@@ -162,7 +162,7 @@ export const getSingleBook = (id, userId) => async (dispatch) => {
   try {
     // Gọi API lấy thông tin sách
     const bookResponse = await apiService.get(`/books/${id}`);
-    console.log("Book Response:12345", bookResponse.data); // Kiểm tra phản hồi từ API
+    // console.log("Book Response:12345", bookResponse.data); // Kiểm tra phản hồi từ API
     dispatch(bookSlice.actions.getBookDetailSuccess(bookResponse.data));
 
     // Gọi API lấy thông tin giỏ hàng nếu có userId

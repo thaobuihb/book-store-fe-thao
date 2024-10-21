@@ -18,7 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import {
   loadWishlist,
-  toggleBookInWishlist,
+  // toggleBookInWishlist,
   deleteBookInWishlist
 } from "../features/wishlist/wishlistSlice";
 
@@ -26,23 +26,25 @@ const WishlistPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Lấy danh sách chi tiết wishlist từ Redux store
+  
   const { detailedWishlist, isLoading } = useSelector((state) => state.wishlist);
 
-  // Dùng useEffect để gọi loadWishlist khi component được render
+  console.log("Redux wishlist state:", detailedWishlist);
+  console.log("Redux loading state:", isLoading);
+
+  
   useEffect(() => {
-    // Gọi action để lấy dữ liệu wishlist từ localStorage hoặc server
     dispatch(loadWishlist());
   }, [dispatch]);
 
-  // Hàm xử lý thêm vào giỏ hàng
+  
   const handleAddToCart = (bookId) => {
-    navigate("/cart"); // Điều hướng sang trang giỏ hàng
+    navigate("/cart"); 
   };
 
   // Hàm xử lý xóa sách khỏi wishlist
   const handleRemoveFromWishlist = (bookId) => {
-    dispatch(deleteBookInWishlist(bookId)); // Gọi action để xóa sách khỏi wishlist
+    dispatch(deleteBookInWishlist(bookId)); 
   };
 
   return (
@@ -66,8 +68,8 @@ const WishlistPage = () => {
         </Typography>
       ) : (
         <Grid container spacing={3} justifyContent="center">
-          {detailedWishlist.map((book) => (
-            <Grid item xs={12} sm={6} md={3} key={book._id}>
+          {detailedWishlist.map((book, index) => (
+            <Grid item xs={12} sm={6} md={3} key={book._id || index}>
               <Card
                 sx={{
                   position: "relative",
