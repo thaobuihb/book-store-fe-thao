@@ -147,6 +147,45 @@ export const toggleBookInWishlist = (bookId) => async (dispatch, getState) => {
   }
 };
 
+export const removeBookFromWishlist = (bookId) => async (dispatch, getState) => {
+  const state = getState();
+  const { isAuthenticated, user } = state.user;
+  const { wishlist } = state.wishlist;
+
+  try {
+    if (isAuthenticated && user) {
+      const token = localStorage.getItem('accessToken');
+
+      console.log("User ID:", user._id);
+      console.log("Book ID:", bookId);
+      console.log("Token:", token);
+      
+      // Trường hợp người dùng đã đăng nhập
+      await apiService.delete(`/wishlist/remove`, {
+        data: {
+          userId: user._id,  
+          bookId
+        },
+        headers: {
+          Authorization: `Bearer ${token}` 
+        }
+      });
+
+      dispatch(removeBookFromWishlistSuccess(bookId)); 
+      toast.success("Sách đã được xóa khỏi danh sách yêu thích");
+    } else {
+      // Trường hợp người dùng chưa đăng nhập (xóa từ localStorage)
+      const updatedWishlist = wishlist.filter((id) => id !== bookId);
+      saveWishlistToLocalStorage(updatedWishlist);  
+      dispatch(removeBookFromWishlistSuccess(bookId)); 
+      toast.success("Sách đã được xóa khỏi danh sách yêu thích (local)");
+    }
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Không thể xóa sách khỏi danh sách yêu thích");
+  }
+};
+
 
 
 // Tải thông tin chi tiết wishlist khi người dùng mở trang
@@ -207,9 +246,9 @@ export const syncWishlistAfterLogin = (userId) => async (dispatch, getState) => 
 
 export const clearWishlistOnLogout = () => async (dispatch) => {
   try {
-    // Không cần đồng bộ lại vì đã đồng bộ trước đó
-    dispatch(clearWishlist()); // Xóa wishlist khỏi Redux
-    localStorage.removeItem("wishlist"); // Xóa wishlist khỏi localStorage
+    
+    dispatch(clearWishlist()); 
+    localStorage.removeItem("wishlist"); 
   } catch (error) {
     console.error("Lỗi khi xóa wishlist trước khi logout:", error.message);
   }

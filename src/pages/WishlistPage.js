@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import {
   loadWishlist,
   // toggleBookInWishlist,
-  deleteBookInWishlist
+  removeBookFromWishlist
 } from "../features/wishlist/wishlistSlice";
 
 const WishlistPage = () => {
@@ -44,7 +44,7 @@ const WishlistPage = () => {
 
   // Hàm xử lý xóa sách khỏi wishlist
   const handleRemoveFromWishlist = (bookId) => {
-    dispatch(deleteBookInWishlist(bookId)); 
+    dispatch(removeBookFromWishlist(bookId)); 
   };
 
   return (
