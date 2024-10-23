@@ -1,27 +1,59 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"; 
 import { useDispatch, useSelector } from "react-redux"; 
 import { getSingleBook, getBooks } from "../features/book/bookSlice"; 
+import { toggleBookInWishlist } from "../features/wishlist/wishlistSlice"; 
 import { Box, Typography, Button, IconButton, TextField } from "@mui/material"; 
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined"; 
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import BookItem from "../features/book/bookItem"; 
 
 const DetailPage = () => {
   const { bookId } = useParams(); 
   const dispatch = useDispatch();
-  const { book, books } = useSelector((state) => state.book); 
+  const { book, books } = useSelector((state) => {
+    console.log("Redux state:", state.book);
+    return state.book;
+  });
+
+  const { wishlist } = useSelector((state) => state.wishlist); 
+  
+  const [quantity, setQuantity] = useState(1); 
 
   useEffect(() => {
     const fetchBookData = async () => {
-      await dispatch(getSingleBook(bookId));  // Lấy chi tiết sách
-      if (book?.category) {  // Kiểm tra nếu có category ID
-        dispatch(getBooks(1, "", "", "", book.category));  // Lấy sách cùng danh mục theo category ID
+      await dispatch(getSingleBook(bookId));  
+      console.log("Book fetched:", book);
+      if (book?.category) {  
+        dispatch(getBooks(1, "", "", "", book.category));  
       }
     };
 
     fetchBookData();
   }, [dispatch, bookId, book?.category]);
+
+  // Hàm giảm số lượng
+  const handleDecrease = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  // Hàm tăng số lượng
+  const handleIncrease = () => {
+    setQuantity(quantity + 1);
+  };
+
+  // Thêm sách vào wishlist
+  const handleAddToWishlist = () => {
+    dispatch(toggleBookInWishlist(bookId)); 
+  };
+
+  // Kiểm tra xem sách có trong wishlist không
+  const isBookInWishlist = wishlist.includes(bookId);
+
   return (
     <Box sx={{ padding: 4 }}>
       {/* Phần trên */}
@@ -68,9 +100,12 @@ const DetailPage = () => {
               Price: ${book.price}
             </Typography>{" "}
             <Typography sx={{ m: 5 }} variant="h6">
-              Discount: ${book.discountedPrice}
+              Discount: {book.discountRate ? `${book.discountRate} %` : "0%"}
             </Typography>{" "}
-            <Typography variant="body2">Publisher: {book.publisher}</Typography> 
+            <Typography sx={{ m: 5 }} variant="h6">
+              DiscountedPrice: ${book.discountedPrice} 
+            </Typography>{" "}
+            <Typography sx={{ m: 5 }} variant="body2">Publisher: {book.publisher}</Typography> 
             <Typography sx={{ m: 5 }} variant="body2">
               Publication Date: {book.publicationDate}
             </Typography>
@@ -85,9 +120,17 @@ const DetailPage = () => {
           {/* Các nút thao tác */}
           <Box sx={{ mt: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", m: 5 }}>
-              <IconButton sx={{ color: "black" }}>-</IconButton>{" "}
-              <TextField value="1" sx={{ width: "50px", mx: 1 }} />{" "}
-              <IconButton sx={{ color: "black" }}>+</IconButton>{" "}
+              <IconButton sx={{ color: "black" }} onClick={handleDecrease}>
+                <RemoveIcon />
+              </IconButton>{" "}
+              <TextField 
+                value={quantity} 
+                sx={{ width: "50px", mx: 1 }} 
+                inputProps={{ readOnly: true }} 
+              />{" "}
+              <IconButton sx={{ color: "black" }} onClick={handleIncrease}>
+                <AddIcon />
+              </IconButton>{" "}
             </Box>
             <Button
               variant="contained"
@@ -99,8 +142,15 @@ const DetailPage = () => {
             <Button variant="contained" color="secondary" sx={{ m: 2 }}>
               Buy Now
             </Button>
-            <IconButton color="primary">
-              <FavoriteBorderIcon />
+            <IconButton
+              color="primary"
+              onClick={handleAddToWishlist}
+              sx={{
+                color: isBookInWishlist ? "secondary.main"
+                : "#0000FF", 
+              }}
+            >
+              <FavoriteIcon />
             </IconButton>
           </Box>
         </Box>

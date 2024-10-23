@@ -129,7 +129,18 @@ export const toggleBookInWishlist = (bookId) => async (dispatch, getState) => {
 
   try {
     if (isAlreadyInWishlist) {
-      const response = await apiService.post(`/wishlist/remove`, { userId: user._id, bookId });
+      const token = localStorage.getItem('accessToken');
+      await apiService({
+        method: 'DELETE',
+        url: `/wishlist/remove`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          userId: user._id,
+          bookId,
+        }
+      });
       dispatch(removeBookFromWishlistSuccess(bookId));
       toast.success("Đã xóa sách khỏi danh sách yêu thích");
     } else {
@@ -139,7 +150,7 @@ export const toggleBookInWishlist = (bookId) => async (dispatch, getState) => {
     }
 
     const updatedWishlist = getState().wishlist.wishlist;
-    saveWishlistToLocalStorage(updatedWishlist); // Cập nhật localStorage sau khi đồng bộ với server
+    saveWishlistToLocalStorage(updatedWishlist); 
   } catch (error) {
     console.error("Error syncing wishlist with server:", error.message);
     dispatch(hasError(error.message));

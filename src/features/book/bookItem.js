@@ -147,7 +147,7 @@ const BookItem = ({
                         color: isBookInWishlist(book._id)
                           ? "secondary.main"
                           : "#0000FF",
-                      }} // Đổi màu icon nếu sách đã ở trong wishlist
+                      }} 
                     />
                   </IconButton>
                 </Box>
