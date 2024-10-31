@@ -25,7 +25,7 @@ const DetailPage = () => {
   useEffect(() => {
     const fetchBookData = async () => {
       await dispatch(getSingleBook(bookId));  
-      console.log("Book fetched:", book);
+      // console.log("Book fetched:", book);
       if (book?.category) {  
         dispatch(getBooks(1, "", "", "", book.category));  
       }

@@ -108,20 +108,20 @@ export const toggleBookInWishlist = (bookId) => async (dispatch, getState) => {
 
     // Thêm sách vào localStorage
     if (!wishlist.includes(bookId)) {
-      dispatch(addBookToWishlistSuccess(bookId)); // Lưu vào Redux store
+      dispatch(addBookToWishlistSuccess(bookId)); 
       toast.success("Sách đã được thêm vào danh sách yêu thích (local)");
 
       const updatedWishlist = getState().wishlist.wishlist;
-      saveWishlistToLocalStorage(updatedWishlist); // Cập nhật localStorage
+      saveWishlistToLocalStorage(updatedWishlist); 
     } else {
-      dispatch(removeBookFromWishlistSuccess(bookId)); // Xóa khỏi Redux store
+      dispatch(removeBookFromWishlistSuccess(bookId)); 
       toast.success("Sách đã được xóa khỏi danh sách yêu thích (local)");
 
       const updatedWishlist = getState().wishlist.wishlist;
-      saveWishlistToLocalStorage(updatedWishlist); // Cập nhật localStorage
+      saveWishlistToLocalStorage(updatedWishlist); 
     }
 
-    return; // Dừng lại ở đây nếu người dùng đã đăng xuất hoặc chưa đăng nhập
+    return; 
   }
 
   // Nếu người dùng đã đăng nhập, gửi yêu cầu lên server
@@ -196,7 +196,6 @@ export const removeBookFromWishlist = (bookId) => async (dispatch, getState) => 
     toast.error("Không thể xóa sách khỏi danh sách yêu thích");
   }
 };
-
 
 
 // Tải thông tin chi tiết wishlist khi người dùng mở trang

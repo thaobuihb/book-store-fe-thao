@@ -22,13 +22,15 @@ import { logoutSuccess } from "../features/user/userSlice";
 function MainHeader() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const { isAuthenticated, logout, user } = useAuth();
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { logout } = useAuth();
-  const cartItemCount = 3; 
-  
+
+  // Lấy giỏ hàng từ Redux store
+  const cart = useSelector((state) => state.cart.cart);
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0); 
+
   const wishlist = useSelector((state) => state.wishlist.wishlist);
-  const wishlistCount = wishlist.length; 
+  const wishlistCount = wishlist.length;
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -41,11 +43,10 @@ function MainHeader() {
   };
 
   const handleLogout = () => {
-    // Gọi hàm logout và xử lý đăng xuất người dùng
     logout(wishlist, user, () => {
-      dispatch(logoutSuccess());  // Cập nhật Redux với trạng thái isAuthenticated về false
-      dispatch(clearWishlistOnLogout());  // Xóa wishlist trong Redux
-      navigate("/", { replace: true });  // Điều hướng về trang chủ sau khi đăng xuất
+      dispatch(logoutSuccess());
+      dispatch(clearWishlistOnLogout());
+      navigate("/", { replace: true });
     });
   };
 
@@ -100,7 +101,7 @@ function MainHeader() {
             {/* Cart */}
             <RouterLink to={"/cart"}>
               <IconButton size="large" color="inherit" aria-label="cart" sx={{ mr: 2 }}>
-                <Badge badgeContent={cartItemCount} color="primary">
+                <Badge badgeContent={cartItemCount} color="secondary">
                   <ShoppingCartOutlinedIcon />
                 </Badge>
               </IconButton>

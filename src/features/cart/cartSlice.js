@@ -1,14 +1,36 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { toast } from "react-toastify";
 import apiService from "../../app/apiService";
+import { toast } from "react-toastify";
 
-const initialState = {
-  cart: [],
-  isLoading: false,
-  errors: null,
+export const loadCartFromLocalStorage = () => {
+  try {
+    const serializedState = localStorage.getItem("cart");
+    return serializedState ? JSON.parse(serializedState) : [];
+  } catch (e) {
+    return [];
+  }
 };
 
-const slice = createSlice({
+const saveCartToLocalStorage = (cart) => {
+  try {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  } catch (e) {
+    console.error("Không thể lưu giỏ hàng vào localStorage", e);
+  }
+};
+
+const removeCartFromLocalStorage = () => {
+  localStorage.removeItem("cart");
+};
+
+const initialState = {
+  cart: loadCartFromLocalStorage(),
+  detailedCart: [],
+  isLoading: false,
+  error: null,
+};
+
+const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
@@ -17,167 +39,125 @@ const slice = createSlice({
     },
     hasError(state, action) {
       state.isLoading = false;
-      state.errors = action.payload;
+      state.error = action.payload;
     },
-    getCartSuccess(state, action) {
+    addBookToCartSuccess(state, action) {
+      const book = action.payload;
+      const existingItem = state.cart.find(item => item.bookId === book.bookId);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        state.cart.push({ ...book, quantity: 1 });
+      }
+      saveCartToLocalStorage(state.cart);
       state.isLoading = false;
-      state.errors = null;
-      state.cart = action.payload;
     },
-    updateCart(state, action) {
+    removeBookFromCartSuccess(state, action) {
+      state.cart = state.cart.filter(book => book.bookId !== action.payload);
+      saveCartToLocalStorage(state.cart);
+      state.isLoading = false;
+    },
+    updateCartQuantity(state, action) {
+      const { bookId, quantity } = action.payload;
+      const item = state.cart.find(book => book.bookId === bookId);
+      if (item) {
+        item.quantity = quantity;
+      }
+      saveCartToLocalStorage(state.cart);
+      state.isLoading = false;
+    },
+    clearCart(state) {
+      state.cart = [];
+      removeCartFromLocalStorage();
+      state.isLoading = false;
+    },
+    syncCartFromBackendSuccess(state, action) {
       state.cart = action.payload;
+      saveCartToLocalStorage(state.cart);
+      state.isLoading = false;
+    },
+    clearAllCartItemsSuccess(state) {
+      state.cart = [];
+      removeCartFromLocalStorage();
+      state.isLoading = false;
     },
   },
 });
 
-export const getCart = (userId) => async (dispatch) => {
-  dispatch(slice.actions.startLoading());
+export const {
+  startLoading,
+  hasError,
+  addBookToCartSuccess,
+  removeBookFromCartSuccess,
+  updateCartQuantity,
+  clearCart,
+  syncCartFromBackendSuccess,
+  clearAllCartItemsSuccess
+} = cartSlice.actions;
+
+export const addToCart = (book) => async (dispatch, getState) => {
+  dispatch(startLoading());
+  const state = getState();
+  const { user, isAuthenticated } = state.user;
+
   try {
-    const response = await apiService.get(`/carts/${userId}`);
-    const updatedCart = await fetchBookNames(response.data);
-    dispatch(slice.actions.getCartSuccess(updatedCart));
+    if (isAuthenticated) {
+      // Kiểm tra và truyền đầy đủ userId và book data
+      await apiService.post("/carts", { 
+        userId: user._id, 
+        bookId: book.bookId, 
+        quantity: 1, 
+        price: book.price 
+      });
+    }
+    dispatch(addBookToCartSuccess(book));
+    toast.success("Book added to the cart");
   } catch (error) {
-    dispatch(slice.actions.hasError(error));
-    toast.error(error.message);
+    dispatch(hasError(error.message));
+    toast.error("Error adding book to cart");
   }
 };
 
-export const orderCart =
-  (userId, cart, shippingAddress, paymentMethods) => async (dispatch) => {
-    if (!paymentMethods) {
-      paymentMethods = "After recieve";
-    }
-    const checkedBooks = cart.filter((item) => item.checked);
-    try {
-      const response = await apiService.post(`/orders/${userId}`, {
-        books: checkedBooks,
-        shippingAddress,
-        paymentMethods,
-      });
-      toast.success(response.message);
-      const responseAgain = await apiService.get(`/carts/${userId}`);
-      const updatedCart = await fetchBookNames(responseAgain.data);
-      dispatch(slice.actions.updateCart(updatedCart));
-    } catch (error) {
-      dispatch(slice.actions.hasError(error));
-      toast.error(error.message);
-    }
-  };
 
-export const addToCart =
-  (userId, bookId, quantity = 1, price, isBookNotInCart) =>
-  async (dispatch) => {
-    if (isBookNotInCart) {
-      toast.error("Book allready in cart");
-    } else {
-      try {
-        const bookData = {
-          bookId: bookId,
-          quantity: quantity,
-          price: price,
-        };
+export const syncCartAfterLogin = (userId) => async (dispatch) => {
+  dispatch(startLoading());
 
-        if (quantity > 0) {
-          await apiService.post(`/carts/${userId}`, bookData);
-          toast.success("Book added to the cart successfully");
-        } else {
-          toast.error("Invalid quantity");
-        }
-      } catch (error) {
-        dispatch(slice.actions.hasError(error));
-        toast.error(error.message);
-      }
-    }
-  };
+  const localCart = loadCartFromLocalStorage();
 
-const fetchBookNames = async (cartItems) => {
-  const updatedCart = await Promise.all(
-    cartItems.map(async (item) => {
-      try {
-        const bookResponse = await apiService.get(`/books/${item.bookId}`);
-        const bookName = bookResponse.data.name;
-        return {
-          ...item,
-          bookName,
-          checked: false,
-        };
-      } catch (error) {
-        console.error(error);
-        return item;
-      }
-    })
-  );
-  return updatedCart;
+  try {
+    const response = await apiService.post(`/carts/sync`, { userId, cart: localCart });
+    dispatch(syncCartFromBackendSuccess(response.data));
+    saveCartToLocalStorage(response.data);
+    toast.success("Cart synced successfully");
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Error syncing cart");
+  }
 };
 
-export const increaseQuantity =
-  (userId, bookId, quantity, price) => async (dispatch) => {
-    quantity = quantity + 1;
-    try {
-      const bookData = {
-        bookId: bookId,
-        quantity: quantity,
-        price: price,
-      };
-      await apiService.post(`/carts/${userId}`, bookData);
-      const response = await apiService.get(`/carts/${userId}`);
-      const updatedCart = await fetchBookNames(response.data);
-      dispatch(slice.actions.updateCart(updatedCart));
-    } catch (error) {
-      dispatch(slice.actions.hasError(error));
-      toast.error(error.message);
-    }
-  };
-
-export const changeQuantity =
-  (userId, bookId, quantity, price) => async (dispatch) => {
-    try {
-      const bookData = {
-        bookId: bookId,
-        quantity: quantity,
-        price: price,
-      };
-      await apiService.post(`/carts/${userId}`, bookData);
-      const response = await apiService.get(`/carts/${userId}`);
-      const updatedCart = await fetchBookNames(response.data);
-      dispatch(slice.actions.updateCart(updatedCart));
-    } catch (error) {
-      dispatch(slice.actions.hasError(error));
-      toast.error(error.message);
-    }
-  };
-
-export const decreaseQuantity =
-  (userId, bookId, quantity, price) => async (dispatch) => {
-    if (quantity >= 0) {
-      quantity = quantity - 1;
-      try {
-        const bookData = {
-          bookId: bookId,
-          quantity: quantity,
-          price: price,
-        };
-        await apiService.post(`/carts/${userId}`, bookData);
-        const response = await apiService.get(`/carts/${userId}`);
-        const updatedCart = await fetchBookNames(response.data);
-        dispatch(slice.actions.updateCart(updatedCart));
-        if (quantity === 0)
-          toast.success("Book removed from the cart successfully");
-      } catch (error) {
-        dispatch(slice.actions.hasError(error));
-        toast.error(error.message);
-      }
-    }
-  };
-
-export const toggleCheckbox = (bookId) => (dispatch, getState) => {
-  const { cart } = getState().cart;
-
-  const updatedCart = cart.map((item) =>
-    item.bookId === bookId ? { ...item, checked: !item.checked } : item
-  );
-
-  dispatch(slice.actions.updateCart(updatedCart));
+export const clearCartOnLogout = () => (dispatch) => {
+  dispatch(clearCart());
+  localStorage.removeItem("cart");
 };
 
-export default slice.reducer;
+
+export const clearAllCartItems = () => async (dispatch, getState) => {
+  dispatch(startLoading());
+  const { user, isAuthenticated } = getState().user;
+
+  if (isAuthenticated && user) {
+    try {
+      await apiService.post(`/carts/clear`, { userId: user._id });
+      dispatch(clearAllCartItemsSuccess());
+      toast.success("Cart cleared successfully");
+    } catch (error) {
+      dispatch(hasError(error.message));
+      toast.error("Error clearing cart");
+    }
+  } else {
+    dispatch(clearCart());
+    toast.success("Cart cleared successfully");
+  }
+};
+
+export default cartSlice.reducer;

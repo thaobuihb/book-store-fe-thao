@@ -2,6 +2,7 @@ import { createContext, useReducer, useEffect } from "react";
 import apiService from "../app/apiService";
 import { isValidToken } from "../utils/jwt";
 import { syncWishlistAfterLogin, clearWishlist } from "../features/wishlist/wishlistSlice";
+import { syncCartAfterLogin, clearCartOnLogout } from "../features/cart/cartSlice"; 
 import { loginSuccess, logoutSuccess } from "../features/user/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -60,8 +61,6 @@ const setSession = (accessToken) => {
   }
 };
 
-
-
 const AuthContext = createContext({ ...initialState });
 
 function AuthProvider({ children }) {
@@ -113,19 +112,19 @@ function AuthProvider({ children }) {
   const login = async ({ email, password }, callback) => {
     const response = await apiService.post("/auth/login", { email, password });
     const { user, accessToken } = response.data;
-  
+
     setSession(accessToken);
     dispatch({
       type: LOGIN_SUCCESS,
       payload: { user },
     });
-  
+
     reduxDispatch(loginSuccess(user));
     reduxDispatch(syncWishlistAfterLogin(user._id));
-  
+    reduxDispatch(syncCartAfterLogin(user._id)); 
+
     callback();
   };
-  
 
   const register = async ({ name, email, password }, callback) => {
     const response = await apiService.post("/users", {
@@ -147,7 +146,7 @@ function AuthProvider({ children }) {
   const logout = async (wishlist, user, callback) => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (token && user && wishlist.length > 0) {
+      if (token && user) {
         try {
           await apiService.post(`/wishlist/sync`, {
             userId: user._id,
@@ -157,28 +156,24 @@ function AuthProvider({ children }) {
         } catch (error) {
           console.error("Lỗi khi đồng bộ wishlist trước khi logout:", error.response ? error.response.data : error.message);
         }
+        reduxDispatch(clearCartOnLogout()); 
       } else {
         console.warn("No token or userId, skipping wishlist sync during logout.");
       }
-  
-      // Xóa session sau khi đồng bộ hoàn tất
+
       setSession(null);
       reduxDispatch(logoutSuccess());
-  
+
       toast.success("Đăng xuất thành công!");
-  
-      // Gọi callback để hoàn tất đăng xuất
+
       if (callback) callback();
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error.message);
       toast.error("Đăng xuất không thành công");
-  
+
       if (callback) callback();
     }
   };
-  
-  
-  
 
   return (
     <AuthContext.Provider

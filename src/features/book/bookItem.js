@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { toggleBookInWishlist } from "../wishlist/wishlistSlice";
+import { addToCart } from "../cart/cartSlice";
 
 const BookItem = ({
   title,
@@ -26,6 +27,7 @@ const BookItem = ({
 }) => {
   const dispatch = useDispatch();
   const { wishlist } = useSelector((state) => state.wishlist); 
+  const cart = useSelector((state) => state.cart.cart);
   const bookList = Array.isArray(books) ? books : [];
 
   const navigate = useNavigate();
@@ -40,6 +42,20 @@ const BookItem = ({
 
   const isBookInWishlist = (bookId) => {
     return wishlist.includes(bookId); 
+  };
+
+  const handleAddToCart = (book) => {
+    dispatch(addToCart({
+      bookId: book._id,
+      name: book.title,
+      price: book.price,
+      discountedPrice: book.discountedPrice,
+      img: book.img, 
+    }));
+  };
+
+  const isBookInCart = (bookId) => {
+    return cart.some((item) => item.bookId === bookId);
   };
 
   return (
@@ -131,12 +147,14 @@ const BookItem = ({
                   sx={{ padding: "5px", marginTop: "auto" }}
                 >
                   <IconButton
-                    color="primary"
-                    onClick={() => {
-                      // Logic để thêm vào giỏ hàng
-                    }}
+                    color="secondary"
+                    onClick={() => handleAddToCart(book)}
                   >
-                    <AddShoppingCartIcon sx={{ color: "#0000FF" }} />
+                    <AddShoppingCartIcon
+                      sx={{
+                        color: isBookInCart(book._id) ? "secondary.main" : "#0000FF",
+                      }}
+                    />
                   </IconButton>
                   <IconButton
                     color="secondary"

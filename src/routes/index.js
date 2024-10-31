@@ -23,7 +23,7 @@ function Router() {
       <Route path="/" element={<HomePage />}/>
       <Route path="book/:bookId" element={<DetailPage />}/>
       <Route path="/books" element={<BookPage/>}/>
-      <Route path="cart/:userId" element={<CartPage />}/>
+      <Route path="cart" element={<CartPage />}/>
       <Route path="order/:userId" element={<OrderPage />}/>
       <Route path="user/:userId" element={<UserProfilePage />}/>
       <Route path="/help" element={<HelpCenter />}/>
