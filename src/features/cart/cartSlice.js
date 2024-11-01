@@ -53,11 +53,12 @@ const cartSlice = createSlice({
       state.isLoading = false;
     },
     removeBookFromCartSuccess(state, action) {
-      state.cart = state.cart.filter(book => book.bookId !== action.payload);
+      state.cart = state.cart.filter((book) => book.bookId !== action.payload);
+      state.detailedCart = state.detailedCart.filter((book) => book.bookId !== action.payload); // Cập nhật cả detailedCart nếu cần
       saveCartToLocalStorage(state.cart);
       state.isLoading = false;
     },
-    updateCartQuantity(state, action) {
+    updateCartQuantitySuccess(state, action) {
       const { bookId, quantity } = action.payload;
       const item = state.cart.find(book => book.bookId === bookId);
       if (item) {
@@ -68,6 +69,7 @@ const cartSlice = createSlice({
     },
     clearCart(state) {
       state.cart = [];
+      state.detailedCart = [];
       removeCartFromLocalStorage();
       state.isLoading = false;
     },
@@ -78,9 +80,18 @@ const cartSlice = createSlice({
     },
     clearAllCartItemsSuccess(state) {
       state.cart = [];
+      state.detailedCart = [];
       removeCartFromLocalStorage();
       state.isLoading = false;
     },
+    loadCartDetailsSuccess(state, action) {
+      state.detailedCart = action.payload.map(book => ({
+        ...book,
+        bookId: book._id,        
+        quantity: book.quantity || 1,  
+      }));
+      state.isLoading = false;
+    }
   },
 });
 
@@ -89,10 +100,11 @@ export const {
   hasError,
   addBookToCartSuccess,
   removeBookFromCartSuccess,
-  updateCartQuantity,
+  updateCartQuantitySuccess,
   clearCart,
   syncCartFromBackendSuccess,
-  clearAllCartItemsSuccess
+  clearAllCartItemsSuccess,
+  loadCartDetailsSuccess
 } = cartSlice.actions;
 
 export const addToCart = (book) => async (dispatch, getState) => {
@@ -145,19 +157,88 @@ export const clearAllCartItems = () => async (dispatch, getState) => {
   dispatch(startLoading());
   const { user, isAuthenticated } = getState().user;
 
-  if (isAuthenticated && user) {
-    try {
-      await apiService.post(`/carts/clear`, { userId: user._id });
-      dispatch(clearAllCartItemsSuccess());
-      toast.success("Cart cleared successfully");
-    } catch (error) {
-      dispatch(hasError(error.message));
-      toast.error("Error clearing cart");
+  try {
+    if (isAuthenticated && user) {
+      // console.log("User is authenticated, attempting to clear cart on server.");
+      
+      // Gửi yêu cầu DELETE để xóa giỏ hàng trên server
+      const response = await apiService.delete(`/carts`);
+      // console.log("Server response for clearing cart:", response);
+    } else {
+      // console.log("User not authenticated, clearing cart from localStorage.");
+      
+      // Xóa giỏ hàng khỏi localStorage nếu người dùng chưa đăng nhập
+      localStorage.removeItem("cart");
     }
-  } else {
-    dispatch(clearCart());
+
+    // Cập nhật Redux store
+    dispatch(clearAllCartItemsSuccess());
+    // console.log("Cart cleared successfully in Redux.");
     toast.success("Cart cleared successfully");
+  } catch (error) {
+    console.error("Error clearing cart:", error.message);
+    dispatch(hasError(error.message));
+    toast.error("Error clearing cart");
   }
 };
+
+
+
+// Lấy chi tiết sách trong giỏ hàng
+export const loadCart = () => async (dispatch, getState) => {
+  dispatch(startLoading());
+
+  const state = getState();
+  const { cart } = state.cart;
+
+  if (cart.length === 0) {
+    dispatch(loadCartDetailsSuccess([])); 
+    return;
+  }
+
+  try {
+    
+    const bookIds = cart.map((item) => item.bookId);
+
+    const response = await apiService.post("/books/carts", { bookIds });
+    dispatch(loadCartDetailsSuccess(response.data)); 
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Không thể lấy thông tin sách");
+  }
+};
+
+export const updateCartQuantity = ({ bookId, quantity }) => async (dispatch, getState) => {
+  dispatch(startLoading());
+  const state = getState();
+  const { user, isAuthenticated } = state.user;
+
+  try {
+    if (isAuthenticated) {
+      await apiService.put("/carts/update", { userId: user._id, bookId, quantity });
+    }
+    dispatch(updateCartQuantitySuccess({ bookId, quantity }));
+    toast.success("Cart quantity updated successfully");
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Error updating cart quantity");
+  }
+};
+
+export const removeBookFromCart = (bookId) => async (dispatch, getState) => {
+  const { user, isAuthenticated } = getState().user;
+  if (isAuthenticated) {
+    try {
+      await apiService.delete(`/carts`, { data: { bookId } });
+    } catch (error) {
+      dispatch(hasError(error.message));
+      toast.error("Lỗi khi xóa sách khỏi giỏ hàng trên server");
+      return;
+    }
+  }
+  dispatch(removeBookFromCartSuccess(bookId));
+  toast.success("Sách đã được xóa khỏi giỏ hàng");
+};
+
 
 export default cartSlice.reducer;
