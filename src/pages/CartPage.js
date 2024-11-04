@@ -73,7 +73,7 @@ const CartPage = () => {
                       <CardContent>
                         <Typography variant="h6">{item.name}</Typography>
                         <Typography variant="body1">
-                          Giá: ${item.discountedPrice}
+                          Price: ${item.discountedPrice}
                         </Typography>
                         <Box
                           sx={{
@@ -105,7 +105,7 @@ const CartPage = () => {
                           </IconButton>
                         </Box>
                         <Typography variant="body1" sx={{ marginTop: 1 }}>
-                          Tổng: ${(item.discountedPrice || item.price) * item.quantity}
+                          Totals: ${(item.discountedPrice || item.price) * item.quantity}
                         </Typography>
                       </CardContent>
                     </Box>

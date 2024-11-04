@@ -17,32 +17,39 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   loadWishlist,
-  removeBookFromWishlist
+  removeBookFromWishlist,
+  clearAllWishlistItems,
 } from "../features/wishlist/wishlistSlice";
-import { addToCart } from "../features/cart/cartSlice"; 
+import { addToCart } from "../features/cart/cartSlice";
 
 const WishlistPage = () => {
   const dispatch = useDispatch();
-  
-  const { detailedWishlist, isLoading } = useSelector((state) => state.wishlist);
+  const { detailedWishlist, isLoading } = useSelector(
+    (state) => state.wishlist
+  );
 
   useEffect(() => {
     dispatch(loadWishlist());
   }, [dispatch]);
 
-  // Thay đổi hàm handleAddToCart
   const handleAddToCart = (book) => {
-    dispatch(addToCart({
-      bookId: book._id,
-      name: book.name,
-      price: book.price,
-      discountedPrice: book.discountedPrice,
-      img: book.img,
-    }));
+    dispatch(
+      addToCart({
+        bookId: book._id,
+        name: book.name,
+        price: book.price,
+        discountedPrice: book.discountedPrice,
+        img: book.img,
+      })
+    );
   };
 
   const handleRemoveFromWishlist = (bookId) => {
-    dispatch(removeBookFromWishlist(bookId)); 
+    dispatch(removeBookFromWishlist(bookId));
+  };
+
+  const handleClearWishlist = () => {
+    dispatch(clearAllWishlistItems());
   };
 
   return (
@@ -52,7 +59,11 @@ const WishlistPage = () => {
       </Typography>
 
       {isLoading ? (
-        <Typography variant="h6" color="textSecondary" sx={{ textAlign: "center" }}>
+        <Typography
+          variant="h6"
+          color="textSecondary"
+          sx={{ textAlign: "center" }}
+        >
           Loading your wishlist...
         </Typography>
       ) : detailedWishlist.length === 0 ? (
@@ -149,7 +160,7 @@ const WishlistPage = () => {
                       marginRight: "auto",
                       fontWeight: "bold",
                     }}
-                    onClick={() => handleAddToCart(book)} // Truyền cả đối tượng book vào
+                    onClick={() => handleAddToCart(book)}
                   >
                     ADD TO CART
                   </Button>
@@ -159,6 +170,19 @@ const WishlistPage = () => {
           ))}
         </Grid>
       )}
+
+      <Typography
+        variant="body2"
+        sx={{
+          marginTop: 2,
+          cursor: "pointer",
+          textDecoration: "underline",
+          textAlign: "center",
+        }}
+        onClick={handleClearWishlist}
+      >
+        Clear wishlist
+      </Typography>
 
       <Box sx={{ marginTop: 6, display: "flex", justifyContent: "center" }}>
         <Typography variant="h6" sx={{ marginRight: 2 }}>

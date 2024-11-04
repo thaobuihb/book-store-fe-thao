@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"; 
 import { getSingleBook, getBooks } from "../features/book/bookSlice"; 
 import { toggleBookInWishlist } from "../features/wishlist/wishlistSlice"; 
+import { addToCart } from "../features/cart/cartSlice";
 import { Box, Typography, Button, IconButton, TextField } from "@mui/material"; 
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined"; 
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -53,6 +54,19 @@ const DetailPage = () => {
 
   // Kiểm tra xem sách có trong wishlist không
   const isBookInWishlist = wishlist.includes(bookId);
+
+  const handleAddToCart = () => {
+    dispatch(
+      addToCart({
+        bookId: book._id,
+        name: book.name,
+        price: book.price,
+        discountedPrice: book.discountedPrice,
+        img: book.img,
+        quantity: quantity 
+      })
+    );
+  };
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -136,6 +150,7 @@ const DetailPage = () => {
               variant="contained"
               startIcon={<ShoppingCartOutlinedIcon />}
               sx={{ m: 2 }}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </Button>

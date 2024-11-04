@@ -281,4 +281,20 @@ export const deleteBookInWishlist = () => async(dispatch, getState) => {
   }
 }
 
+export const clearAllWishlistItems = () => async (dispatch, getState) => {
+  dispatch(startLoading());
+  const { user, isAuthenticated } = getState().user;
+
+  try {
+    if (isAuthenticated) {
+      await apiService.delete(`/wishlist`);
+    }
+    dispatch(clearWishlist()); 
+    toast.success("Wishlist cleared successfully");
+  } catch (error) {
+    dispatch(hasError(error.message));
+    toast.error("Error clearing wishlist");
+  }
+};
+
 export default wishlistSlice.reducer;

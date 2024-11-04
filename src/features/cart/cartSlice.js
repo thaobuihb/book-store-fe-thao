@@ -112,23 +112,25 @@ export const addToCart = (book) => async (dispatch, getState) => {
   const state = getState();
   const { user, isAuthenticated } = state.user;
 
+  const payload = {
+    userId: user?._id,
+    bookId: book.bookId || book._id, 
+    quantity: book.quantity || 1,    
+    price: book.price || book.discountedPrice || 0, 
+  };
+
   try {
     if (isAuthenticated) {
-      // Kiểm tra và truyền đầy đủ userId và book data
-      await apiService.post("/carts", { 
-        userId: user._id, 
-        bookId: book.bookId, 
-        quantity: 1, 
-        price: book.price 
-      });
+      await apiService.post("/carts", payload);
     }
-    dispatch(addBookToCartSuccess(book));
+    dispatch(addBookToCartSuccess(payload)); 
     toast.success("Book added to the cart");
   } catch (error) {
     dispatch(hasError(error.message));
     toast.error("Error adding book to cart");
   }
 };
+
 
 
 export const syncCartAfterLogin = (userId) => async (dispatch) => {
