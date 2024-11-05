@@ -158,38 +158,40 @@ const Home = () => {
     <Container>
       {/* Phần sử dụng BookItem để hiển thị slideshow với sách ngẫu nhiên */}
       <SlideshowContainer>
-        <Grid container spacing={2}>
-          {slideshowBooks.map((book) => (
-            <Grid item xs={12} sm={4} key={book._id}>
-              <Card
-                sx={{
-                  maxWidth: 300,
-                  height: 300,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  flexDirection: "column",
-                  alignSelf: "center",
-                  m: 3,
-                }}
-              >
-                <CardActionArea onClick={() => handleBookClick(book._id)}>
-                  <CardMedia
-                    component="img"
-                    image={book.img}
-                    alt="Book Cover"
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </CardActionArea>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </SlideshowContainer>
-
+  <Grid container spacing={2}>
+    {slideshowBooks.map((book) => (
+      <Grid item xs={12} sm={4} key={book._id}>
+        <Card
+          sx={{
+            maxWidth: 300,
+            height: 300,
+            display: "flex",
+            justifyContent: "space-between",
+            flexDirection: "column",
+            alignSelf: "center",
+            m: 3,
+          }}
+        >
+          <CardActionArea onClick={() => handleBookClick(book._id)}>
+            <CardMedia
+              component="img"
+              image={book.img}
+              alt="Book Cover"
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+            <Typography variant="h6" align="center" sx={{ mt: 1 }}>
+              {book.name}
+            </Typography>
+          </CardActionArea>
+        </Card>
+      </Grid>
+    ))}
+  </Grid>
+</SlideshowContainer>
       {/* Các phần sách khác */}
       <BookItem
         title="New Releases"

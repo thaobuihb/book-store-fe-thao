@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBooks } from "../features/book/bookSlice";
+import { getCategories } from "../features/category/categorySlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Container } from "@mui/material";
 import BookItem from "../features/book/bookItem";
@@ -11,6 +12,7 @@ function BookPage() {
   const [searchParams] = useSearchParams();
 
   const { books, totalPages, currentPage } = useSelector((state) => state.book);
+  const categories = useSelector((state) => state.category.categories);
 
   const category = searchParams.get("category") || "";
   const search = searchParams.get("search") || "";
@@ -19,37 +21,28 @@ function BookPage() {
   const [categoryName, setCategoryName] = useState("");
 
   useEffect(() => {
-    // Ưu tiên tìm kiếm theo search query trước
-    if (search) {
-      dispatch(getBooks(page, search, "", "", ""));
-    } else if (category) {
-      // Nếu không có search query, tìm theo category
-      dispatch(getBooks(page, "", "", "", category));
-
-      const categoryMap = {
-        "66ee3a6f1191f821c77c5704": "Medical",  
-        "66ee3a6f1191f821c77c5705": "Art-Photography",
-        "66ee3a6f1191f821c77c5706": "Biography",
-        "66ee3a6f1191f821c77c5707": "Business-Finance-Law",
-        "66ee3a6f1191f821c77c5708": "Childrens-Books",
-        "66ee3a6f1191f821c77c5709": "Computing",
-        "66ee3a6f1191f821c77c570a": "Crafts-Hobbies",
-        "66ee3a6f1191f821c77c570b": "Crime-Thriller",
-        "66ee3a6f1191f821c77c570c": "Dictionaries-Languages", 
-        "66ee3a6f1191f821c77c570d": "Entertainment",
-        "66ee3a6f1191f821c77c570e": "Food Drink",
-        "66ee3a6f1191f821c77c570f": "Graphic-Novels-Anime-Manga",
-        "66ee3a6f1191f821c77c5710": "Health",
-        "66ee3a6f1191f821c77c5711": "Personal-Development",
-        "66ee3a6f1191f821c77c5712": "Poetry-Drama",         
-      };
-      setCategoryName(categoryMap[category] || "Unknown Category");
+    // Gọi danh mục nếu chưa có trong Redux store
+    if (categories.length === 0) {
+      dispatch(getCategories());
     }
-  }, [dispatch, page, search, category]);
+  }, [dispatch, categories.length]);
+
+  useEffect(() => {
+    const fetchBooks = () => {
+      if (search) {
+        dispatch(getBooks(page, search, "", "", ""));
+      } else if (category) {
+        dispatch(getBooks(page, "", "", "", category));
+
+        const selectedCategory = categories.find((cat) => cat._id === category);
+        setCategoryName(selectedCategory ? selectedCategory.categoryName : "Unknown Category");
+      }
+    };
+    fetchBooks();
+  }, [dispatch, page, search, category, categories]);
 
   return (
     <Container>
-      {/* Hiển thị kết quả tìm kiếm nếu có search query */}
       {search ? (
         <BookItem
           title={`Search results for "${search}"`}

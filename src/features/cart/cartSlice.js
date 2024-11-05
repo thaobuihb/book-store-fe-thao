@@ -45,9 +45,9 @@ const cartSlice = createSlice({
       const book = action.payload;
       const existingItem = state.cart.find(item => item.bookId === book.bookId);
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += book.quantity; 
       } else {
-        state.cart.push({ ...book, quantity: 1 });
+        state.cart.push({ ...book, quantity: book.quantity }); 
       }
       saveCartToLocalStorage(state.cart);
       state.isLoading = false;
@@ -114,9 +114,9 @@ export const addToCart = (book) => async (dispatch, getState) => {
 
   const payload = {
     userId: user?._id,
-    bookId: book.bookId || book._id, 
-    quantity: book.quantity || 1,    
-    price: book.price || book.discountedPrice || 0, 
+    bookId: book.bookId || book._id,
+    quantity: book.quantity && book.quantity > 0 ? book.quantity : 1, 
+    price: book.discountedPrice || book.price || 0, 
   };
 
   try {
@@ -130,6 +130,7 @@ export const addToCart = (book) => async (dispatch, getState) => {
     toast.error("Error adding book to cart");
   }
 };
+
 
 
 

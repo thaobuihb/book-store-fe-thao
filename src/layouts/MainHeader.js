@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Box,
@@ -18,16 +18,19 @@ import useAuth from "../hooks/useAuth";
 import { useSelector, useDispatch } from "react-redux";
 import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
 import { logoutSuccess } from "../features/user/userSlice";
+import { getCategories } from "../features/category/categorySlice";
 
 function MainHeader() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [categoryAnchorEl, setCategoryAnchorEl] = useState(null);
+  const categories = useSelector((state) => state.category.categories);
+
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { logout } = useAuth();
 
-  // Lấy giỏ hàng từ Redux store
   const cart = useSelector((state) => state.cart.cart);
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0); 
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   const wishlist = useSelector((state) => state.wishlist.wishlist);
   const wishlistCount = wishlist.length;
@@ -54,6 +57,23 @@ function MainHeader() {
     if (query.trim()) {
       navigate(`/books?search=${query.trim()}`);
     }
+  };
+
+  useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
+
+  const handleCategoryMenuOpen = (event) => {
+    setCategoryAnchorEl(event.currentTarget);
+  };
+
+  const handleCategoryMenuClose = () => {
+    setCategoryAnchorEl(null);
+  };
+
+  const handleCategoryClick = (categoryId) => {
+    handleCategoryMenuClose();
+    navigate(`/books?category=${categoryId}`);
   };
 
   return (
@@ -91,7 +111,12 @@ function MainHeader() {
           <Box sx={{ display: "flex", alignItems: "center", mx: 2 }}>
             {/* Wishlist */}
             <RouterLink to={"/wishlist"}>
-              <IconButton size="large" color="inherit" aria-label="wishlist" sx={{ mr: 2 }}>
+              <IconButton
+                size="large"
+                color="inherit"
+                aria-label="wishlist"
+                sx={{ mr: 2 }}
+              >
                 <Badge badgeContent={wishlistCount} color="secondary">
                   <FavoriteBorderIcon />
                 </Badge>
@@ -100,7 +125,12 @@ function MainHeader() {
 
             {/* Cart */}
             <RouterLink to={"/cart"}>
-              <IconButton size="large" color="inherit" aria-label="cart" sx={{ mr: 2 }}>
+              <IconButton
+                size="large"
+                color="inherit"
+                aria-label="cart"
+                sx={{ mr: 2 }}
+              >
                 <Badge badgeContent={cartItemCount} color="secondary">
                   <ShoppingCartOutlinedIcon />
                 </Badge>
@@ -109,7 +139,14 @@ function MainHeader() {
 
             {/* User Login/Logout */}
             {!isAuthenticated ? (
-              <RouterLink to={"/login"} style={{ textDecoration: "none", color: "white", margin: '0 8px' }}>
+              <RouterLink
+                to={"/login"}
+                style={{
+                  textDecoration: "none",
+                  color: "white",
+                  margin: "0 8px",
+                }}
+              >
                 <Typography sx={{ color: "white", textDecoration: "none" }}>
                   Login
                 </Typography>
@@ -158,18 +195,63 @@ function MainHeader() {
             mt: 1,
           }}
         >
-          <RouterLink to={"/categories"} style={{ textDecoration: "none" }}>
-            <Typography sx={{ mx: 3, color: "white", fontSize: "16px", fontWeight: "bold" }}>
-              Shop by Category
-            </Typography>
-          </RouterLink>
+          <Typography
+            variant="h6"
+            sx={{ cursor: "pointer", color: "#ffffff" }}
+            onMouseEnter={handleCategoryMenuOpen}
+          >
+            Shop by Category
+          </Typography>
+
+          <Menu
+            anchorEl={categoryAnchorEl}
+            open={Boolean(categoryAnchorEl)}
+            onClose={handleCategoryMenuClose}
+            onMouseLeave={handleCategoryMenuClose}
+            MenuListProps={{ onMouseLeave: handleCategoryMenuClose }}
+          >
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <MenuItem
+                  key={category._id}
+                  onClick={() => handleCategoryClick(category._id)}
+                  sx={{
+                    backgroundColor: "#ffffff",
+                    color: "#000000",
+                    "&:hover": {
+                      backgroundColor: "#f0f0f0",
+                    },
+                  }}
+                >
+                  {category.categoryName}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>No categories available</MenuItem>
+            )}
+          </Menu>
+
           <RouterLink to={"/best-seller"} style={{ textDecoration: "none" }}>
-            <Typography sx={{ mx: 3, color: "white", fontSize: "16px", fontWeight: "bold" }}>
+            <Typography
+              sx={{
+                mx: 3,
+                color: "white",
+                fontSize: "16px",
+                fontWeight: "bold",
+              }}
+            >
               Best Seller
             </Typography>
           </RouterLink>
           <RouterLink to={"/help"} style={{ textDecoration: "none" }}>
-            <Typography sx={{ mx: 3, color: "white", fontSize: "16px", fontWeight: "bold" }}>
+            <Typography
+              sx={{
+                mx: 3,
+                color: "white",
+                fontSize: "16px",
+                fontWeight: "bold",
+              }}
+            >
               Contact Us
             </Typography>
           </RouterLink>

@@ -51,6 +51,7 @@ export const getCategories = () => async (dispatch) => {
   dispatch(categorySlice.actions.startLoading());
   try {
     const response = await apiService.get(`/categories`);
+    console.log("Categories loaded:", response.data); // Kiểm tra dữ liệu từ API
     dispatch(categorySlice.actions.getCategoriesSuccess(response.data));
     dispatch(categorySlice.actions.endLoading());
   } catch (error) {
