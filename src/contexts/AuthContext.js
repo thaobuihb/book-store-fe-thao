@@ -71,22 +71,21 @@ function AuthProvider({ children }) {
     const initialize = async () => {
       try {
         const accessToken = window.localStorage.getItem("accessToken");
-
+  
         if (accessToken && isValidToken(accessToken)) {
           setSession(accessToken);
-
+  
           const response = await apiService.get("/users/me");
           const user = response.data;
-
+  
           dispatch({
             type: INITIALIZE,
             payload: { isAuthenticated: true, user },
           });
-
+  
           reduxDispatch(loginSuccess(user));
         } else {
-          setSession(null);
-
+          setSession(null); 
           dispatch({
             type: INITIALIZE,
             payload: { isAuthenticated: false, user: null },
@@ -94,7 +93,7 @@ function AuthProvider({ children }) {
         }
       } catch (err) {
         console.error(err);
-
+  
         setSession(null);
         dispatch({
           type: INITIALIZE,
@@ -105,9 +104,10 @@ function AuthProvider({ children }) {
         });
       }
     };
-
+  
     initialize();
   }, []);
+  
 
   const login = async ({ email, password }, callback) => {
     const response = await apiService.post("/auth/login", { email, password });
@@ -146,34 +146,48 @@ function AuthProvider({ children }) {
   const logout = async (wishlist, user, callback) => {
     try {
       const token = localStorage.getItem("accessToken");
+  
+      // Kiểm tra token và user trước khi thực hiện yêu cầu đồng bộ wishlist
       if (token && user) {
         try {
+          // Đồng bộ wishlist trước khi xóa token
           await apiService.post(`/wishlist/sync`, {
             userId: user._id,
             localWishlist: wishlist,
           });
           console.log("Wishlist synced successfully before logout.");
         } catch (error) {
-          console.error("Lỗi khi đồng bộ wishlist trước khi logout:", error.response ? error.response.data : error.message);
+          console.error(
+            "Lỗi khi đồng bộ wishlist trước khi logout:",
+            error.response ? error.response.data : error.message
+          );
         }
+  
+        // Thực hiện xóa giỏ hàng trong Redux sau khi đồng bộ wishlist
         reduxDispatch(clearCartOnLogout()); 
       } else {
         console.warn("No token or userId, skipping wishlist sync during logout.");
       }
-
-      setSession(null);
+  
+      // Cập nhật Redux store và xóa token khỏi localStorage sau khi hoàn tất các thao tác
       reduxDispatch(logoutSuccess());
-
+      setSession(null);  // Xóa token khỏi session
+      localStorage.removeItem("accessToken"); // Xóa token khỏi localStorage
+  
+      // Hiển thị thông báo
       toast.success("Đăng xuất thành công!");
-
+  
+      // Điều hướng callback (nếu có)
       if (callback) callback();
+      
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error.message);
       toast.error("Đăng xuất không thành công");
-
+  
       if (callback) callback();
     }
   };
+  
 
   return (
     <AuthContext.Provider
@@ -189,4 +203,4 @@ function AuthProvider({ children }) {
   );
 }
 
-export { AuthContext, AuthProvider };
+export { AuthContext, AuthProvider, setSession };

@@ -53,6 +53,11 @@ function MainHeader() {
     });
   };
 
+  const handleProfileClick = () => {
+    setAnchorEl(null); 
+    navigate(`/user/${user._id}`); 
+  };
+
   const handleSearch = (query) => {
     if (query.trim()) {
       navigate(`/books?search=${query.trim()}`);
@@ -178,7 +183,7 @@ function MainHeader() {
                   onClose={handleClose}
                   sx={{ mr: 0 }}
                 >
-                  <MenuItem onClick={handleClose}>Profile</MenuItem>
+                  <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
                   <MenuItem onClick={handleLogout}>Log out</MenuItem>
                 </Menu>
               </div>

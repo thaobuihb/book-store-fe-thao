@@ -11,7 +11,7 @@ import { LoadingButton } from "@mui/lab";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate, useLocation, Link as RouterLink } from "react-router-dom";
 
 import useAuth from "../hooks/useAuth";
 import { FormProvider, FTextField } from "../components/form";
@@ -37,6 +37,7 @@ const defaultValues = {
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const auth = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
@@ -55,9 +56,13 @@ function RegisterPage() {
 
   const onSubmit = async (data) => {
     const { name, email, password } = data;
+    const from = location.state?.from?.pathname || "/"; // Lấy trang trước đó hoặc mặc định là trang chủ
+
     try {
       await auth.register({ name, email, password }, () => {
-        navigate("/", { replace: true });
+        auth.login({ email, password }, () => {
+          navigate(from, { replace: true });
+        });
       });
     } catch (error) {
       reset();

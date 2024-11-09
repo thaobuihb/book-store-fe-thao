@@ -21,7 +21,6 @@ function BookPage() {
   const [categoryName, setCategoryName] = useState("");
 
   useEffect(() => {
-    // Gọi danh mục nếu chưa có trong Redux store
     if (categories.length === 0) {
       dispatch(getCategories());
     }

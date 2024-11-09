@@ -5,6 +5,7 @@ import apiService from "../../app/apiService";
 const initialState = {
   isLoading: false,
   isBookNotInCart: false,
+  bookLoaded: false,
   errors: null,
   cart: [],
   books: [],
@@ -22,7 +23,7 @@ const initialState = {
   minPrice: 0,
   maxPrice: 50,
   booksByCategory: [],
-  categoryOfBooks:[],
+  categoryOfBooks: [],
 };
 
 const bookSlice = createSlice({
@@ -31,6 +32,7 @@ const bookSlice = createSlice({
   reducers: {
     startLoading(state) {
       state.isLoading = true;
+      state.bookLoaded = false;
       state.books = [];
       state.book = "";
     },
@@ -52,21 +54,26 @@ const bookSlice = createSlice({
     getNewlyReleasedBooksSuccess(state, action) {
       state.newlyReleasedBooks = action.payload;
     },
-
     getBooksByCategorySuccess(state, action) {
       state.booksByCategory = action.payload;
       state.errors = null;
     },
-
     getCategoryOfBooksSuccess(state, action) {
       state.categoryOfBooks = action.payload.categories;
       state.errors = null;
     },
-
     getBookDetailSuccess(state, action) {
       state.isLoading = false;
+      state.bookLoaded = true;
       state.errors = null;
       state.book = action.payload;
+    },
+    getBookWithCategorySuccess(state, action) {
+      state.isLoading = false;
+      state.bookLoaded = true;
+      state.errors = null;
+      state.book = action.payload.book;
+      state.booksByCategory = action.payload.relatedBooks;
     },
     getBookDetailAgain(state, action) {
       state.errors = null;
@@ -119,12 +126,8 @@ export const getBooks = (page, search, minPrice, maxPrice, category) => async (d
       maxPrice: maxPrice || Number.MAX_SAFE_INTEGER,
       category: category || "",
     }).toString();
-
-    // console.log("Fetching books with URL:", `/books?${queryParams}`);
     
     const response = await apiService.get(`/books?${queryParams}`);
-    
-    // console.log("Books API response:", response.data);
     dispatch(bookSlice.actions.getBooksSuccess(response.data));
     dispatch(bookSlice.actions.endLoading());
   } catch (error) {
@@ -132,6 +135,27 @@ export const getBooks = (page, search, minPrice, maxPrice, category) => async (d
     toast.error(error.message);
   }
 };
+
+export const getBookWithCategory = (bookId) => async (dispatch) => {
+  dispatch(bookSlice.actions.startLoading());
+  try {
+    const bookResponse = await apiService.get(`/books/${bookId}`);
+    const book = bookResponse.data;
+    dispatch(bookSlice.actions.getBookDetailSuccess(book));
+
+    if (book.category) {
+      const categoryResponse = await apiService.get(`/books/category/${book.category}`);
+      dispatch(bookSlice.actions.getBooksByCategorySuccess(categoryResponse.data));
+    } else {
+      throw new Error("Category ID not found for the selected book.");
+    }
+  } catch (error) {
+    dispatch(bookSlice.actions.hasError(error.message));
+    toast.error(error.message);
+  }
+};
+
+
 
 export const getNewlyReleasedBooks = () => async (dispatch) => {
   dispatch(bookSlice.actions.startLoading());
@@ -157,32 +181,28 @@ export const getDiscountedBooks = () => async (dispatch) => {
   }
 };
 
-export const getSingleBook = (id, userId) => async (dispatch) => {
+export const getBooksByCategory = (categoryId) => async (dispatch) => {
   dispatch(bookSlice.actions.startLoading());
   try {
-    // Gọi API lấy thông tin sách
-    const bookResponse = await apiService.get(`/books/${id}`);
-    // console.log("Book Response:12345", bookResponse.data); // Kiểm tra phản hồi từ API
-    dispatch(bookSlice.actions.getBookDetailSuccess(bookResponse.data));
-
-    // Gọi API lấy thông tin giỏ hàng nếu có userId
-    if (userId) {
-      const cartResponse = await apiService.get(`/carts/${userId}`);
-      dispatch(bookSlice.actions.getCart(cartResponse.data));
-    }
+    const response = await apiService.get(`/books/category/${categoryId}`);
+    dispatch(bookSlice.actions.getBooksByCategorySuccess(response.data));
+    dispatch(bookSlice.actions.endLoading());
   } catch (error) {
     dispatch(bookSlice.actions.hasError(error));
     toast.error(error.message);
   }
 };
 
-export const getBookDetailAgain = (id) => async (dispatch) => {
+export const getCategoryOfBooks = () => async (dispatch) => {
+  dispatch(bookSlice.actions.startLoading());
   try {
-    const response = await apiService.get(`/books/${id}`);
-    dispatch(bookSlice.actions.getBookDetailAgain(response.data));
+    const response = await apiService.get('/books/categories');
+    dispatch(bookSlice.actions.getCategoryOfBooksSuccess(response.data));
   } catch (error) {
-    dispatch(bookSlice.actions.hasError(error.message));
+    dispatch(bookSlice.actions.hasError(error));
     toast.error(error.message);
+  } finally {
+    dispatch(bookSlice.actions.endLoading()); 
   }
 };
 
@@ -206,31 +226,30 @@ export const changeReview = (review) => (dispatch) => {
   dispatch(bookSlice.actions.changeReview(review));
 };
 
-export const sendReview =
-  (userId, name, bookId, review) => async (dispatch) => {
-    dispatch(bookSlice.actions.setButtonSendTrue());
+export const sendReview = (userId, name, bookId, review) => async (dispatch) => {
+  dispatch(bookSlice.actions.setButtonSendTrue());
 
-    if (!review) {
-      toast.error("Review is null. Please enter a valid review.");
+  if (!review) {
+    toast.error("Review is null. Please enter a valid review.");
+    dispatch(bookSlice.actions.setButtonSendFalse());
+  } else {
+    try {
+      const reviewData = {
+        name,
+        bookId,
+        comment: review,
+      };
+
+      await apiService.post(`/reviews/${userId}`, reviewData);
+      dispatch(bookSlice.actions.changeReview(""));
       dispatch(bookSlice.actions.setButtonSendFalse());
-    } else {
-      try {
-        const reviewData = {
-          name,
-          bookId,
-          comment: review,
-        };
-
-        await apiService.post(`/reviews/${userId}`, reviewData);
-        dispatch(bookSlice.actions.changeReview(""));
-        dispatch(bookSlice.actions.setButtonSendFalse());
-        toast.success("Leave a review successfully");
-      } catch (error) {
-        dispatch(bookSlice.actions.hasError(error.message));
-        toast.error(error.message);
-      }
+      toast.success("Review submitted successfully");
+    } catch (error) {
+      dispatch(bookSlice.actions.hasError(error.message));
+      toast.error(error.message);
     }
-  };
+  }
+};
 
 export const updateReview = (userId, data) => async (dispatch) => {
   try {
@@ -256,33 +275,6 @@ export const changeMinPrice = (minPrice) => (dispatch) => {
 
 export const changeMaxPrice = (maxPrice) => (dispatch) => {
   dispatch(bookSlice.actions.changeMaxPrice(maxPrice));
-};
-
-export const getBooksByCategory = (categoryId) => async (dispatch) => {
-  dispatch(bookSlice.actions.startLoading());
-  try {
-    const response = await apiService.get(`/books/category/${categoryId}`);
-    // console.log("%%%%%%", response.data)
-    dispatch(bookSlice.actions.getBooksByCategorySuccess(response.data));
-    dispatch(bookSlice.actions.endLoading());
-  } catch (error) {
-    dispatch(bookSlice.actions.hasError(error));
-    toast.error(error.message);
-  }
-};
-
-export const getCategoryOfBooks = () => async (dispatch) => {
-  dispatch(bookSlice.actions.startLoading());
-  try {
-    const response = await apiService.get('books/categories');
-    dispatch(bookSlice.actions.getCategoryOfBooksSuccess(response.data));
-    // console.log("56789", response)
-  } catch (error) {
-    dispatch(bookSlice.actions.hasError(error));
-    toast.error(error.message);
-  } finally {
-    dispatch(bookSlice.actions.endLoading()); 
-  }
 };
 
 export default bookSlice.reducer;
