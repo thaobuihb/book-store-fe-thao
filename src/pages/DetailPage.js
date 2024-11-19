@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getBookWithCategory } from "../features/book/bookSlice";
 import { toggleBookInWishlist } from "../features/wishlist/wishlistSlice";
@@ -13,10 +13,11 @@ import BookItem from "../features/book/bookItem";
 
 const DetailPage = () => {
   const { bookId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { book, isLoading, booksByCategory } = useSelector((state) => state.book);
   const { wishlist } = useSelector((state) => state.wishlist);
-  
+
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -51,6 +52,24 @@ const DetailPage = () => {
         quantity: quantity,
       })
     );
+  };
+
+  const handleBuyNow = (useId) => {
+    const orderDetails = {
+      items: [
+        {
+          img: book.img,
+          bookId: book._id,
+          name: book.name,
+          price: book.discountedPrice || book.price,
+          quantity: quantity,
+          total: parseFloat((book.discountedPrice || book.price) * quantity),
+        },
+      ],
+      totalAmount: parseFloat((book.discountedPrice || book.price) * quantity),
+    };
+  
+    navigate(`/order/${useId}`, { state: orderDetails });
   };
 
   if (isLoading) {
@@ -141,7 +160,12 @@ const DetailPage = () => {
             >
               Add to Cart
             </Button>
-            <Button variant="contained" color="secondary" sx={{ m: 2 }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              sx={{ m: 2 }}
+              onClick={handleBuyNow}
+            >
               Buy Now
             </Button>
             <IconButton

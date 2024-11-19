@@ -12,10 +12,17 @@ import {
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { Add, Remove, Delete } from "@mui/icons-material";
-import { updateCartQuantity, loadCart, removeBookFromCart, clearAllCartItems} from "../features/cart/cartSlice";
+import { useNavigate } from "react-router-dom";
+import {
+  updateCartQuantity,
+  loadCart,
+  removeBookFromCart,
+  clearAllCartItems,
+} from "../features/cart/cartSlice";
 
 const CartPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cart = useSelector((state) => state.cart.cart);
   const detailedCart = useSelector((state) => state.cart.detailedCart);
 
@@ -24,7 +31,11 @@ const CartPage = () => {
     return cartItem ? { ...book, quantity: cartItem.quantity } : book;
   });
 
-  const totalPrice = cartItems.reduce((total, item) => total + (item.discountedPrice || item.price) * item.quantity, 0);
+  const totalPrice = cartItems.reduce(
+    (total, item) =>
+      total + parseFloat((item.discountedPrice || item.price) * item.quantity),
+    0
+  );
 
   useEffect(() => {
     dispatch(loadCart());
@@ -46,6 +57,10 @@ const CartPage = () => {
 
   const handleClearCart = () => {
     dispatch(clearAllCartItems());
+  };
+
+  const handleProceedToCheckout = (useId) => {
+    navigate(`/order/${useId}`, { state: { cartItems, totalPrice } });
   };
 
   return (
@@ -73,7 +88,7 @@ const CartPage = () => {
                       <CardContent>
                         <Typography variant="h6">{item.name}</Typography>
                         <Typography variant="body1">
-                          Price: ${item.discountedPrice}
+                          Price: ${item.discountedPrice || item.price}
                         </Typography>
                         <Box
                           sx={{
@@ -83,7 +98,9 @@ const CartPage = () => {
                           }}
                         >
                           <IconButton
-                            onClick={() => handleUpdateQuantity(item.bookId, item.quantity - 1)}
+                            onClick={() =>
+                              handleUpdateQuantity(item.bookId, item.quantity - 1)
+                            }
                             disabled={item.quantity <= 1}
                           >
                             <Remove />
@@ -99,13 +116,16 @@ const CartPage = () => {
                             {item.quantity}
                           </Typography>
                           <IconButton
-                            onClick={() => handleUpdateQuantity(item.bookId, item.quantity + 1)}
+                            onClick={() =>
+                              handleUpdateQuantity(item.bookId, item.quantity + 1)
+                            }
                           >
                             <Add />
                           </IconButton>
                         </Box>
                         <Typography variant="body1" sx={{ marginTop: 1 }}>
-                          Totals: ${(item.discountedPrice || item.price) * item.quantity}
+                          Totals: $
+                          {(item.discountedPrice || item.price) * item.quantity}
                         </Typography>
                       </CardContent>
                     </Box>
@@ -121,7 +141,6 @@ const CartPage = () => {
             </Grid>
           </Grid>
 
-          {/* Tổng số tiền và các nút thanh toán */}
           <Grid item xs={12} md={4}>
             <Box
               sx={{
@@ -133,18 +152,18 @@ const CartPage = () => {
               }}
             >
               <Typography variant="h5" gutterBottom>
-                Totals: ${totalPrice.toFixed(2)}
+                Totals: ${totalPrice}
               </Typography>
               <Button
                 variant="contained"
                 color="primary"
                 size="large"
                 sx={{ marginTop: 2, width: "100%" }}
+                onClick={handleProceedToCheckout}
               >
                 Proceed to checkout
               </Button>
 
-              {/* Thêm chữ "or" */}
               <Typography variant="body1" sx={{ my: 2, fontWeight: "bold" }}>
                 or
               </Typography>
@@ -164,7 +183,6 @@ const CartPage = () => {
                 <span style={{ color: "#87CEEB" }}>Pal</span>
               </Button>
 
-              {/* Dòng chữ Clear Cart */}
               <Typography
                 variant="body2"
                 sx={{

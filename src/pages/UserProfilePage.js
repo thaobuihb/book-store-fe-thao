@@ -19,13 +19,20 @@ const UserProfileUpdate = () => {
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [birthday, setBirthday] = useState("");
-  const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [ward, setWard] = useState("");
+  const [street, setStreet] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [zipcode, setZipcode] = useState("");
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Ngày hiện tại để dùng làm max cho ngày sinh
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -33,9 +40,13 @@ const UserProfileUpdate = () => {
       setEmail(user.email);
       setGender(user.gender);
       setBirthday(user.birthday);
-      setAddress(user.address);
       setCity(user.city);
       setState(user.state);
+      setDistrict(user.district);
+      setWard(user.ward);
+      setStreet(user.street);
+      setHouseNumber(user.houseNumber);
+      setPhone(user.phone);
       setZipcode(user.zipcode);
     } else if (isAuthenticated && !user) {
       dispatch(getCurrentUserProfile());
@@ -45,6 +56,7 @@ const UserProfileUpdate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Kiểm tra nếu ngày sinh là ngày tương lai
     if (new Date(birthday) > new Date()) {
       setFormError("Ngày sinh không hợp lệ.");
       return;
@@ -55,9 +67,13 @@ const UserProfileUpdate = () => {
       email,
       gender,
       birthday,
-      address,
       city,
       state,
+      district,
+      ward,
+      street,
+      houseNumber,
+      phone,
       zipcode,
       password,
     };
@@ -75,11 +91,11 @@ const UserProfileUpdate = () => {
       setFormError("");
 
       const timer = setTimeout(() => {
-        dispatch(resetUpdateStatus()); 
-        navigate(-1); 
+        dispatch(resetUpdateStatus());
+        navigate(-1);
       }, 2000);
 
-      return () => clearTimeout(timer); 
+      return () => clearTimeout(timer);
     } else if (error) {
       setFormError(error);
     }
@@ -126,29 +142,51 @@ const UserProfileUpdate = () => {
           fullWidth
           margin="normal"
           InputLabelProps={{ shrink: true }}
+          inputProps={{ max: today }} // Không cho phép chọn ngày sau ngày hiện tại
           value={birthday}
           onChange={(e) => setBirthday(e.target.value)}
         />
         <TextField
-          label="Địa chỉ"
-          fullWidth
-          margin="normal"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-        <TextField
-          label="Thành phố"
+          label="Tỉnh/Thành phố"
           fullWidth
           margin="normal"
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
         <TextField
-          label="Tỉnh/Bang"
+          label="Quận/Huyện"
           fullWidth
           margin="normal"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
+          value={district}
+          onChange={(e) => setDistrict(e.target.value)}
+        />
+        <TextField
+          label="Xã/Phường/Thị trấn"
+          fullWidth
+          margin="normal"
+          value={ward}
+          onChange={(e) => setWard(e.target.value)}
+        />
+        <TextField
+          label="Đường"
+          fullWidth
+          margin="normal"
+          value={street}
+          onChange={(e) => setStreet(e.target.value)}
+        />
+        <TextField
+          label="Số nhà"
+          fullWidth
+          margin="normal"
+          value={houseNumber}
+          onChange={(e) => setHouseNumber(e.target.value)}
+        />
+        <TextField
+          label="Số điện thoại"
+          fullWidth
+          margin="normal"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
         />
         <TextField
           label="Mã bưu điện"
