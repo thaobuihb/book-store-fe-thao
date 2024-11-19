@@ -102,7 +102,7 @@ const CartPage = () => {
                 <Grid item xs={12} key={`${item.bookId}-${index}`}>
                   <Card sx={{ display: "flex", alignItems: "center", padding: 2 }}>
                     <Checkbox
-                      checked={selectedItems.includes(item.bookId)}
+                      checked={Array.isArray(selectedItems) && selectedItems.includes(item.bookId)}
                       onChange={() => handleCheckboxChange(item.bookId)}
                     />
                     <CardMedia
