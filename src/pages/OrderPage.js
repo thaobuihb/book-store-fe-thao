@@ -31,18 +31,20 @@ const OrderPage = () => {
   const detailedCart = useSelector((state) => state.cart.detailedCart);
   const locationState = location.state;
 
-  const cartItems = locationState?.items || 
-    detailedCart.map((book) => {
-      const cartItem = cart.find((item) => item.bookId === book._id);
-      return cartItem ? { ...book, quantity: cartItem.quantity } : book;
-    });
-
-    console.log("Detailed Cart:123456", detailedCart);
-console.log("Cart:@@@@@@@@", cart);
+  // Chỉ hiển thị sách đã được chọn
+  const selectedCartItems = locationState?.items || 
+    detailedCart
+      .map((book) => {
+        const cartItem = cart.find((item) => item.bookId === book._id);
+        return cartItem && cartItem.isSelected
+          ? { ...book, quantity: cartItem.quantity }
+          : null;
+      })
+      .filter((item) => item !== null);
 
   const totalAmount =
     locationState?.totalAmount ||
-    cartItems.reduce(
+    selectedCartItems.reduce(
       (total, item) => total + (item.discountedPrice || item.price) * item.quantity,
       0
     );
@@ -91,7 +93,7 @@ console.log("Cart:@@@@@@@@", cart);
     // Save order details to server or Redux store
     const orderData = {
       ...formData,
-      items: cartItems,
+      items: selectedCartItems,
       totalAmount,
     };
     console.log("Placing order with data:", orderData);
@@ -213,7 +215,7 @@ console.log("Cart:@@@@@@@@", cart);
             Kiểm tra lại đơn hàng
           </Typography>
           <Box>
-            {cartItems.map((item, index) => (
+            {selectedCartItems.map((item, index) => (
               <Card key={index} sx={{ display: "flex", mb: 2 }}>
                 <CardMedia
                   component="img"

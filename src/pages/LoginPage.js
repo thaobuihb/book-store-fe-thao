@@ -28,9 +28,10 @@ const defaultValues = {
   remember: true,
 };
 
-function LoginPage({ setUserProfile }) { 
+function LoginPage({ setUserProfile }) {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("Location State:######", location.state);
   const auth = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -46,17 +47,16 @@ function LoginPage({ setUserProfile }) {
   } = methods;
 
   const onSubmit = async (data) => {
-    const from = location.state?.from?.pathname || "/";
-    let { email, password } = data;
-  
+    const from = location.state?.from || "/";
+    console.log("Redirecting to:&&&&&", from);
     try {
-      const user = await auth.login({ email, password }, () => {
-        navigate(from, { replace: true });
+      const user = await auth.login(data, () => {
+        navigate(from, { replace: true }); 
       });
-      
+
       setUserProfile({
         name: user.name,
-        avatar: user.avatar || null, 
+        avatar: user.avatar || null,
       });
     } catch (error) {
       reset();

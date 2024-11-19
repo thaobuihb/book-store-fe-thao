@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,6 +9,7 @@ import {
   IconButton,
   Grid,
   Container,
+  Checkbox,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { Add, Remove, Delete } from "@mui/icons-material";
@@ -23,44 +24,66 @@ import {
 const CartPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const cart = useSelector((state) => state.cart.cart);
   const detailedCart = useSelector((state) => state.cart.detailedCart);
 
+  // Quản lý trạng thái chọn sách
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // Kết hợp thông tin từ `cart` và `detailedCart`
   const cartItems = detailedCart.map((book) => {
     const cartItem = cart.find((item) => item.bookId === book._id);
     return cartItem ? { ...book, quantity: cartItem.quantity } : book;
   });
 
-  const totalPrice = cartItems.reduce(
-    (total, item) =>
-      total + parseFloat((item.discountedPrice || item.price) * item.quantity),
-    0
-  );
+  // Tính tổng tiền chỉ của sách đã chọn
+  const totalPrice = cartItems
+    .filter((item) => selectedItems.includes(item.bookId))
+    .reduce(
+      (total, item) =>
+        total + (item.discountedPrice || item.price) * item.quantity,
+      0
+    );
 
   useEffect(() => {
     dispatch(loadCart());
   }, [dispatch]);
 
+  // Cập nhật số lượng sách trong giỏ
   const handleUpdateQuantity = (bookId, quantity) => {
-    if (!bookId || isNaN(quantity)) {
-      console.error("Invalid bookId or quantity:", bookId, quantity);
-      return;
-    }
     if (quantity >= 0) {
       dispatch(updateCartQuantity({ bookId, quantity }));
     }
   };
 
+  // Xóa sách khỏi giỏ
   const handleRemoveItem = (bookId) => {
     dispatch(removeBookFromCart(bookId));
+    setSelectedItems((prev) => prev.filter((id) => id !== bookId));
   };
 
+  // Xóa toàn bộ sách trong giỏ
   const handleClearCart = () => {
     dispatch(clearAllCartItems());
+    setSelectedItems([]);
   };
 
+  // Điều hướng tới trang thanh toán chỉ với sách đã chọn
   const handleProceedToCheckout = (useId) => {
+    const selectedBooks = cartItems.filter((item) =>
+      selectedItems.includes(item.bookId)
+    );
     navigate(`/order/${useId}`, { state: { cartItems, totalPrice } });
+  };
+
+  // Xử lý checkbox chọn/bỏ chọn sách
+  const handleCheckboxChange = (bookId) => {
+    setSelectedItems((prev) =>
+      prev.includes(bookId)
+        ? prev.filter((id) => id !== bookId)
+        : [...prev, bookId]
+    );
   };
 
   return (
@@ -70,7 +93,7 @@ const CartPage = () => {
       </Typography>
 
       {cartItems.length === 0 ? (
-        <Typography variant="h6">Your bag is empty</Typography>
+        <Typography variant="h6">Your cart is empty</Typography>
       ) : (
         <Grid container spacing={2}>
           <Grid item xs={12} md={8}>
@@ -78,6 +101,10 @@ const CartPage = () => {
               {cartItems.map((item, index) => (
                 <Grid item xs={12} key={`${item.bookId}-${index}`}>
                   <Card sx={{ display: "flex", alignItems: "center", padding: 2 }}>
+                    <Checkbox
+                      checked={selectedItems.includes(item.bookId)}
+                      onChange={() => handleCheckboxChange(item.bookId)}
+                    />
                     <CardMedia
                       component="img"
                       image={item.img || "/default-book.jpg"}
@@ -124,7 +151,7 @@ const CartPage = () => {
                           </IconButton>
                         </Box>
                         <Typography variant="body1" sx={{ marginTop: 1 }}>
-                          Totals: $
+                          Total: $
                           {(item.discountedPrice || item.price) * item.quantity}
                         </Typography>
                       </CardContent>
@@ -152,7 +179,7 @@ const CartPage = () => {
               }}
             >
               <Typography variant="h5" gutterBottom>
-                Totals: ${totalPrice}
+                Total: ${totalPrice.toFixed(2)}
               </Typography>
               <Button
                 variant="contained"
@@ -160,6 +187,7 @@ const CartPage = () => {
                 size="large"
                 sx={{ marginTop: 2, width: "100%" }}
                 onClick={handleProceedToCheckout}
+                disabled={selectedItems.length === 0}
               >
                 Proceed to checkout
               </Button>

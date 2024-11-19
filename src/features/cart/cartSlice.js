@@ -34,6 +34,13 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
+    toggleSelectBook(state, action) {
+      const { bookId, isSelected } = action.payload;
+      const cartItem = state.cart.find((item) => item.bookId === bookId);
+      if (cartItem) {
+        cartItem.isSelected = isSelected;
+      }
+    },
     startLoading(state) {
       state.isLoading = true;
     },
@@ -96,6 +103,7 @@ const cartSlice = createSlice({
 });
 
 export const {
+  toggleSelectBook,
   startLoading,
   hasError,
   addBookToCartSuccess,

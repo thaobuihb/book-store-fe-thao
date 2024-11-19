@@ -144,18 +144,13 @@ function MainHeader() {
 
             {/* User Login/Logout */}
             {!isAuthenticated ? (
-              <RouterLink
-                to={"/login"}
-                style={{
-                  textDecoration: "none",
-                  color: "white",
-                  margin: "0 8px",
-                }}
-              >
-                <Typography sx={{ color: "white", textDecoration: "none" }}>
-                  Login
-                </Typography>
-              </RouterLink>
+              <Typography
+              sx={{ color: "white", textDecoration: "none", cursor: "pointer", margin: "0 8px" }}
+              onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
+            >
+              Login
+            </Typography>
+            
             ) : (
               <div>
                 <Typography
