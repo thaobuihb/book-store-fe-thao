@@ -26,28 +26,24 @@ const OrderPage = () => {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   const user = useSelector((state) => state.user.user);
 
-  // Retrieve order details from location state or cart
-  const cart = useSelector((state) => state.cart.cart);
-  const detailedCart = useSelector((state) => state.cart.detailedCart);
+  // Kiểm tra state truyền từ location
   const locationState = location.state;
 
-  // Chỉ hiển thị sách đã được chọn
-  const selectedCartItems = locationState?.items || 
-    detailedCart
-      .map((book) => {
-        const cartItem = cart.find((item) => item.bookId === book._id);
-        return cartItem && cartItem.isSelected
-          ? { ...book, quantity: cartItem.quantity }
-          : null;
-      })
-      .filter((item) => item !== null);
+  // Nếu không có state từ location, đọc từ localStorage
+  const [orderDetails, setOrderDetails] = useState(() => {
+    const savedOrder = localStorage.getItem("buyNowOrder");
+    return savedOrder ? JSON.parse(savedOrder) : { items: [], totalAmount: 0 };
+  });
 
-  const totalAmount =
-    locationState?.totalAmount ||
-    selectedCartItems.reduce(
-      (total, item) => total + (item.discountedPrice || item.price) * item.quantity,
-      0
-    );
+  // Nếu có state từ location, cập nhật lại orderDetails
+  useEffect(() => {
+    if (locationState?.items) {
+      setOrderDetails({
+        items: locationState.items,
+        totalAmount: locationState.totalAmount,
+      });
+    }
+  }, [locationState]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -90,14 +86,13 @@ const OrderPage = () => {
   };
 
   const handlePlaceOrder = () => {
-    // Save order details to server or Redux store
     const orderData = {
       ...formData,
-      items: selectedCartItems,
-      totalAmount,
+      items: orderDetails.items,
+      totalAmount: orderDetails.totalAmount,
     };
     console.log("Placing order with data:", orderData);
-    // Call order API here
+    // Gọi API để lưu dữ liệu đặt hàng
   };
 
   return (
@@ -215,11 +210,11 @@ const OrderPage = () => {
             Kiểm tra lại đơn hàng
           </Typography>
           <Box>
-            {selectedCartItems.map((item, index) => (
+            {orderDetails.items.map((item, index) => (
               <Card key={index} sx={{ display: "flex", mb: 2 }}>
                 <CardMedia
                   component="img"
-                  image={item.img ? item.img : "/default-book.jpg"} 
+                  image={item.img ? item.img : "/default-book.jpg"}
                   alt={item.name}
                   sx={{ width: 100, height: 150 }}
                 />
@@ -238,7 +233,7 @@ const OrderPage = () => {
           </Box>
 
           <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mt: 3 }}>
-            Tổng tiền: ${totalAmount.toFixed(2)}
+            Tổng tiền: ${orderDetails.totalAmount.toFixed(2)}
           </Typography>
 
           <Button
@@ -248,7 +243,7 @@ const OrderPage = () => {
             sx={{ mt: 2 }}
             onClick={handlePlaceOrder}
           >
-            Phương thức thanh toán
+            Đặt hàng
           </Button>
         </Grid>
       </Grid>

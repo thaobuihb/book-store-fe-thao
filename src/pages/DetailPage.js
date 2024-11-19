@@ -15,7 +15,12 @@ const DetailPage = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { book, isLoading, booksByCategory } = useSelector((state) => state.book);
+  const { book, isLoading, booksByCategory } = useSelector(
+    (state) => state.book
+  );
+
+  const cart = useSelector((state) => state.cart.cart);
+
   const { wishlist } = useSelector((state) => state.wishlist);
 
   const [quantity, setQuantity] = useState(1);
@@ -55,6 +60,21 @@ const DetailPage = () => {
   };
 
   const handleBuyNow = (useId) => {
+    const isBookInCart = cart.some((item) => item.bookId === book._id);
+
+    if (!isBookInCart) {
+      dispatch(
+        addToCart({
+          bookId: book._id,
+          name: book.name,
+          price: book.price,
+          discountedPrice: book.discountedPrice,
+          img: book.img,
+          quantity: quantity,
+        })
+      );
+    }
+
     const orderDetails = {
       items: [
         {
@@ -68,7 +88,9 @@ const DetailPage = () => {
       ],
       totalAmount: parseFloat((book.discountedPrice || book.price) * quantity),
     };
-  
+
+    localStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
+
     navigate(`/order/${useId}`, { state: orderDetails });
   };
 

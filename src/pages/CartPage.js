@@ -19,6 +19,7 @@ import {
   loadCart,
   removeBookFromCart,
   clearAllCartItems,
+  toggleSelectBook,
 } from "../features/cart/cartSlice";
 
 const CartPage = () => {
@@ -72,9 +73,13 @@ const CartPage = () => {
   // Điều hướng tới trang thanh toán chỉ với sách đã chọn
   const handleProceedToCheckout = (useId) => {
     const selectedBooks = cartItems.filter((item) =>
-      selectedItems.includes(item.bookId)
+    selectedItems.includes(item.bookId)
     );
-    navigate(`/order/${useId}`, { state: { cartItems, totalPrice } });
+    const totalAmount = selectedBooks.reduce(
+      (total, item) => total + (item.discountedPrice || item.price) * item.quantity,
+      0
+    );
+    navigate(`/order/${useId}`, { state: { items: selectedBooks, totalAmount } });
   };
 
   // Xử lý checkbox chọn/bỏ chọn sách
