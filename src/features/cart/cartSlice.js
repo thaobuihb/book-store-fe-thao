@@ -44,6 +44,10 @@ const cartSlice = createSlice({
     startLoading(state) {
       state.isLoading = true;
     },
+
+    triggerCartReload: (state) => {
+      state.cartReloadTrigger = !state.cartReloadTrigger; 
+    },
     hasError(state, action) {
       state.isLoading = false;
       state.error = action.payload;
@@ -112,7 +116,8 @@ export const {
   clearCart,
   syncCartFromBackendSuccess,
   clearAllCartItemsSuccess,
-  loadCartDetailsSuccess
+  loadCartDetailsSuccess,
+  triggerCartReload
 } = cartSlice.actions;
 
 export const addToCart = (book) => async (dispatch, getState) => {

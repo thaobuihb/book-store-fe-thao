@@ -28,9 +28,27 @@ const CartPage = () => {
 
   const cart = useSelector((state) => state.cart.cart);
   const detailedCart = useSelector((state) => state.cart.detailedCart);
+  const cartReloadTrigger = useSelector((state) => state.cart.cartReloadTrigger);
 
-  // Quản lý trạng thái chọn sách
+
+  // Quản lý trạng thái chọn sách, mặc định tick tất cả
   const [selectedItems, setSelectedItems] = useState([]);
+
+  useEffect(() => {
+    dispatch(loadCart());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (cartReloadTrigger) {
+      dispatch(loadCart());
+    }
+  }, [cartReloadTrigger, dispatch]);
+
+  // Khi giỏ hàng được tải, mặc định chọn tất cả sách
+  useEffect(() => {
+    const allBookIds = cart.map((item) => item.bookId);
+    setSelectedItems(allBookIds);
+  }, [cart]);
 
   // Kết hợp thông tin từ `cart` và `detailedCart`
   const cartItems = detailedCart.map((book) => {
@@ -46,10 +64,6 @@ const CartPage = () => {
         total + (item.discountedPrice || item.price) * item.quantity,
       0
     );
-
-  useEffect(() => {
-    dispatch(loadCart());
-  }, [dispatch]);
 
   // Cập nhật số lượng sách trong giỏ
   const handleUpdateQuantity = (bookId, quantity) => {
@@ -73,10 +87,11 @@ const CartPage = () => {
   // Điều hướng tới trang thanh toán chỉ với sách đã chọn
   const handleProceedToCheckout = (useId) => {
     const selectedBooks = cartItems.filter((item) =>
-    selectedItems.includes(item.bookId)
+      selectedItems.includes(item.bookId)
     );
     const totalAmount = selectedBooks.reduce(
-      (total, item) => total + (item.discountedPrice || item.price) * item.quantity,
+      (total, item) =>
+        total + (item.discountedPrice || item.price) * item.quantity,
       0
     );
     navigate(`/order/${useId}`, { state: { items: selectedBooks, totalAmount } });
@@ -107,7 +122,7 @@ const CartPage = () => {
                 <Grid item xs={12} key={`${item.bookId}-${index}`}>
                   <Card sx={{ display: "flex", alignItems: "center", padding: 2 }}>
                     <Checkbox
-                      checked={Array.isArray(selectedItems) && selectedItems.includes(item.bookId)}
+                      checked={selectedItems.includes(item.bookId)}
                       onChange={() => handleCheckboxChange(item.bookId)}
                     />
                     <CardMedia

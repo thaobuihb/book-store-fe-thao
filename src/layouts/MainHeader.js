@@ -19,6 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
 import { logoutSuccess } from "../features/user/userSlice";
 import { getCategories } from "../features/category/categorySlice";
+import { triggerCartReload } from "../features/cart/cartSlice";
 
 function MainHeader() {
   const navigate = useNavigate();
@@ -81,6 +82,12 @@ function MainHeader() {
     navigate(`/books?category=${categoryId}`);
   };
 
+  // Khi click biểu tượng giỏ hàng
+  const handleCartClick = () => {
+    dispatch(triggerCartReload()); // Kích hoạt reload giỏ hàng
+    navigate("/cart"); // Điều hướng đến trang giỏ hàng
+  };
+
   return (
     <Box>
       <AppBar position="static" color="primary">
@@ -129,28 +136,33 @@ function MainHeader() {
             </RouterLink>
 
             {/* Cart */}
-            <RouterLink to={"/cart"}>
-              <IconButton
-                size="large"
-                color="inherit"
-                aria-label="cart"
-                sx={{ mr: 2 }}
-              >
-                <Badge badgeContent={cartItemCount} color="secondary">
-                  <ShoppingCartOutlinedIcon />
-                </Badge>
-              </IconButton>
-            </RouterLink>
+            <IconButton
+              size="large"
+              color="inherit"
+              aria-label="cart"
+              sx={{ mr: 2 }}
+              onClick={handleCartClick}
+            >
+              <Badge badgeContent={cartItemCount} color="secondary">
+                <ShoppingCartOutlinedIcon />
+              </Badge>
+            </IconButton>
 
             {/* User Login/Logout */}
             {!isAuthenticated ? (
               <Typography
-              sx={{ color: "white", textDecoration: "none", cursor: "pointer", margin: "0 8px" }}
-              onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
-            >
-              Login
-            </Typography>
-            
+                sx={{
+                  color: "white",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  margin: "0 8px",
+                }}
+                onClick={() =>
+                  navigate("/login", { state: { from: window.location.pathname } })
+                }
+              >
+                Login
+              </Typography>
             ) : (
               <div>
                 <Typography
