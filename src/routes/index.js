@@ -12,6 +12,7 @@ import HomePage from "../pages/homePage";
 import AdminPage from "../pages/adminPage";
 import WishlistPage from "../pages/WishlistPage";
 import BookPage from "../pages/BookPage"
+import ThankYouPage from "../pages/ThankYouPage";
 
 import MainLayout from "../layouts/MainLayout";
 import BlankLayout from "../layouts/BlankLayout";
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/help" element={<HelpCenter />}/>
       <Route path="admin/:userId" element={<AdminPage />}/>
       <Route path="wishlist" element={<WishlistPage />}/>
+      <Route path="thank-you" element={<ThankYouPage />}/>
       </Route>
 
      <Route element={<BlankLayout />}>

@@ -1,50 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import {
   Box,
   Typography,
-  Link,
   TextField,
   Button,
   Card,
   CardContent,
   CardMedia,
   Grid,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { loadCart } from "../features/cart/cartSlice";
+import { useSelector } from "react-redux";
 
 const OrderPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
 
-  useEffect(() => {
-    dispatch(loadCart());
-  }, [dispatch]);
-
-  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
+  // Lấy thông tin người dùng từ Redux
   const user = useSelector((state) => state.user.user);
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
 
-  // Kiểm tra state truyền từ location
-  const locationState = location.state;
-
-  // Nếu không có state từ location, đọc từ localStorage
+  // Lấy thông tin order từ `localStorage` hoặc `location.state`
   const [orderDetails, setOrderDetails] = useState(() => {
-    const savedOrder = localStorage.getItem("buyNowOrder");
-    return savedOrder ? JSON.parse(savedOrder) : { items: [], totalAmount: 0 };
+    const savedOrder = localStorage.getItem("orderDetails");
+    return savedOrder
+      ? JSON.parse(savedOrder)
+      : location.state || { items: [], totalAmount: 0 };
   });
 
-  // Nếu có state từ location, cập nhật lại orderDetails
-  useEffect(() => {
-    if (locationState?.items) {
-      setOrderDetails({
-        items: locationState.items,
-        totalAmount: locationState.totalAmount,
-      });
-    }
-  }, [locationState]);
-
+  // Trạng thái lưu thông tin form
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -57,8 +46,9 @@ const OrderPage = () => {
     houseNumber: "",
   });
 
+  // Tự động điền thông tin nếu người dùng đã đăng nhập
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated && user) {
       setFormData({
         fullName: user.name || "",
         email: user.email || "",
@@ -71,7 +61,10 @@ const OrderPage = () => {
         houseNumber: user.houseNumber || "",
       });
     }
-  }, [user]);
+  }, [isAuthenticated, user]);
+
+  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -79,134 +72,86 @@ const OrderPage = () => {
       ...prevData,
       [name]: value,
     }));
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: false }));
   };
 
-  const handleLoginRedirect = () => {
-    navigate("/login");
+  const validateForm = () => {
+    const requiredFields = [
+      "fullName",
+      "email",
+      "phone",
+      "country",
+      "city",
+      "district",
+      "ward",
+      "street",
+      "houseNumber",
+    ];
+    const newErrors = {};
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = true;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handlePlaceOrder = () => {
+    if (!validateForm()) {
+      return;
+    }
+
     const orderData = {
       ...formData,
       items: orderDetails.items,
       totalAmount: orderDetails.totalAmount,
+      paymentMethod,
     };
-    console.log("Placing order with data:", orderData);
-    // Gọi API để lưu dữ liệu đặt hàng
+
+    // Điều hướng đến trang PayPal nếu chọn PayPal
+    if (paymentMethod === "PayPal") {
+      navigate("/paypal-payment", { state: { orderData } });
+    } else {
+      // Xóa `localStorage` sau khi đặt hàng thành công
+      localStorage.removeItem("orderDetails");
+      // Điều hướng đến trang cảm ơn
+      navigate("/thank-you", {
+        state: { message: "Đặt hàng thành công!", orderData },
+      });
+    }
   };
 
   return (
     <Box sx={{ padding: 4 }}>
-      {!isAuthenticated && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body1">
-            Bạn đã là thành viên?{" "}
-            <Link
-              component="button"
-              variant="body1"
-              onClick={handleLoginRedirect}
-              sx={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-            >
-              Đăng nhập ngay
-            </Link>
-          </Typography>
-        </Box>
-      )}
-
       <Grid container sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Cột trái: Địa chỉ giao hàng */}
-        <Grid item xs={12} md={6} sx={{ paddingRight: 5, paddingLeft: 15 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
+        <Grid item xs={12} md={6} sx={{ paddingRight: 5 }}>
+          <Typography variant="h5" gutterBottom>
             Địa chỉ giao hàng
           </Typography>
           <Box component="form" noValidate autoComplete="off">
-            <TextField
-              label="Họ và tên người nhận"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Số điện thoại"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Quốc gia"
-              name="country"
-              value={formData.country}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Tỉnh/Thành Phố"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Quận/Huyện"
-              name="district"
-              value={formData.district}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Phường/Xã"
-              name="ward"
-              value={formData.ward}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Đường"
-              name="street"
-              value={formData.street}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Số nhà"
-              name="houseNumber"
-              value={formData.houseNumber}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              required
-            />
+            {Object.keys(formData).map((field, index) => (
+              <TextField
+                key={index}
+                label={field}
+                name={field}
+                value={formData[field]}
+                onChange={handleInputChange}
+                fullWidth
+                margin="normal"
+                required
+                error={!!errors[field]}
+                helperText={errors[field] ? "Vui lòng điền thông tin còn thiếu" : ""}
+              />
+            ))}
           </Box>
         </Grid>
 
-        {/* Cột phải: Thông tin về đơn hàng */}
-        <Grid item xs={12} md={6} sx={{ paddingLeft: 5, paddingRight: 15 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
+        {/* Cột phải: Thông tin đơn hàng */}
+        <Grid item xs={12} md={6} sx={{ paddingLeft: 5 }}>
+          <Typography variant="h5" gutterBottom>
             Kiểm tra lại đơn hàng
           </Typography>
           <Box>
@@ -214,37 +159,46 @@ const OrderPage = () => {
               <Card key={index} sx={{ display: "flex", mb: 2 }}>
                 <CardMedia
                   component="img"
-                  image={item.img ? item.img : "/default-book.jpg"}
+                  image={item.img || "/default-book.jpg"}
                   alt={item.name}
                   sx={{ width: 100, height: 150 }}
                 />
-                <CardContent sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                  <Typography variant="h6">{item.name}</Typography>
-                  <Typography variant="body2">
-                    Giá: ${item.discountedPrice || item.price}
-                  </Typography>
-                  <Typography variant="body2">Số lượng: {item.quantity}</Typography>
-                  <Typography variant="body2">
-                    Tổng: ${(item.discountedPrice || item.price) * item.quantity}
-                  </Typography>
+                <CardContent>
+                  <Typography>{item.name}</Typography>
+                  <Typography>Số lượng: {item.quantity}</Typography>
+                  <Typography>Giá: ${item.price}</Typography>
+                  <Typography>Tổng: ${item.quantity * item.price}</Typography>
                 </CardContent>
               </Card>
             ))}
           </Box>
+          <Typography variant="h6">Tổng tiền: ${orderDetails.totalAmount.toFixed(2)}</Typography>
 
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mt: 3 }}>
-            Tổng tiền: ${orderDetails.totalAmount.toFixed(2)}
-          </Typography>
+          {/* Lựa chọn phương thức thanh toán */}
+          <FormControl component="fieldset" sx={{ mt: 4 }}>
+            <FormLabel component="legend">Phương thức thanh toán</FormLabel>
+            <RadioGroup
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <FormControlLabel
+                value="COD"
+                control={<Radio />}
+                label="Thanh toán khi nhận hàng (COD)"
+              />
+              <FormControlLabel
+                value="PayPal"
+                control={<Radio />}
+                label="Thanh toán qua PayPal"
+              />
+            </RadioGroup>
+          </FormControl>
 
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            sx={{ mt: 2 }}
-            onClick={handlePlaceOrder}
-          >
-            Đặt hàng
-          </Button>
+          <Box sx={{ mt: 4, textAlign: "center" }}>
+            <Button variant="contained" color="primary" size="large" onClick={handlePlaceOrder}>
+              Đặt hàng
+            </Button>
+          </Box>
         </Grid>
       </Grid>
     </Box>

@@ -140,7 +140,7 @@ function MainHeader() {
               size="large"
               color="inherit"
               aria-label="cart"
-              sx={{ mr: 2 }}
+              sx={{ color: "blue", mr: 2 }}
               onClick={handleCartClick}
             >
               <Badge badgeContent={cartItemCount} color="secondary">
