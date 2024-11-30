@@ -1,7 +1,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import bookReducer from "../features/book/bookSlice";
 import cartReducer from "../features/cart/cartSlice";
-import orderReducer from "../features/order/orderSlice";
+import orderReducer from "../features/order/orderSlice"
 import wishlistReducer from "../features/wishlist/wishlistSlice";
 import adminReducer from "../features/admin/adminSlice";
 import userReducer from "../features/user/userSlice";

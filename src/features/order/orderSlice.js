@@ -1,8 +1,38 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import apiService from "../../app/apiService"; 
+import apiService from "../../app/apiService";
 import { toast } from "react-toastify";
 
-// Async thunks cho các hành động liên quan đến đơn hàng
+// Tạo đơn hàng cho người dùng đã đăng nhập
+export const createOrder = createAsyncThunk(
+  "orders/createOrder",
+  async ({ userId, orderData }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.post(`/orders/${userId}`, orderData);
+      toast.success("Đơn hàng đã được tạo thành công!");
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Tạo đơn hàng cho người dùng không đăng nhập
+export const createGuestOrder = createAsyncThunk(
+  "orders/createGuestOrder",
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const response = await apiService.post(`/orders/guest`, orderData);
+      toast.success("Đơn hàng đã được tạo thành công!");
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
 // Lấy danh sách đơn hàng của người dùng
 export const fetchOrders = createAsyncThunk(
@@ -19,43 +49,7 @@ export const fetchOrders = createAsyncThunk(
   }
 );
 
-// Tạo một đơn hàng mới
-export const createOrder = createAsyncThunk(
-  "orders/createOrder",
-  async ({ userId, orderData }, { rejectWithValue }) => {
-    try {
-      const response = await apiService.post(`/orders/${userId}`, orderData);
-      toast.success("Đơn hàng đã được tạo thành công!");
-      
-      // Lưu tạm vào LocalStorage
-      localStorage.setItem("orderDetails", JSON.stringify(response.data));
-
-      return response.data;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
-      toast.error(errorMessage);
-      return rejectWithValue(errorMessage);
-    }
-  }
-);
-
-// Hủy một đơn hàng
-export const cancelOrder = createAsyncThunk(
-  "orders/cancelOrder",
-  async ({ userId, orderId }, { rejectWithValue }) => {
-    try {
-      const response = await apiService.put(`/orders/${userId}/${orderId}`, { status: "Cancelled" });
-      toast.success("Đơn hàng đã bị hủy!");
-      return response.data;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Lỗi khi hủy đơn hàng.";
-      toast.error(errorMessage);
-      return rejectWithValue(errorMessage);
-    }
-  }
-);
-
-// Lấy chi tiết đơn hàng
+// Lấy chi tiết một đơn hàng
 export const fetchOrderDetails = createAsyncThunk(
   "orders/fetchOrderDetails",
   async ({ userId, orderId }, { rejectWithValue }) => {
@@ -70,16 +64,16 @@ export const fetchOrderDetails = createAsyncThunk(
   }
 );
 
-// Xác nhận thanh toán đơn hàng (nếu cần)
-export const confirmPayment = createAsyncThunk(
-  "orders/confirmPayment",
-  async ({ orderId, paymentDetails }, { rejectWithValue }) => {
+// Cập nhật trạng thái đơn hàng (hủy đơn hàng)
+export const updateOrderStatus = createAsyncThunk(
+  "orders/updateOrderStatus",
+  async ({ userId, orderId, status }, { rejectWithValue }) => {
     try {
-      const response = await apiService.put(`/orders/${orderId}/payment-status`, paymentDetails);
-      toast.success("Thanh toán thành công!");
+      const response = await apiService.put(`/orders/${userId}/${orderId}`, { status });
+      toast.success("Trạng thái đơn hàng đã được cập nhật!");
       return response.data;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Thanh toán thất bại.";
+      const errorMessage = error.response?.data?.message || "Lỗi khi cập nhật trạng thái đơn hàng.";
       toast.error(errorMessage);
       return rejectWithValue(errorMessage);
     }
@@ -96,25 +90,41 @@ const orderSlice = createSlice({
     error: null,
   },
   reducers: {
-    // Xóa lỗi
     clearError(state) {
       state.error = null;
     },
-    // Xóa thông tin đơn hàng
     clearOrderDetails(state) {
       state.orderDetails = null;
-      localStorage.removeItem("orderDetails");
-    },
-    // Khôi phục thông tin đơn hàng từ LocalStorage
-    restoreOrderDetails(state) {
-      const savedOrder = localStorage.getItem("orderDetails");
-      if (savedOrder) {
-        state.orderDetails = JSON.parse(savedOrder);
-      }
     },
   },
   extraReducers: (builder) => {
     builder
+      // createOrder
+      .addCase(createOrder.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createOrder.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orders.push(action.payload);
+      })
+      .addCase(createOrder.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // createGuestOrder
+      .addCase(createGuestOrder.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createGuestOrder.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orders.push(action.payload);
+      })
+      .addCase(createGuestOrder.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
       // fetchOrders
       .addCase(fetchOrders.pending, (state) => {
         state.isLoading = true;
@@ -125,35 +135,6 @@ const orderSlice = createSlice({
         state.orders = action.payload;
       })
       .addCase(fetchOrders.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      // createOrder
-      .addCase(createOrder.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(createOrder.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.orders.push(action.payload);
-        state.orderDetails = action.payload;
-      })
-      .addCase(createOrder.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      // cancelOrder
-      .addCase(cancelOrder.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(cancelOrder.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.orders = state.orders.map((order) =>
-          order.id === action.payload.id ? { ...order, status: "Cancelled" } : order
-        );
-      })
-      .addCase(cancelOrder.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
@@ -170,20 +151,18 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // confirmPayment
-      .addCase(confirmPayment.pending, (state) => {
+      // updateOrderStatus
+      .addCase(updateOrderStatus.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(confirmPayment.fulfilled, (state, action) => {
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.isLoading = false;
-        const updatedOrder = action.payload;
         state.orders = state.orders.map((order) =>
-          order.id === updatedOrder.id ? updatedOrder : order
+          order._id === action.payload._id ? action.payload : order
         );
-        state.orderDetails = updatedOrder;
       })
-      .addCase(confirmPayment.rejected, (state, action) => {
+      .addCase(updateOrderStatus.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });
@@ -191,6 +170,6 @@ const orderSlice = createSlice({
 });
 
 // Export reducers và actions
-export const { clearError, clearOrderDetails, restoreOrderDetails } = orderSlice.actions;
+export const { clearError, clearOrderDetails } = orderSlice.actions;
 
 export default orderSlice.reducer;

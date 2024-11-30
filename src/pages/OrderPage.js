@@ -15,25 +15,38 @@ import {
   FormLabel,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { createOrder, createGuestOrder, clearOrderDetails } from "../features/order/orderSlice";
 
 const OrderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
-  // Lấy thông tin người dùng từ Redux
-  const user = useSelector((state) => state.user.user);
-  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
+  // Lấy trạng thái từ Redux
+  const { isLoading = false, error = null } = useSelector((state) => state.orders || {});
+  const { user, isAuthenticated } = useSelector((state) => state.user || {});
 
-  // Lấy thông tin order từ `localStorage` hoặc `location.state`
+  // Lấy thông tin từ localStorage hoặc location
   const [orderDetails, setOrderDetails] = useState(() => {
     const savedOrder = localStorage.getItem("orderDetails");
+
+    if (savedOrder) {
+      console.log("Dữ liệu đã lưu trong Local Storage:", JSON.parse(savedOrder));
+    } else {
+      console.log("Dữ liệu chưa được lưu trong Local Storage!");
+    }
+
+
     return savedOrder
       ? JSON.parse(savedOrder)
       : location.state || { items: [], totalAmount: 0 };
   });
 
-  // Trạng thái lưu thông tin form
+  useEffect(() => {
+    localStorage.setItem("orderDetails", JSON.stringify(orderDetails));
+  }, [orderDetails]);
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -46,7 +59,9 @@ const OrderPage = () => {
     houseNumber: "",
   });
 
-  // Tự động điền thông tin nếu người dùng đã đăng nhập
+  const [paymentMethod, setPaymentMethod] = useState("After receive");
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     if (isAuthenticated && user) {
       setFormData({
@@ -62,9 +77,6 @@ const OrderPage = () => {
       });
     }
   }, [isAuthenticated, user]);
-
-  const [paymentMethod, setPaymentMethod] = useState("COD");
-  const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -98,33 +110,63 @@ const OrderPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!validateForm()) {
+      console.error("Form không hợp lệ:", formData, errors);
       return;
     }
-
+  
     const orderData = {
-      ...formData,
-      items: orderDetails.items,
+      books: orderDetails.items.map((item) => ({
+        bookId: item._id,
+        quantity: item.quantity || 1,
+      })),
+      shippingAddress: {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        addressLine: `${formData.houseNumber}, ${formData.street}`,
+        city: formData.city,
+        state: formData.district,
+        zipcode: formData.ward,
+        country: formData.country,
+      },
       totalAmount: orderDetails.totalAmount,
-      paymentMethod,
+      paymentMethods: paymentMethod,
     };
+  
+    // console.log("Dữ liệu gửi lên API:", orderData);
 
-    // Điều hướng đến trang PayPal nếu chọn PayPal
-    if (paymentMethod === "PayPal") {
-      navigate("/paypal-payment", { state: { orderData } });
-    } else {
-      // Xóa `localStorage` sau khi đặt hàng thành công
-      localStorage.removeItem("orderDetails");
-      // Điều hướng đến trang cảm ơn
+    console.log("Books gửi lên:", orderDetails.items);
+console.log("Tổng tiền gửi lên:", orderDetails.totalAmount);
+
+  
+    try {
+      let response;
+      if (isAuthenticated) {
+        // Gọi API tạo đơn hàng cho người dùng đã đăng nhập
+        response = await dispatch(createOrder({ userId: user._id, orderData })).unwrap();
+      } else {
+        // Gọi API tạo đơn hàng cho khách
+        response = await dispatch(createGuestOrder(orderData)).unwrap();
+      }
+  
+      console.log("Đơn hàng đã được tạo thành công:", response);
+  
+      // Chuyển hướng đến trang cảm ơn kèm thông tin đơn hàng
       navigate("/thank-you", {
-        state: { message: "Đặt hàng thành công!", orderData },
+        state: { message: "Đặt hàng thành công!", orderData: response },
       });
+    } catch (error) {
+      console.error("Lỗi khi thực hiện đặt hàng:", error);
     }
   };
+  
 
   return (
     <Box sx={{ padding: 4 }}>
+      {isLoading && <Typography variant="h6">Đang xử lý...</Typography>}
+      {error && <Typography variant="h6" color="error">Lỗi: {error}</Typography>}
+
       <Grid container sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Cột trái: Địa chỉ giao hàng */}
         <Grid item xs={12} md={6} sx={{ paddingRight: 5 }}>
@@ -182,7 +224,7 @@ const OrderPage = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
             >
               <FormControlLabel
-                value="COD"
+                value="After receive"
                 control={<Radio />}
                 label="Thanh toán khi nhận hàng (COD)"
               />
