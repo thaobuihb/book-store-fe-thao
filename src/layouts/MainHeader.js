@@ -84,8 +84,8 @@ function MainHeader() {
 
   // Khi click biểu tượng giỏ hàng
   const handleCartClick = () => {
-    dispatch(triggerCartReload()); // Kích hoạt reload giỏ hàng
-    navigate("/cart"); // Điều hướng đến trang giỏ hàng
+    dispatch(triggerCartReload()); 
+    navigate("/cart"); 
   };
 
   return (

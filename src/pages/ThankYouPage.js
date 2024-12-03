@@ -1,32 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
-import { useLocation, useParams } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Box, Typography, Card, CardContent, CardMedia, Grid } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchOrderDetails } from "../features/order/orderSlice";
+import { fetchOrderDetails, selectOrderDetails } from "../features/order/orderSlice";
+import { useLocation } from "react-router-dom";
 
 const ThankYouPage = () => {
+  
   const location = useLocation();
-  const { orderId } = location.state || {}; 
+  const { orderId } = location.state || {};
   const dispatch = useDispatch();
-  const { orderDetails = null, isLoading = false, error = null } =
-  useSelector((state) => state.orders || {});
-
-  const [localOrder, setLocalOrder] = useState(null);
+  const { orderDetails, isLoading, error } = useSelector((state) => state.orders || {});
 
   useEffect(() => {
-    console.log("Gửi request lấy thông tin đơn hàng với ID:", orderId);
     if (orderId) {
-      dispatch(fetchOrderDetails(orderId));
+      dispatch(fetchOrderDetails({ userId: "currentUserId", orderId }));
     }
   }, [dispatch, orderId]);
-
-  useEffect(() => {
-    if (!orderId && location.state?.orderData) {
-      setLocalOrder(location.state.orderData);
-    }
-  }, [location.state]);
-
-  const orderData = orderDetails || localOrder;
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -37,42 +26,37 @@ const ThankYouPage = () => {
         <Typography>Đang tải thông tin đơn hàng...</Typography>
       ) : error ? (
         <Typography color="error">Lỗi: {error}</Typography>
-      ) : orderData ? (
+      ) : orderDetails ? (
         <>
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="h6">Thông tin đơn hàng:</Typography>
-            <Typography>Mã đơn hàng: {orderData?.orderCode || "N/A"}</Typography>
-            <Typography>
-              Ngày đặt hàng:{" "}
-              {orderData?.createdAt
-                ? new Date(orderData.createdAt).toLocaleString()
-                : "N/A"}
-            </Typography>
-            <Typography>
-              Tổng tiền: ${orderData?.totalAmount || "N/A"}
-            </Typography>
-            <Typography>
-              Phương thức thanh toán: {orderData?.paymentMethods || "N/A"}
-            </Typography>
-          </Box>
+          <Typography variant="h6">Thông tin đơn hàng:</Typography>
+          <Typography>Mã đơn hàng: {orderDetails.orderCode}</Typography>
+          <Typography>Tổng tiền: ${orderDetails.totalAmount}</Typography>
 
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="h6">Thông tin giao hàng:</Typography>
-            <Typography>
-              Họ tên: {orderData?.shippingAddress?.fullName || "N/A"}
-            </Typography>
-            <Typography>
-              Số điện thoại: {orderData?.shippingAddress?.phone || "N/A"}
-            </Typography>
-            <Typography>
-              Địa chỉ:{" "}
-              {`${orderData?.shippingAddress?.addressLine || ""}, ${
-                orderData?.shippingAddress?.city || ""
-              }, ${orderData?.shippingAddress?.state || ""}, ${
-                orderData?.shippingAddress?.country || ""
-              }`}
-            </Typography>
-          </Box>
+          <Typography variant="h6" sx={{ mt: 3 }}>
+            Sách đã đặt:
+          </Typography>
+          <Grid container spacing={2}>
+            {orderDetails.books.map((book, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card>
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image={book.img}
+                    alt={book.name}
+                  />
+                  <CardContent>
+                    <Typography variant="h6">{book.name}</Typography>
+                    <Typography>Số lượng: {book.quantity}</Typography>
+                    <Typography>Giá: ${book.price}</Typography>
+                    <Typography>
+                      Tổng: ${book.quantity * book.price}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         </>
       ) : (
         <Typography>Không tìm thấy thông tin đơn hàng.</Typography>

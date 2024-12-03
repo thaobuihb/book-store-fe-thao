@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder, createGuestOrder, clearOrderDetails } from "../features/order/orderSlice";
+import { createOrder, createGuestOrder } from "../features/order/orderSlice";
 
 const OrderPage = () => {
   const navigate = useNavigate();
@@ -27,26 +27,29 @@ const OrderPage = () => {
   const { isLoading = false, error = null } = useSelector((state) => state.orders || {});
   const { user, isAuthenticated } = useSelector((state) => state.user || {});
 
-  // Lấy thông tin từ localStorage hoặc location
+  // Ưu tiên dữ liệu từ `location.state`, dùng `localStorage` như dự phòng
   const [orderDetails, setOrderDetails] = useState(() => {
-    const savedOrder = localStorage.getItem("orderDetails");
-
-    if (savedOrder) {
-      console.log("Dữ liệu đã lưu trong Local Storage:", JSON.parse(savedOrder));
-    } else {
-      console.log("Dữ liệu chưa được lưu trong Local Storage!");
+    if (location.state && location.state.items) {
+      console.log("Dữ liệu từ navigate:", location.state);
+      return location.state;
     }
 
+    const savedOrder = localStorage.getItem("orderDetails");
+    if (savedOrder) {
+      console.log("Dữ liệu từ localStorage:", JSON.parse(savedOrder));
+      return JSON.parse(savedOrder);
+    }
 
-    return savedOrder
-      ? JSON.parse(savedOrder)
-      : location.state || { items: [], totalAmount: 0 };
+    console.log("Không có dữ liệu trong state hoặc localStorage");
+    return { items: [], totalAmount: 0 };
   });
 
+  // Cập nhật `localStorage` khi `orderDetails` thay đổi
   useEffect(() => {
     localStorage.setItem("orderDetails", JSON.stringify(orderDetails));
   }, [orderDetails]);
 
+  // Dữ liệu biểu mẫu địa chỉ
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -59,9 +62,11 @@ const OrderPage = () => {
     houseNumber: "",
   });
 
+  // Phương thức thanh toán
   const [paymentMethod, setPaymentMethod] = useState("After receive");
   const [errors, setErrors] = useState({});
 
+  // Điền thông tin người dùng nếu đã đăng nhập
   useEffect(() => {
     if (isAuthenticated && user) {
       setFormData({
@@ -78,6 +83,7 @@ const OrderPage = () => {
     }
   }, [isAuthenticated, user]);
 
+  // Cập nhật dữ liệu biểu mẫu
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -87,6 +93,7 @@ const OrderPage = () => {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: false }));
   };
 
+  // Xác minh biểu mẫu
   const validateForm = () => {
     const requiredFields = [
       "fullName",
@@ -110,12 +117,13 @@ const OrderPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Xử lý đặt hàng
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
       console.error("Form không hợp lệ:", formData, errors);
       return;
     }
-  
+
     const orderData = {
       books: orderDetails.items.map((item) => ({
         bookId: item._id,
@@ -133,26 +141,20 @@ const OrderPage = () => {
       totalAmount: orderDetails.totalAmount,
       paymentMethods: paymentMethod,
     };
-  
-    // console.log("Dữ liệu gửi lên API:", orderData);
 
-    console.log("Books gửi lên:", orderDetails.items);
-console.log("Tổng tiền gửi lên:", orderDetails.totalAmount);
+    console.log("Dữ liệu gửi lên API:", orderData);
 
-  
     try {
       let response;
       if (isAuthenticated) {
-        // Gọi API tạo đơn hàng cho người dùng đã đăng nhập
         response = await dispatch(createOrder({ userId: user._id, orderData })).unwrap();
       } else {
-        // Gọi API tạo đơn hàng cho khách
         response = await dispatch(createGuestOrder(orderData)).unwrap();
       }
-  
+
       console.log("Đơn hàng đã được tạo thành công:", response);
-  
-      // Chuyển hướng đến trang cảm ơn kèm thông tin đơn hàng
+
+      // Chuyển hướng đến trang cảm ơn
       navigate("/thank-you", {
         state: { message: "Đặt hàng thành công!", orderData: response },
       });
@@ -160,7 +162,6 @@ console.log("Tổng tiền gửi lên:", orderDetails.totalAmount);
       console.error("Lỗi khi thực hiện đặt hàng:", error);
     }
   };
-  
 
   return (
     <Box sx={{ padding: 4 }}>
