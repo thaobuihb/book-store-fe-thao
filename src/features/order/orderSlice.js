@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService from "../../app/apiService";
 import { toast } from "react-toastify";
 
+
 // Tạo đơn hàng cho người dùng đã đăng nhập
 export const createOrder = createAsyncThunk(
   "orders/createOrder",
@@ -80,6 +81,19 @@ export const updateOrderStatus = createAsyncThunk(
   }
 );
 
+export const fetchPurchaseHistory = createAsyncThunk(
+  "orders/fetchPurchaseHistory",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await apiService.get(`/orders/purchase-history/${userId}`);
+      console.log("API response for purchase history:%%%%%%%%%%", response.data);
+
+      return response.data; 
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch purchase history");
+    }
+  }
+);
 
 
 // Khởi tạo slice
@@ -88,6 +102,7 @@ const orderSlice = createSlice({
   initialState: {
     orders: [],
     orderDetails: null,
+    purchaseHistory: [],
     isLoading: false,
     error: null,
   },
@@ -167,7 +182,23 @@ const orderSlice = createSlice({
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })
+
+    // 
+    .addCase(fetchPurchaseHistory.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    })
+    .addCase(fetchPurchaseHistory.fulfilled, (state, action) => {
+      console.log("Purchase history data fetched:!!!!!!", action.payload);
+
+      state.isLoading = false;
+      state.purchaseHistory = Array.isArray(action.payload) ? action.payload : [];
+    })
+    .addCase(fetchPurchaseHistory.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    });
   },
 });
 

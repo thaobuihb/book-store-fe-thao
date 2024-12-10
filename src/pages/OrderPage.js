@@ -24,10 +24,12 @@ const OrderPage = () => {
   const dispatch = useDispatch();
 
   // Lấy trạng thái từ Redux
-  const { isLoading = false, error = null } = useSelector((state) => state.orders || {});
+  const { isLoading = false, error = null } = useSelector(
+    (state) => state.orders || {}
+  );
   const { user, isAuthenticated } = useSelector((state) => state.user || {});
 
-  // Ưu tiên dữ liệu từ `location.state`, dùng `localStorage` như dự phòng
+  // Lấy thông tin đơn hàng từ state hoặc localStorage
   const [orderDetails, setOrderDetails] = useState(() => {
     if (location.state && location.state.items) {
       console.log("Dữ liệu từ navigate:", location.state);
@@ -47,6 +49,7 @@ const OrderPage = () => {
   // Cập nhật `localStorage` khi `orderDetails` thay đổi
   useEffect(() => {
     localStorage.setItem("orderDetails", JSON.stringify(orderDetails));
+    console.log("Order Details from localStorage or state:", orderDetails);
   }, [orderDetails]);
 
   // Dữ liệu biểu mẫu địa chỉ
@@ -65,6 +68,10 @@ const OrderPage = () => {
   // Phương thức thanh toán
   const [paymentMethod, setPaymentMethod] = useState("After receive");
   const [errors, setErrors] = useState({});
+
+  // Tính toán chi phí vận chuyển và tổng thanh toán
+  const shippingFee = 3.0; 
+  const totalPayment = orderDetails.totalAmount + shippingFee;
 
   // Điền thông tin người dùng nếu đã đăng nhập
   useEffect(() => {
@@ -138,7 +145,7 @@ const OrderPage = () => {
         zipcode: formData.ward,
         country: formData.country,
       },
-      totalAmount: orderDetails.totalAmount,
+      totalAmount: totalPayment,
       paymentMethods: paymentMethod,
     };
 
@@ -147,7 +154,9 @@ const OrderPage = () => {
     try {
       let response;
       if (isAuthenticated) {
-        response = await dispatch(createOrder({ userId: user._id, orderData })).unwrap();
+        response = await dispatch(
+          createOrder({ userId: user._id, orderData })
+        ).unwrap();
       } else {
         response = await dispatch(createGuestOrder(orderData)).unwrap();
       }
@@ -166,7 +175,11 @@ const OrderPage = () => {
   return (
     <Box sx={{ padding: 4 }}>
       {isLoading && <Typography variant="h6">Đang xử lý...</Typography>}
-      {error && <Typography variant="h6" color="error">Lỗi: {error}</Typography>}
+      {error && (
+        <Typography variant="h6" color="error">
+          Lỗi: {error}
+        </Typography>
+      )}
 
       <Grid container sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Cột trái: Địa chỉ giao hàng */}
@@ -186,7 +199,9 @@ const OrderPage = () => {
                 margin="normal"
                 required
                 error={!!errors[field]}
-                helperText={errors[field] ? "Vui lòng điền thông tin còn thiếu" : ""}
+                helperText={
+                  errors[field] ? "Vui lòng điền thông tin còn thiếu" : ""
+                }
               />
             ))}
           </Box>
@@ -209,14 +224,17 @@ const OrderPage = () => {
                 <CardContent>
                   <Typography>{item.name}</Typography>
                   <Typography>Số lượng: {item.quantity}</Typography>
-                  <Typography>Giá: ${item.price}</Typography>
-                  <Typography>Tổng: ${item.quantity * item.price}</Typography>
+                  <Typography>
+                    Giá: ${item.discountedPrice || item.price}
+                  </Typography>
+                  <Typography>
+                    Tổng: $
+                    {item.quantity * (item.discountedPrice || item.price)}
+                  </Typography>
                 </CardContent>
               </Card>
             ))}
           </Box>
-          <Typography variant="h6">Tổng tiền: ${orderDetails.totalAmount.toFixed(2)}</Typography>
-
           {/* Lựa chọn phương thức thanh toán */}
           <FormControl component="fieldset" sx={{ mt: 4 }}>
             <FormLabel component="legend">Phương thức thanh toán</FormLabel>
@@ -236,9 +254,38 @@ const OrderPage = () => {
               />
             </RadioGroup>
           </FormControl>
-
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Chi tiết thanh toán
+            </Typography>
+            <Box
+              sx={{
+                mt: 2,
+                padding: 2,
+                border: "1px solid #e0e0e0",
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="body1">
+                <strong>Tổng tiền hàng:</strong> $
+                {orderDetails.totalAmount.toFixed(2)}
+              </Typography>
+              <Typography variant="body1" sx={{ mt: 1 }}>
+                <strong>Phí vận chuyển:</strong> $3.00
+              </Typography>
+              <Typography variant="h6" sx={{ mt: 1 }}>
+                <strong>Tổng thanh toán:</strong> $
+                {totalPayment.toFixed(2)}
+              </Typography>
+            </Box>
+          </Box>
           <Box sx={{ mt: 4, textAlign: "center" }}>
-            <Button variant="contained" color="primary" size="large" onClick={handlePlaceOrder}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={handlePlaceOrder}
+            >
               Đặt hàng
             </Button>
           </Box>

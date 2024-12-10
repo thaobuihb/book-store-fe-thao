@@ -85,7 +85,7 @@ function MainHeader() {
   // Khi click biểu tượng giỏ hàng
   const handleCartClick = () => {
     dispatch(triggerCartReload()); 
-    navigate("/cart"); 
+    navigate("/cart", { state: { activeTab: "yourCart" } }); 
   };
 
   return (

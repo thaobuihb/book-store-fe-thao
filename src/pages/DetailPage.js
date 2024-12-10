@@ -60,8 +60,9 @@ const DetailPage = () => {
   };
 
   const handleBuyNow = (useId) => {
+    console.log("Book data in Buy Now:", book); 
     const isBookInCart = cart.some((item) => item.bookId === book._id);
-
+  
     if (!isBookInCart) {
       dispatch(
         addToCart({
@@ -74,12 +75,14 @@ const DetailPage = () => {
         })
       );
     }
-
+  
+    
     const orderDetails = {
       items: [
         {
           img: book.img,
-          bookId: book._id,
+          _id: book._id, 
+          bookId: book._id, 
           name: book.name,
           price: book.discountedPrice || book.price,
           quantity: quantity,
@@ -89,15 +92,13 @@ const DetailPage = () => {
       totalAmount: parseFloat((book.discountedPrice || book.price) * quantity),
     };
 
+    console.log("Order Details for Buy Now:123456", orderDetails); 
+  
     localStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
-
+  
     navigate(`/order/${useId}`, { state: orderDetails });
   };
-
-  if (isLoading) {
-    return <Typography>Loading...</Typography>;
-  }
-
+  
   return (
     <Box sx={{ padding: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", m: 10 }}>
