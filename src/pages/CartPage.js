@@ -31,7 +31,6 @@ import {
 } from "../features/cart/selectors";
 import { selectPurchaseHistory } from "../features/order/orderSelectors";
 
-
 const CartPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -43,7 +42,9 @@ const CartPage = () => {
   const cartReloadTrigger = useSelector(selectCartReloadTrigger);
   const purchaseHistory = useSelector(selectPurchaseHistory);
   // console.log("Purchase history from Redux:^^^^^^", purchaseHistory);
-
+  // purchaseHistory.map((order) => {
+  //   console.log("Books in order: ", order.books);
+  // });
 
   // const cartReloadTrigger = useSelector((state) => state.cart.cartReloadTrigger);
   const { user } = useSelector((state) => state.user);
@@ -84,6 +85,10 @@ const CartPage = () => {
 
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
+    const container = document.getElementById("cart-page-container");
+    if (container) {
+      container.focus();
+    }
   };
 
   const handleUpdateQuantity = (bookId, quantity) => {
@@ -125,7 +130,7 @@ const CartPage = () => {
   };
 
   return (
-    <Container>
+    <Container id="cart-page-container" tabIndex="-1">
       <Typography variant="h4" gutterBottom>
         Shopping
       </Typography>
@@ -133,11 +138,27 @@ const CartPage = () => {
         value={currentTab}
         onChange={handleTabChange}
         aria-label="Cart and Purchase History"
-        sx={{ mb: 4 }}
       >
-        <Tab label="Your Cart" />
-        <Tab label="Purchase History" />
+        <Tab label="Your Cart" id="tab-0" aria-controls="tabpanel-0" />
+        <Tab label="Purchase History" id="tab-1" aria-controls="tabpanel-1" />
       </Tabs>
+
+      <Box
+        id="tabpanel-0"
+        role="tabpanel"
+        hidden={currentTab !== 0}
+        aria-labelledby="tab-0"
+      >
+        {/* Nội dung của Your Cart */}
+      </Box>
+      <Box
+        id="tabpanel-1"
+        role="tabpanel"
+        hidden={currentTab !== 1}
+        aria-labelledby="tab-1"
+      >
+        {/* Nội dung của Purchase History */}
+      </Box>
 
       {currentTab === 0 && (
         <>
@@ -281,8 +302,11 @@ const CartPage = () => {
                 <Grid item xs={12} sm={6} md={4} key={order._id}>
                   <Card>
                     <CardContent>
-                      <Typography variant="h6">
-                        Order ID: {order.orderCode}
+                      <Typography variant="h8">
+                        Order code: <strong>{order.orderCode}</strong>
+                      </Typography>
+                      <Typography>
+                        Status: <strong>{order.status}</strong>{" "}
                       </Typography>
                       <Typography>
                         Date: {new Date(order.createdAt).toLocaleDateString()}
@@ -291,27 +315,33 @@ const CartPage = () => {
                         Total: ${order.totalAmount.toFixed(2)}
                       </Typography>
                       <Typography sx={{ mt: 2 }}>Books:</Typography>
-                      {order.books.map((book, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginTop: 1,
-                          }}
-                        >
-                          <CardMedia
-                            component="img"
-                            image={book.img || "/default-book.jpg"}
-                            alt={book.name}
-                            sx={{ width: 50, height: 50, marginRight: 2 }}
-                          />
-                          <Box>
-                            <Typography>{book.name}</Typography>
-                            <Typography>Quantity: {book.quantity}</Typography>
+                      {order.books.map((book, idx) => {
+                        // console.log("Book data:******", book);
+                        return (
+                          <Box
+                            key={idx}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              marginTop: 1,
+                            }}
+                          >
+                            <CardMedia
+                              component="img"
+                              image={book.bookId?.img || "/default-book.jpg"}
+                              alt={book.bookId.name}
+                              sx={{ width: 50, height: 50, marginRight: 2 }}
+                            />
+                            <Box>
+                              <Typography>{book.name}</Typography>
+                              <Typography>
+                                Price: ${book.price.toFixed(2)}
+                              </Typography>
+                              <Typography>Quantity: {book.quantity}</Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                      ))}
+                        );
+                      })}
                     </CardContent>
                   </Card>
                 </Grid>

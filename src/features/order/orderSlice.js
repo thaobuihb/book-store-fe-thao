@@ -86,7 +86,7 @@ export const fetchPurchaseHistory = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await apiService.get(`/orders/purchase-history/${userId}`);
-      console.log("API response for purchase history:%%%%%%%%%%", response.data);
+      // console.log("API response for purchase history:%%%%%%%%%%", response.data);
 
       return response.data; 
     } catch (error) {
@@ -191,9 +191,14 @@ const orderSlice = createSlice({
     })
     .addCase(fetchPurchaseHistory.fulfilled, (state, action) => {
       console.log("Purchase history data fetched:!!!!!!", action.payload);
+      
+
 
       state.isLoading = false;
-      state.purchaseHistory = Array.isArray(action.payload) ? action.payload : [];
+  state.purchaseHistory = Array.isArray(action.payload)
+    ? [...action.payload] 
+    : [];
+  console.log("Updated purchase history in state: ", state.purchaseHistory);
     })
     .addCase(fetchPurchaseHistory.rejected, (state, action) => {
       state.isLoading = false;
