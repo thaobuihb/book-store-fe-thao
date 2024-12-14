@@ -54,7 +54,7 @@ const CartPage = () => {
   useEffect(() => {
     dispatch(loadCart());
     if (user?._id) {
-      console.log("Fetching purchase history for user:#########", user._id);
+      // console.log("Fetching purchase history for user:#########", user._id);
       dispatch(fetchPurchaseHistory(user._id));
     }
   }, [dispatch, user?._id]);

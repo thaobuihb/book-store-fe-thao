@@ -56,6 +56,7 @@ export const fetchOrderDetails = createAsyncThunk(
   async ({ userId, orderId }, { rejectWithValue }) => {
     try {
       const response = await apiService.get(`/orders/${userId}/${orderId}`);
+      console.log("API Response for Order Details:", response.data);
       return response.data;
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Lỗi khi lấy thông tin đơn hàng.";
@@ -161,12 +162,17 @@ const orderSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchOrderDetails.fulfilled, (state, action) => {
+        // console.log("Fetched Order Details:", action.payload);
         state.isLoading = false;
         state.orderDetails = action.payload;
+        console.log("Updated orderDetails in Redux State: bbbbbb", state.orderDetails); 
+
       })
       .addCase(fetchOrderDetails.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        console.error("Failed to fetch order details:&&&&&&", action.payload);
+
       })
       // updateOrderStatus
       .addCase(updateOrderStatus.pending, (state) => {

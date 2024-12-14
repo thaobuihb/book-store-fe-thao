@@ -1,68 +1,160 @@
 import React, { useEffect } from "react";
-import { Box, Typography, Card, CardContent, CardMedia, Grid } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  Grid,
+  Button
+} from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchOrderDetails, selectOrderDetails } from "../features/order/orderSlice";
-import { useLocation } from "react-router-dom";
+import {
+  fetchOrderDetails,
+  selectOrderDetails,
+} from "../features/order/orderSlice";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ThankYouPage = () => {
-  
   const location = useLocation();
+  const navigate = useNavigate();
   const { orderId } = location.state || {};
   const dispatch = useDispatch();
-  const { orderDetails, isLoading, error } = useSelector((state) => state.orders || {});
+  const { orderDetails, error, isLoading } = useSelector(
+    (state) => state.order
+  );
+  const user = useSelector((state) => state.user?.user);
 
   useEffect(() => {
-    if (orderId) {
-      dispatch(fetchOrderDetails({ userId: "currentUserId", orderId }));
+    if (orderId && user?._id) {
+      console.log(
+        "Fetching order details for User ID:",
+        user._id,
+        "and Order ID:",
+        orderId
+      );
+      dispatch(fetchOrderDetails({ userId: user._id, orderId }));
     }
-  }, [dispatch, orderId]);
+  }, [dispatch, orderId, user?._id]);
+
+  useEffect(() => {
+    console.log("Order ID in ThankYouPage:", orderId);
+    console.log("Order Details in Redux:", orderDetails);
+  }, [orderDetails]);
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Cảm ơn bạn đã đặt hàng tại Susu Anna Bookstore!
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh", 
+        padding: 4,
+        textAlign: "center", 
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          color: "orange", 
+          fontStyle: "italic", 
+        }}
+      >
+        Thank you for shopping at Susu Anna Bookstore!
       </Typography>
       {isLoading ? (
-        <Typography>Đang tải thông tin đơn hàng...</Typography>
+        <Typography>Loading order details...</Typography>
       ) : error ? (
-        <Typography color="error">Lỗi: {error}</Typography>
+        <Typography color="error">Error: {error}</Typography>
       ) : orderDetails ? (
         <>
-          <Typography variant="h6">Thông tin đơn hàng:</Typography>
-          <Typography>Mã đơn hàng: {orderDetails.orderCode}</Typography>
-          <Typography>Tổng tiền: ${orderDetails.totalAmount}</Typography>
+          <Typography
+            variant="h6"
+            sx={{ textTransform: "uppercase", fontWeight: "bold" }}
+          >
+            ORDER INFORMATION
+          </Typography>
+          <Typography>
+            <strong>Order Code: {orderDetails.orderCode}</strong>
+          </Typography>
+          <Typography variant="body1" sx={{ mt: 1 }}>
+            <strong>Shipping Fee: $3.00</strong>
+          </Typography>
+          <Typography>
+            <strong>Total Amount: ${orderDetails.totalAmount}</strong>
+          </Typography>
 
           <Typography variant="h6" sx={{ mt: 3 }}>
-            Sách đã đặt:
+            Ordered Books:
           </Typography>
-          <Grid container spacing={2}>
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              maxWidth: "100%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             {orderDetails.books.map((book, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card>
+                <Card
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 2,
+                    height: "100%", 
+                  }}
+                >
                   <CardMedia
                     component="img"
-                    height="140"
                     image={book.img}
                     alt={book.name}
+                    sx={{
+                      height: 140,
+                      width: "auto",
+                      objectFit: "contain",
+                      marginBottom: 2, 
+                    }}
                   />
-                  <CardContent>
-                    <Typography variant="h6">{book.name}</Typography>
-                    <Typography>Số lượng: {book.quantity}</Typography>
-                    <Typography>Giá: ${book.price}</Typography>
-                    <Typography>
-                      Tổng: ${book.quantity * book.price}
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="h6" align="center">
+                      {book.name}
                     </Typography>
+                    <Typography align="center">
+                      Quantity: {book.quantity}
+                    </Typography>
+                    <Typography align="center">Price: ${book.price}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
+          <Box sx={{ marginTop: 4 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={() => navigate("/")} 
+        >
+          Keep Buying
+        </Button>
+      </Box>
         </>
       ) : (
-        <Typography>Không tìm thấy thông tin đơn hàng.</Typography>
+        <Typography>Order details not found.</Typography>
       )}
     </Box>
   );
 };
-
 export default ThankYouPage;

@@ -130,7 +130,7 @@ const OrderPage = () => {
       console.error("Form không hợp lệ:", formData, errors);
       return;
     }
-
+  
     const orderData = {
       books: orderDetails.items.map((item) => ({
         bookId: item._id,
@@ -148,9 +148,9 @@ const OrderPage = () => {
       totalAmount: totalPayment,
       paymentMethods: paymentMethod,
     };
-
+  
     console.log("Dữ liệu gửi lên API:", orderData);
-
+  
     try {
       let response;
       if (isAuthenticated) {
@@ -160,17 +160,26 @@ const OrderPage = () => {
       } else {
         response = await dispatch(createGuestOrder(orderData)).unwrap();
       }
-
+  
       console.log("Đơn hàng đã được tạo thành công:", response);
-
+  
+      // Lấy `orderId` từ phản hồi
+      const orderId = response?._id || response?.orderCode;
+  
+      if (!orderId) {
+        console.error("Không tìm thấy `orderId` trong phản hồi:", response);
+        return;
+      }
+  
       // Chuyển hướng đến trang cảm ơn
       navigate("/thank-you", {
-        state: { message: "Đặt hàng thành công!", orderData: response },
+        state: { message: "Đặt hàng thành công!", orderId },
       });
     } catch (error) {
       console.error("Lỗi khi thực hiện đặt hàng:", error);
     }
   };
+  
 
   return (
     <Box sx={{ padding: 4 }}>
