@@ -6,40 +6,68 @@ import {
   CardContent,
   CardMedia,
   Grid,
-  Button
+  Button,
+  CircularProgress,
+  Tooltip,
 } from "@mui/material";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchOrderDetails,
+  fetchGuestOrderDetails,
   selectOrderDetails,
 } from "../features/order/orderSlice";
 import { useLocation, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 const ThankYouPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { orderId } = location.state || {};
   const dispatch = useDispatch();
-  const { orderDetails, error, isLoading } = useSelector(
-    (state) => state.order
-  );
-  const user = useSelector((state) => state.user?.user);
+  const orderDetails = useSelector(selectOrderDetails);
+  const { isAuthenticated, user } = useAuth();
+  const { isLoading, error } = useSelector((state) => state.order);
 
+  // Fetch order details based on authentication status
   useEffect(() => {
-    if (orderId && user?._id) {
-      console.log(
-        "Fetching order details for User ID:",
-        user._id,
-        "and Order ID:",
-        orderId
-      );
-      dispatch(fetchOrderDetails({ userId: user._id, orderId }));
+    if (!orderId) {
+      toast.error("Order ID is missing!");
+      navigate("/");
+      return;
     }
-  }, [dispatch, orderId, user?._id]);
+
+    if (isAuthenticated) {
+      // Trường hợp người dùng đã đăng nhập
+      dispatch(fetchOrderDetails({ userId: user?._id, orderId }))
+        .unwrap()
+        .then((details) => {
+          console.log("Fetched order details for authenticated user:", details);
+        })
+        .catch((error) => {
+          console.error("Error fetching order details:", error);
+          toast.error("Unable to fetch order details!");
+          navigate("/");
+        });
+    } else {
+      // Trường hợp người dùng chưa đăng nhập
+      dispatch(fetchGuestOrderDetails(orderId))
+        .unwrap()
+        .then((details) => {
+          console.log("Fetched guest order details:", details);
+        })
+        .catch((error) => {
+          console.error("Error fetching guest order details:", error);
+          toast.error("Order not found!");
+          navigate("/");
+        });
+    }
+  }, [orderId, isAuthenticated, user?._id, dispatch, navigate]);
 
   useEffect(() => {
     console.log("Order ID in ThankYouPage:", orderId);
-    console.log("Order Details in Redux:", orderDetails);
+    console.log("Order Details in State:", orderDetails);
   }, [orderDetails]);
 
   return (
@@ -49,25 +77,27 @@ const ThankYouPage = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "100vh", 
+        minHeight: "100vh",
         padding: 4,
-        textAlign: "center", 
+        textAlign: "center",
       }}
     >
       <Typography
         variant="h4"
         gutterBottom
         sx={{
-          color: "orange", 
-          fontStyle: "italic", 
+          color: "orange",
+          fontStyle: "italic",
         }}
       >
         Thank you for shopping at Susu Anna Bookstore!
       </Typography>
       {isLoading ? (
-        <Typography>Loading order details...</Typography>
+        <CircularProgress color="primary" />
       ) : error ? (
-        <Typography color="error">Error: {error}</Typography>
+        <Typography color="error" variant="body1">
+          {error}
+        </Typography>
       ) : orderDetails ? (
         <>
           <Typography
@@ -80,10 +110,12 @@ const ThankYouPage = () => {
             <strong>Order Code: {orderDetails.orderCode}</strong>
           </Typography>
           <Typography variant="body1" sx={{ mt: 1 }}>
-            <strong>Shipping Fee: $3.00</strong>
+            <strong>Shipping Fee: ${orderDetails.shippingFee || 3.0}</strong>
           </Typography>
           <Typography>
-            <strong>Total Amount: ${orderDetails.totalAmount}</strong>
+            <strong>
+              Total Amount: ${orderDetails.totalAmount.toFixed(2)}
+            </strong>
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3 }}>
@@ -98,58 +130,66 @@ const ThankYouPage = () => {
               justifyContent: "center",
             }}
           >
-            {orderDetails.books.map((book, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 2,
-                    height: "100%", 
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={book.img}
-                    alt={book.name}
-                    sx={{
-                      height: 140,
-                      width: "auto",
-                      objectFit: "contain",
-                      marginBottom: 2, 
-                    }}
-                  />
-                  <CardContent
+            {orderDetails.books?.length > 0 ? (
+              orderDetails.books.map((book, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card
                     sx={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
+                      justifyContent: "center",
+                      padding: 2,
+                      height: "100%",
                     }}
                   >
-                    <Typography variant="h6" align="center">
-                      {book.name}
-                    </Typography>
-                    <Typography align="center">
-                      Quantity: {book.quantity}
-                    </Typography>
-                    <Typography align="center">Price: ${book.price}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+                    <CardMedia
+                      component="img"
+                      image={book.bookId?.img || book.img || "/default-book.jpg"}
+                      alt={book.bookId?.name || book.name || "Book"}
+                      sx={{
+                        height: 140,
+                        width: "auto",
+                        objectFit: "contain",
+                        marginBottom: 2,
+                      }}
+                    />
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h6" align="center">
+                        {book.name || "Unknown Book"}
+                      </Typography>
+                      <Typography align="center">
+                        Quantity: {book.quantity || 0}
+                      </Typography>
+                      <Typography align="center">
+                        Price: ${book.price?.toFixed(2) || "N/A"}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))
+            ) : (
+              <Typography>No books found in this order.</Typography>
+            )}
           </Grid>
           <Box sx={{ marginTop: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={() => navigate("/")} 
-        >
-          Keep Buying
-        </Button>
-      </Box>
+            <Tooltip title="Return to Home Page">
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={() => navigate("/")}
+              >
+                Keep Buying
+              </Button>
+            </Tooltip>
+          </Box>
         </>
       ) : (
         <Typography>Order details not found.</Typography>
@@ -157,4 +197,5 @@ const ThankYouPage = () => {
     </Box>
   );
 };
+
 export default ThankYouPage;

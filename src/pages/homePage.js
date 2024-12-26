@@ -9,12 +9,12 @@ import {
 } from "../features/book/bookSlice";
 import {
   Container,
-  Grid,          
-  Card,          
-  CardMedia,     
+  Grid,
+  Card,
+  CardMedia,
   CardActionArea,
   Typography,
-} from "@mui/material";  
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 import { useNavigate } from "react-router-dom";
@@ -150,48 +150,47 @@ const Home = () => {
   });
 
   const handleBookClick = (bookId) => {
-    navigate(`/book/${bookId}`);  
+    navigate(`/book/${bookId}`);
   };
-
 
   return (
     <Container>
       {/* Phần sử dụng BookItem để hiển thị slideshow với sách ngẫu nhiên */}
       <SlideshowContainer>
-  <Grid container spacing={2}>
-    {slideshowBooks.map((book) => (
-      <Grid item xs={12} sm={4} key={book._id}>
-        <Card
-          sx={{
-            maxWidth: 300,
-            height: 300,
-            display: "flex",
-            justifyContent: "space-between",
-            flexDirection: "column",
-            alignSelf: "center",
-            m: 3,
-          }}
-        >
-          <CardActionArea onClick={() => handleBookClick(book._id)}>
-            <CardMedia
-              component="img"
-              image={book.img}
-              alt="Book Cover"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-            <Typography variant="h6" align="center" sx={{ mt: 1 }}>
-              {book.name}
-            </Typography>
-          </CardActionArea>
-        </Card>
-      </Grid>
-    ))}
-  </Grid>
-</SlideshowContainer>
+        <Grid container spacing={2}>
+          {slideshowBooks.map((book) => (
+            <Grid item xs={12} sm={4} key={book._id}>
+              <Card
+                sx={{
+                  maxWidth: 300,
+                  height: 300,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignSelf: "center",
+                  m: 3,
+                }}
+              >
+                <CardActionArea onClick={() => handleBookClick(book._id)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt="Book Cover"
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <Typography variant="h6" align="center" sx={{ mt: 1 }}>
+                    {book.name}
+                  </Typography>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </SlideshowContainer>
       {/* Các phần sách khác */}
       <BookItem
         title="New Releases"
@@ -201,7 +200,7 @@ const Home = () => {
         totalPages={totalNewReleasePages}
         handleNextPage={handleNextNewReleasePage}
         handlePrevPage={handlePrevNewReleasePage}
-        justifyContent="center"  
+        justifyContent="center"
       />
 
       <BookItem
@@ -212,14 +211,18 @@ const Home = () => {
         totalPages={totalDiscountedPages}
         handleNextPage={handleNextDiscountedPage}
         handlePrevPage={handlePrevDiscountedPage}
-        justifyContent="center"  
+        justifyContent="center"
       />
 
       {/* Phần Danh mục Phổ Biến */}
       <section>
-      <Typography component="h4" gutterBottom sx={{ fontSize: '25px', fontWeight: 'bold' }}>
-  Popular Categories in Books
-</Typography>
+        <Typography
+          component="h4"
+          gutterBottom
+          sx={{ fontSize: "25px", fontWeight: "bold" }}
+        >
+          Popular Categories in Books
+        </Typography>
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {Array.isArray(categoryOfBooks) &&
             categoryOfBooks.slice(0, 6).map((category) => (
@@ -279,7 +282,7 @@ const Home = () => {
         totalPages={totalCategoryPages}
         handleNextPage={handleNextCategoryPage}
         handlePrevPage={handlePrevCategoryPage}
-        justifyContent="center"  
+        justifyContent="center"
       />
     </Container>
   );

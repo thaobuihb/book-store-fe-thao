@@ -31,7 +31,7 @@ const defaultValues = {
 function LoginPage({ setUserProfile }) {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("Location State:######", location.state);
+  // console.log("Location State:######", location.state);
   const auth = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 

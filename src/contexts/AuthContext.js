@@ -1,11 +1,18 @@
 import { createContext, useReducer, useEffect } from "react";
 import apiService from "../app/apiService";
 import { isValidToken } from "../utils/jwt";
-import { syncWishlistAfterLogin, clearWishlist } from "../features/wishlist/wishlistSlice";
-import { syncCartAfterLogin, clearCartOnLogout } from "../features/cart/cartSlice"; 
+import {
+  syncWishlistAfterLogin,
+  clearWishlist,
+} from "../features/wishlist/wishlistSlice";
+import {
+  syncCartAfterLogin,
+  clearCartOnLogout,
+} from "../features/cart/cartSlice";
 import { loginSuccess, logoutSuccess } from "../features/user/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import store from "../app/store";
 
 const initialState = {
   isInitialized: false,
@@ -53,9 +60,11 @@ const reducer = (state, action) => {
 
 const setSession = (accessToken) => {
   if (accessToken) {
+    // console.log("Setting session with token:", accessToken);
     window.localStorage.setItem("accessToken", accessToken);
     apiService.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   } else {
+    // console.log("Clearing session...");
     window.localStorage.removeItem("accessToken");
     delete apiService.defaults.headers.common.Authorization;
   }
@@ -67,63 +76,85 @@ function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const reduxDispatch = useDispatch();
 
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const accessToken = window.localStorage.getItem("accessToken");
-  
-        if (accessToken && isValidToken(accessToken)) {
-          setSession(accessToken);
-  
-          const response = await apiService.get("/users/me");
-          const user = response.data;
-  
-          dispatch({
-            type: INITIALIZE,
-            payload: { isAuthenticated: true, user },
-          });
-  
-          reduxDispatch(loginSuccess(user));
-        } else {
-          setSession(null); 
-          dispatch({
-            type: INITIALIZE,
-            payload: { isAuthenticated: false, user: null },
-          });
-        }
-      } catch (err) {
-        console.error(err);
-  
+  const initialize = async () => {
+    try {
+      // console.log("Initializing authentication...");
+
+      const accessToken = window.localStorage.getItem("accessToken");
+      // console.log("AccessToken from localStorage:", accessToken);
+
+      if (accessToken && isValidToken(accessToken)) {
+        setSession(accessToken);
+        // console.log("Valid token found, setting session.");
+
+        const response = await apiService.get("/users/me");
+        const user = response.data;
+
+        // console.log("User fetched from API:", user);
+
+        dispatch({
+          type: INITIALIZE,
+          payload: { isAuthenticated: true, user },
+        });
+
+        reduxDispatch(loginSuccess(user));
+      } else {
+        console.warn("No valid token found, clearing session.");
         setSession(null);
         dispatch({
           type: INITIALIZE,
-          payload: {
-            isAuthenticated: false,
-            user: null,
-          },
+          payload: { isAuthenticated: false, user: null },
         });
       }
-    };
-  
+    } catch (err) {
+      console.error("Error during authentication initialization:", err);
+
+      setSession(null);
+      dispatch({
+        type: INITIALIZE,
+        payload: {
+          isAuthenticated: false,
+          user: null,
+        },
+      });
+    }
+  };
+
+  useEffect(() => {
     initialize();
-  }, []);
-  
+  }, [reduxDispatch]);
 
   const login = async ({ email, password }, callback) => {
-    const response = await apiService.post("/auth/login", { email, password });
-    const { user, accessToken } = response.data;
+    try {
+      // console.log("Starting login process...");
+      const response = await apiService.post("/auth/login", { email, password });
+      // console.log("Login response received:", response);
 
-    setSession(accessToken);
-    dispatch({
-      type: LOGIN_SUCCESS,
-      payload: { user },
-    });
+      const { user, accessToken } = response.data;
 
-    reduxDispatch(loginSuccess(user));
-    reduxDispatch(syncWishlistAfterLogin(user._id));
-    reduxDispatch(syncCartAfterLogin(user._id)); 
+      if (!accessToken) {
+        throw new Error("No access token returned from login API");
+      }
 
-    callback();
+      // console.log("Access token received:", accessToken);
+
+      setSession(accessToken);
+
+      dispatch({
+        type: LOGIN_SUCCESS,
+        payload: { user },
+      });
+
+      reduxDispatch(loginSuccess(user));
+      reduxDispatch(syncWishlistAfterLogin(user._id));
+      reduxDispatch(syncCartAfterLogin(user._id));
+
+      // console.log("Login process completed successfully.");
+      if (callback) callback();
+    } catch (error) {
+      console.error("Error during login process:", error.message);
+      toast.error("Login failed. Please try again.");
+    }
   };
 
   const register = async ({ name, email, password }, callback) => {
@@ -145,49 +176,50 @@ function AuthProvider({ children }) {
 
   const logout = async (wishlist, user, callback) => {
     try {
+      // console.log("Starting logout process...");
       const token = localStorage.getItem("accessToken");
-  
-      // Kiểm tra token và user trước khi thực hiện yêu cầu đồng bộ wishlist
+      // console.log("Token before logout:", token);
+
+      setSession(null);
+      // console.log(
+      //   "Authorization Header after clearing:",
+      //   apiService.defaults.headers.common.Authorization
+      // );
+
       if (token && user) {
         try {
-          // Đồng bộ wishlist trước khi xóa token
           await apiService.post(`/wishlist/sync`, {
             userId: user._id,
             localWishlist: wishlist,
           });
-          console.log("Wishlist synced successfully before logout.");
+          // console.log("Wishlist synced successfully before logout.");
         } catch (error) {
-          console.error(
-            "Lỗi khi đồng bộ wishlist trước khi logout:",
-            error.response ? error.response.data : error.message
-          );
+          console.error("Error syncing wishlist:", error.message);
         }
-  
-        // Thực hiện xóa giỏ hàng trong Redux sau khi đồng bộ wishlist
-        reduxDispatch(clearCartOnLogout()); 
+        reduxDispatch(clearCartOnLogout());
       } else {
-        console.warn("No token or userId, skipping wishlist sync during logout.");
+        console.warn("No token or user, skipping wishlist sync.");
       }
-  
-      // Cập nhật Redux store và xóa token khỏi localStorage sau khi hoàn tất các thao tác
+
+      try {
+        await apiService.post(`/auth/logout`);
+        // console.log("Successfully logged out from the server.");
+      } catch (error) {
+        console.warn("Server logout failed:", error.message);
+      }
+
       reduxDispatch(logoutSuccess());
-      setSession(null);  // Xóa token khỏi session
-      localStorage.removeItem("accessToken"); // Xóa token khỏi localStorage
-  
-      // Hiển thị thông báo
-      toast.success("Đăng xuất thành công!");
-  
-      // Điều hướng callback (nếu có)
+      // console.log("Redux state after logoutSuccess:", store.getState().user);
+
+      await initialize();
+      toast.success("Logged out successfully!");
       if (callback) callback();
-      
     } catch (error) {
-      console.error("Lỗi khi đăng xuất:", error.message);
-      toast.error("Đăng xuất không thành công");
-  
+      console.error("Error during logout:", error.message);
+      toast.error("Logout failed. Please try again.");
       if (callback) callback();
     }
   };
-  
 
   return (
     <AuthContext.Provider

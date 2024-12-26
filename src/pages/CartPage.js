@@ -22,7 +22,10 @@ import {
   removeBookFromCart,
   clearAllCartItems,
 } from "../features/cart/cartSlice";
-import { fetchPurchaseHistory } from "../features/order/orderSlice";
+import {
+  fetchPurchaseHistory,
+  cancelOrder,
+} from "../features/order/orderSlice";
 
 import {
   selectCartItems,
@@ -127,6 +130,25 @@ const CartPage = () => {
         ? prev.filter((id) => id !== bookId)
         : [...prev, bookId]
     );
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const confirmation = window.confirm(
+        "Are you sure you want to cancel this order?"
+      );
+      if (!confirmation) return;
+
+      if (user?._id) {
+        await dispatch(cancelOrder({ userId: user._id, orderId })).unwrap();
+        alert("Order has been cancelled successfully!");
+      } else {
+        alert("You need to be logged in to cancel an order.");
+      }
+    } catch (error) {
+      console.error("Failed to cancel order:", error);
+      alert("Failed to cancel the order. Please try again later.");
+    }
   };
 
   return (
@@ -314,6 +336,19 @@ const CartPage = () => {
                       <Typography>
                         Total: ${order.totalAmount.toFixed(2)}
                       </Typography>
+                      <Typography sx={{ mt: 2 }}>
+                        <strong>Shipping Address:</strong>
+                      </Typography>
+                      <Typography>{order.shippingAddress.fullName}</Typography>
+                      <Typography>{order.shippingAddress.phone}</Typography>
+                      <Typography>
+                        {order.shippingAddress.addressLine},{" "}
+                        {order.shippingAddress.city},{" "}
+                        {order.shippingAddress.state},{" "}
+                        {order.shippingAddress.zipcode},{" "}
+                        {order.shippingAddress.country}
+                      </Typography>
+
                       <Typography sx={{ mt: 2 }}>Books:</Typography>
                       {order.books.map((book, idx) => {
                         // console.log("Book data:******", book);
@@ -342,6 +377,17 @@ const CartPage = () => {
                           </Box>
                         );
                       })}
+                      {order.status === "Processing" && (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          sx={{ marginTop: 2 }}
+                          onClick={() => handleCancelOrder(order._id)}
+                        >
+                          Cancel Order
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>

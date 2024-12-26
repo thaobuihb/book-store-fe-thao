@@ -14,6 +14,7 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
+import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createOrder, createGuestOrder } from "../features/order/orderSlice";
@@ -128,6 +129,7 @@ const OrderPage = () => {
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
       console.error("Form không hợp lệ:", formData, errors);
+      toast.error("Form is invalid. Please correct the errors.");
       return;
     }
   
@@ -164,23 +166,30 @@ const OrderPage = () => {
       console.log("Đơn hàng đã được tạo thành công:", response);
   
       // Lấy `orderId` từ phản hồi
-      const orderId = response?._id || response?.orderCode;
+      const orderId = isAuthenticated ? response?._id : response?.orderCode;
   
       if (!orderId) {
         console.error("Không tìm thấy `orderId` trong phản hồi:", response);
+        toast.error("Unable to retrieve order details.");
         return;
       }
   
       // Chuyển hướng đến trang cảm ơn
       navigate("/thank-you", {
-        state: { message: "Đặt hàng thành công!", orderId },
+        state: {
+          message: isAuthenticated
+            ? "Order placed successfully!"
+            : "Thank you for your order!",
+          orderId,
+        },
       });
     } catch (error) {
       console.error("Lỗi khi thực hiện đặt hàng:", error);
+      toast.error("Failed to place the order. Please try again.");
     }
   };
   
-
+  
   return (
     <Box sx={{ padding: 4 }}>
       {isLoading && <Typography variant="h6">Đang xử lý...</Typography>}

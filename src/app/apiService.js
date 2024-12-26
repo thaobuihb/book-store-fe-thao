@@ -7,18 +7,30 @@ const apiService = axios.create({
 
 apiService.interceptors.request.use(
   (request) => {
-    console.log("Start Request", request);
+    console.log("Request Headers after logout:", request.headers);
+    // Không thêm Authorization cho các API công khai
+    const publicEndpoints = ["/orders/guest"];
+    if (publicEndpoints.some((endpoint) => request.url.includes(endpoint))) {
+      delete request.headers.Authorization;
+    } else {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        request.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
     return request;
   },
-  function (error) {
-    console.log("REQUEST ERROR", { error });
+  (error) => {
+    console.error("REQUEST ERROR", error);
     return Promise.reject(error);
   }
 );
 
+
 apiService.interceptors.response.use(
   (response) => {
-    console.log("Response", response);
+    console.log("Response", response); 
     return response.data;
   },
   function (error) {
@@ -27,5 +39,6 @@ apiService.interceptors.response.use(
     return Promise.reject({ message });
   }
 );
+
 
 export default apiService;
