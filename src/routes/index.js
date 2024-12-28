@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Routes, Route } from "react-router-dom";
+
+// Các trang chính
 import CartPage from "../pages/CartPage";
 import DetailPage from "../pages/DetailPage";
 import HelpCenter from "../pages/HelpCenter";
@@ -9,34 +11,56 @@ import OrderPage from "../pages/OrderPage";
 import RegisterPage from "../pages/RegisterPage";
 import UserProfilePage from "../pages/UserProfilePage";
 import HomePage from "../pages/homePage";
-import AdminPage from "../pages/adminPage";
 import WishlistPage from "../pages/WishlistPage";
-import BookPage from "../pages/BookPage"
+import BookPage from "../pages/BookPage";
 import ThankYouPage from "../pages/ThankYouPage";
 
+// Layouts
 import MainLayout from "../layouts/MainLayout";
 import BlankLayout from "../layouts/BlankLayout";
+import AdminLayout from "../pages/admin/AdminLayout";
+
+// Các trang Admin
+import DashboardPage from "../pages/admin/DashboardPage";
+import BooksPage from "../pages/admin/BooksPage";
+import OrdersPage from "../pages/admin/OrdersPage";
+import UsersPage from "../pages/admin/UsersPage";
+import CategoriesPage from "../pages/admin/CategoriesPage";
+
+import AdminOnlyRoute from "./AdminOnlyRoute";
 
 function Router() {
   return (
     <Routes>
-    <Route element={<MainLayout />}>
-      <Route path="/" element={<HomePage />}/>
-      <Route path="book/:bookId" element={<DetailPage />}/>
-      <Route path="/books" element={<BookPage/>}/>
-      <Route path="cart" element={<CartPage />}/>
-      <Route path="order/:userId" element={<OrderPage />}/>
-      <Route path="user/:userId" element={<UserProfilePage />}/>
-      <Route path="/help" element={<HelpCenter />}/>
-      <Route path="admin/:userId" element={<AdminPage />}/>
-      <Route path="wishlist" element={<WishlistPage />}/>
-      <Route path="thank-you" element={<ThankYouPage />}/>
+      {/* Main Layout */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="book/:bookId" element={<DetailPage />} />
+        <Route path="/books" element={<BookPage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route path="order/:userId" element={<OrderPage />} />
+        <Route path="user/:userId" element={<UserProfilePage />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="wishlist" element={<WishlistPage />} />
+        <Route path="thank-you" element={<ThankYouPage />} />
       </Route>
 
-     <Route element={<BlankLayout />}>
+      {/* Blank Layout */}
+      <Route element={<BlankLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      {/* Admin Layout */}
+      <Route element={<AdminOnlyRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<DashboardPage />} />
+          <Route path="/admin/books" element={<BooksPage />} />
+          <Route path="/admin/orders" element={<OrdersPage />} />
+          <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/categories" element={<CategoriesPage />} />
+        </Route>
       </Route>
     </Routes>
   );

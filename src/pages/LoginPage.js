@@ -31,7 +31,6 @@ const defaultValues = {
 function LoginPage({ setUserProfile }) {
   const navigate = useNavigate();
   const location = useLocation();
-  // console.log("Location State:######", location.state);
   const auth = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -47,17 +46,24 @@ function LoginPage({ setUserProfile }) {
   } = methods;
 
   const onSubmit = async (data) => {
-    const from = location.state?.from || "/";
-    console.log("Redirecting to:&&&&&", from);
     try {
-      const user = await auth.login(data, () => {
-        navigate(from, { replace: true }); 
-      });
+      const user = await auth.login(data);
 
-      setUserProfile({
-        name: user.name,
-        avatar: user.avatar || null,
-      });
+      // Điều hướng dựa trên vai trò
+      if (user.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        const from = location.state?.from || "/";
+        navigate(from, { replace: true });
+      }
+
+      // Cập nhật thông tin người dùng nếu cần
+      if (setUserProfile) {
+        setUserProfile({
+          name: user.name,
+          avatar: user.avatar || null,
+        });
+      }
     } catch (error) {
       reset();
       setError("responseError", error);
