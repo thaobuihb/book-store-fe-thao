@@ -77,29 +77,22 @@ const BooksPage = () => {
   // Handle scroll for infinite scroll
   useEffect(() => {
     if (tabValue !== 0) return;
-
+    
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (scrollHeight - scrollTop <= clientHeight + 100 && !loading && hasMore) {
+      dispatch(fetchBooks({ page: currentPage + 1 }))
+        .unwrap()
+        .then(() => setCurrentPage((prev) => prev + 1))
+        .catch((err) => {
+          toast.error(`Lỗi tải sách: ${err}`);
+        });
+    }
+  };
 
-      if (
-        scrollTop + clientHeight >= scrollHeight - 50 &&
-        hasMore &&
-        !loading
-      ) {
-        dispatch(fetchBooks({ page: currentPage + 1 }))
-          .unwrap()
-          .then(() => {
-            setCurrentPage((prev) => prev + 1);
-          })
-          .catch((err) => {
-            console.error("Error fetching books:", err);
-          });
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [currentPage, hasMore, loading, dispatch, tabValue]);
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, [dispatch, currentPage, hasMore, loading, tabValue]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -166,7 +159,7 @@ const BooksPage = () => {
       .unwrap()
       .then((restoredBook) => {
         toast.success("Khôi phục sách thành công!");
-
+        // Cập nhật lại danh sách sách ngay sau khi khôi phục
         dispatch(fetchBooks({ page: 1 }));
         dispatch(fetchDeletedBooks());
       })
@@ -240,6 +233,8 @@ const BooksPage = () => {
               <Typography>Không có sách nào.</Typography>
             )}
           </Grid>
+          {loading && <Typography>Đang tải thêm sách...</Typography>}
+          {!hasMore && <Typography>Đã tải hết danh sách sách.</Typography>}
         </>
       )}
 
