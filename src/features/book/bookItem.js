@@ -100,7 +100,7 @@ const BookItem = ({
                   onClick={() => handleBookClick(book._id)}
                   sx={{
                     height: 220,
-                    objectFit: "cover",
+                    objectFit: "contain",
                     cursor: "pointer",
                   }}
                 />

@@ -3,7 +3,12 @@ import { Navigate, Outlet } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const AdminOnlyRoute = () => {
-  const { user } = useAuth();
+  const { user, isInitialized } = useAuth();
+
+  if (!isInitialized) {
+    // Render một trạng thái chờ nếu AuthContext chưa được khởi tạo
+    return <div>Loading...</div>;
+  }
 
   if (!user) {
     // Nếu chưa đăng nhập, điều hướng về trang login

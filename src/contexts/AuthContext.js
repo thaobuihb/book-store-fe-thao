@@ -76,18 +76,25 @@ function AuthProvider({ children }) {
   const initialize = async () => {
     try {
       const accessToken = window.localStorage.getItem("accessToken");
-
+  
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
-
+  
         const response = await apiService.get("/users/me");
         const user = response.data;
 
+        console.log("Initialized User:", user);
+  
+        // Kiểm tra role của user
+        if (!user.role) {
+          throw new Error("User role is missing");
+        }
+  
         dispatch({
           type: INITIALIZE,
           payload: { isAuthenticated: true, user },
         });
-
+  
         reduxDispatch(loginSuccess(user));
       } else {
         setSession(null);
@@ -97,6 +104,7 @@ function AuthProvider({ children }) {
         });
       }
     } catch (err) {
+      console.error("Error during initialization:", err.message);
       setSession(null);
       dispatch({
         type: INITIALIZE,
@@ -107,6 +115,7 @@ function AuthProvider({ children }) {
       });
     }
   };
+  
 
   useEffect(() => {
     initialize();
@@ -116,6 +125,8 @@ function AuthProvider({ children }) {
     try {
       const response = await apiService.post("/auth/login", { email, password });
       const { user, accessToken } = response.data;
+
+      console.log("Login response:", user); 
 
       if (!accessToken) {
         throw new Error("No access token returned from login API");

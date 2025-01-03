@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Các trang chính
 import CartPage from "../pages/CartPage";
@@ -28,12 +28,19 @@ import UsersPage from "../pages/admin/UsersPage";
 import CategoriesPage from "../pages/admin/CategoriesPage";
 
 import AdminOnlyRoute from "./AdminOnlyRoute";
+import useAuth from "../hooks/useAuth";
 
 function Router() {
+  const { user } = useAuth();
+
   return (
     <Routes>
       {/* Main Layout */}
-      <Route element={<MainLayout />}>
+      <Route
+        element={
+          user?.role === "admin" ? <Navigate to="/admin/dashboard" /> : <MainLayout />
+        }
+      >
         <Route path="/" element={<HomePage />} />
         <Route path="book/:bookId" element={<DetailPage />} />
         <Route path="/books" element={<BookPage />} />
@@ -59,7 +66,7 @@ function Router() {
           <Route path="/admin/books" element={<BooksPage />} />
           <Route path="/admin/orders" element={<OrdersPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
-          <Route path="/admin/categories" element={<CategoriesPage />} />
+          {/* <Route path="/admin/categories" element={<CategoriesPage />} /> */}
         </Route>
       </Route>
     </Routes>
