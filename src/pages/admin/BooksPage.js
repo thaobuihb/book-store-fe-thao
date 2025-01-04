@@ -31,6 +31,7 @@ import {
   fetchDeletedBooks,
   restoreDeletedBook,
   permanentlyDeleteBook,
+  updateBook,
 } from "../../features/admin/adminSlice";
 import { toast } from "react-toastify";
 
@@ -49,7 +50,9 @@ const BooksPage = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
 
+
   const [open, setOpen] = useState(false);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false); 
   const [newBook, setNewBook] = useState({
     name: "",
     author: "",
@@ -60,6 +63,8 @@ const BooksPage = () => {
     categoryId: "",
     discountRate: "",
   });
+
+  const [bookToUpdate, setBookToUpdate] = useState({});
 
   const [currentPage, setCurrentPage] = useState(1);
   const [tabValue, setTabValue] = useState(0); // 0: Sách hiện tại, 1: Sách đã xóa
@@ -99,6 +104,11 @@ const BooksPage = () => {
     setNewBook((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleUpdateChange = (e) => {
+    const { name, value } = e.target;
+    setBookToUpdate((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
@@ -125,6 +135,24 @@ const BooksPage = () => {
         toast.error(`Thêm sách thất bại: ${err}`);
       });
   };
+
+  const handleUpdateSubmit = () => {
+    dispatch(updateBook(bookToUpdate))
+      .unwrap()
+      .then(() => {
+        toast.success("Cập nhật sách thành công!");
+        setOpenUpdateModal(false);
+      })
+      .catch((err) => toast.error(`Cập nhật thất bại: ${err}`));
+  };
+
+  const handleOpenUpdateModal = (book) => {
+    setBookToUpdate(book); 
+    setOpenUpdateModal(true);
+  };
+
+  const handleCloseUpdateModal = () => setOpenUpdateModal(false);
+
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -178,6 +206,9 @@ const BooksPage = () => {
         toast.error(`Không thể xóa vĩnh viễn sách: ${err}`);
       });
   };
+
+
+
 
   return (
     <Container>
@@ -343,6 +374,8 @@ const BooksPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+
     </Container>
   );
 };

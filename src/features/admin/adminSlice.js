@@ -141,7 +141,7 @@ export const fetchCategories = createAsyncThunk(
   }
 );
 
-
+//cập nhật sách
 export const updateBook = createAsyncThunk(
   "admin/updateBook",
   async ({ bookId, updatedData }, { rejectWithValue }) => {
@@ -291,7 +291,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload;
+        state.categories = action.payload.categories;
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
