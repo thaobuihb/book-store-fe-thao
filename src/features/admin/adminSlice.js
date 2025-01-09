@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService from "../../app/apiService";
+import { toast } from "react-toastify";
+
 
 // Async Thunks cho API
 
@@ -25,9 +27,25 @@ export const createBook = createAsyncThunk(
   "admin/createBook",
   async (bookData, { rejectWithValue }) => {
     try {
-      const response = await apiService.post("/books", bookData);
+      console.log("Dữ liệu chuẩn bị gửi lên server:", bookData);  // Thêm log kiểm tra
+
+      // Kiểm tra dữ liệu đầu vào
+      if (!bookData.name || !bookData.price || !bookData.publicationDate || !bookData.categoryId) {
+        return rejectWithValue("Thiếu thông tin bắt buộc: Tên, Giá, Ngày xuất bản, Danh mục");
+      }
+
+      // Đảm bảo price và discountRate không âm
+      const sanitizedBookData = {
+        ...bookData,
+        price: Math.max(0, bookData.price),
+        discountRate: Math.max(0, bookData.discountRate || 0),
+      };
+
+      const response = await apiService.post("/books", sanitizedBookData);
+      console.log("Phản hồi từ server:", response.data);
       return response.data;
     } catch (error) {
+      console.error("Chi tiết lỗi từ server:", error.response?.data);
       return rejectWithValue(
         error.response?.data?.message || "Failed to create book"
       );
@@ -141,13 +159,13 @@ export const fetchCategories = createAsyncThunk(
   }
 );
 
-//cập nhật sách
+// Cập nhật sách
 export const updateBook = createAsyncThunk(
   "admin/updateBook",
   async ({ bookId, updatedData }, { rejectWithValue }) => {
     try {
-      const response = await apiService.put(`/admin/books/${bookId}`, updatedData);
-      return response.data;
+      const response = await apiService.put(`/books/${bookId}`, updatedData);
+      return response.data; 
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update book"
@@ -156,6 +174,45 @@ export const updateBook = createAsyncThunk(
   }
 );
 
+
+// Fetch tất cả đơn hàng
+export const fetchOrders = createAsyncThunk(
+  'admin/fetchOrders',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiService.get('/orders');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch orders");
+    }
+  }
+);
+
+// Update trạng thái đơn hàng
+export const updateOrderStatus = createAsyncThunk(
+  'admin/updateOrderStatus',
+  async ({ orderId, updatedStatus }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.put(`/orders/${orderId}`, { status: updatedStatus });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to update order status");
+    }
+  }
+);
+
+// Xóa đơn hàng (nếu cần thiết)
+export const deleteOrder = createAsyncThunk(
+  'admin/deleteOrder',
+  async (orderId, { rejectWithValue }) => {
+    try {
+      await apiService.delete(`/orders/${orderId}`);
+      return orderId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to delete order");
+    }
+  }
+);
 
 // Slice cho admin
 const adminSlice = createSlice({
@@ -169,6 +226,7 @@ const adminSlice = createSlice({
     },
     deletedBooks: [],
     categories: [],
+    orders: [],
     hasMore: true,
     loading: false,
     error: null,
@@ -178,6 +236,7 @@ const adminSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
+    //dashboroard
       .addCase(fetchDashboardData.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -190,7 +249,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+// tạo mới
       .addCase(createBook.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -203,7 +262,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+//lấy sách
       .addCase(fetchBooks.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -223,7 +282,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+//xoá
       .addCase(deleteBook.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -238,7 +297,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+//lấy sách đã xoá
       .addCase(fetchDeletedBooks.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -253,7 +312,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+//lấy lại sách đã xoá
       .addCase(restoreDeletedBook.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -269,7 +328,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+//xoá luôn
       .addCase(permanentlyDeleteBook.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -284,19 +343,80 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+//lấy danh mục
       .addCase(fetchCategories.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload.categories;
+        state.categories = action.payload;
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      // cập nhật
+      .addCase(updateBook.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateBook.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedIndex = state.books.books.findIndex(
+          (book) => book._id === action.payload._id
+        );
+        if (updatedIndex !== -1) {
+          state.books.books[updatedIndex] = action.payload;
+        }
+        toast.success("Cập nhật sách thành công!");
+      })
+      .addCase(updateBook.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(`Cập nhật thất bại: ${action.payload}`);
+      })
+      //Đơn hàng
+      .addCase(fetchOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload;
+      })
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //Cập nhật trạng thái đơn hàng
+      .addCase(updateOrderStatus.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.orders.findIndex(order => order._id === action.payload._id);
+        if (index !== -1) {
+          state.orders[index] = action.payload;
+        }
+      })
+      .addCase(updateOrderStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Xoá đơn hàng
+      .addCase(deleteOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = state.orders.filter(order => order._id !== action.payload);
+      })
+      .addCase(deleteOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
   },
 });
 
