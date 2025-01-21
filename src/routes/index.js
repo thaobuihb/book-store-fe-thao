@@ -66,7 +66,7 @@ function Router() {
           <Route path="/admin/books" element={<BooksPage />} />
           <Route path="/admin/orders" element={<OrdersPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
-          {/* <Route path="/admin/categories" element={<CategoriesPage />} /> */}
+          <Route path="/admin/categories" element={<CategoriesPage />} />
         </Route>
       </Route>
     </Routes>

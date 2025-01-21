@@ -276,8 +276,7 @@ const BooksPage = () => {
 
   const filteredBooks = (tabValue === 0 ? books : deletedBooks).filter(
     (book) => {
-      if (!searchTerm) return true; // Nếu không có từ khóa tìm kiếm, hiển thị tất cả sách
-
+      if (!searchTerm) return true; 
       if (searchCriteria === "categoryId") {
         const category = categories.find((cat) => cat._id === book.category);
         return category
@@ -318,6 +317,7 @@ const BooksPage = () => {
             <MenuItem value="author">Tác giả</MenuItem>
             <MenuItem value="price">Giá</MenuItem>
             <MenuItem value="categoryId">Danh mục</MenuItem>
+            <MenuItem value="Isbn">ISBN</MenuItem>
           </Select>
           <TextField
             label="Tìm kiếm sách"
@@ -354,6 +354,7 @@ const BooksPage = () => {
                       <Typography variant="h8" sx={{ fontWeight: "bold" }}>
                         {book.name}
                       </Typography>
+                      <Typography>ISBN: {book.Isbn}</Typography>
                       <Typography>Tác giả: {book.author}</Typography>
                       <Typography>Giá: ${book.price}</Typography>
                       <Typography>Danh mục: {book.categoryName}</Typography>
@@ -403,7 +404,9 @@ const BooksPage = () => {
                 </Grid>
               ))
             ) : (
-              <Typography sx={{ fontWeight: "bold" }}>Không có sách được tìm</Typography>
+              <Typography sx={{ fontWeight: "bold" }}>
+                Không có sách được tìm
+              </Typography>
             )}
           </Grid>
           {loading && <Typography>Đang tải thêm sách...</Typography>}
@@ -474,7 +477,7 @@ const BooksPage = () => {
       )}
 
       {/* Modal thêm sách */}
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>Thêm sách mới</DialogTitle>
         <DialogContent>
           <Box
@@ -555,6 +558,7 @@ const BooksPage = () => {
                 name="categoryId"
                 value={newBook.categoryId}
                 onChange={handleChange}
+                label="Danh mục"
               >
                 {categories.map((category) => (
                   <MenuItem key={category._id} value={category._id}>
@@ -563,6 +567,7 @@ const BooksPage = () => {
                 ))}
               </Select>
             </FormControl>
+
           </Box>
         </DialogContent>
         <DialogActions>
@@ -672,7 +677,7 @@ const BooksPage = () => {
                 value={bookToUpdate.categoryId || ""}
                 onChange={handleUpdateChange}
                 displayEmpty
-                sx={{ fontSize: "16px", color: "black" }}
+                // sx={{ fontSize: "16px", color: "black" }}
                 label="Danh mục"
               >
                 <MenuItem value="" disabled>

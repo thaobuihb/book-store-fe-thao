@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Box,
   Drawer,
@@ -13,7 +13,7 @@ import {
   Button,
 } from "@mui/material";
 import { Dashboard, Book, ShoppingCart, Group, Category, Logout } from "@mui/icons-material";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
 const drawerWidth = 240;
@@ -21,6 +21,7 @@ const drawerWidth = 240;
 const AdminLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout(null, null, () => {
@@ -36,6 +37,11 @@ const AdminLayout = () => {
     { text: "Categories", icon: <Category />, link: "/admin/categories" },
   ];
 
+  const pageTitle = useMemo(() => {
+    const currentItem = menuItems.find((item) => location.pathname.includes(item.link));
+    return currentItem ? currentItem.text : "Admin";
+  }, [location.pathname, menuItems]);
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -45,7 +51,7 @@ const AdminLayout = () => {
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" noWrap>
-            Admin Dashboard
+            {pageTitle} {/* Tiêu đề động */}
           </Typography>
           <Button
             variant="contained"
@@ -73,7 +79,7 @@ const AdminLayout = () => {
         <Box sx={{ overflow: "auto" }}>
           <List>
             {menuItems.map((item, index) => (
-              <ListItem key={index} component={Link} to={item.link}>
+              <ListItem button key={index} component={Link} to={item.link}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItem>

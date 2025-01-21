@@ -1,15 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  Box,
-  TextField,
-  Select,
-  MenuItem,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -17,118 +9,358 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@mui/material';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchOrders, updateOrderStatus } from '../../features/admin/adminSlice';
-import { toast } from 'react-toastify';
+  Button,
+  Box,
+  TextField,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
+  Modal,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchOrders,
+  //   updateOrderStatus,
+  updateOrderPaymentStatus,
+  updateOrderShippingStatus,
+  updateShippingAddress,
+} from "../../features/admin/adminSlice";
 
-const OrderPage = () => {
+const OrdersPage = () => {
   const dispatch = useDispatch();
-  const { orders, loading, error } = useSelector((state) => state.admin.orders);
+  const { orders = [], loading, error } = useSelector((state) => state.admin);
+  console.log("Orders from Redux Store:", orders);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchCriteria, setSearchCriteria] = useState("customerName");
+  const [tabValue, setTabValue] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [openOrderDetail, setOpenOrderDetail] = useState(false);
+  const [updatedPaymentStatus, setUpdatedPaymentStatus] = useState("");
+  const [updatedOrderStatus, setUpdatedOrderStatus] = useState("");
+  const [cancelOrder, setCancelOrder] = useState(false);
+  const [updatedShippingAddress, setUpdatedShippingAddress] = useState({});
+  const [updatedShippingStatus, setUpdatedShippingStatus] = useState("");
+  useState("");
+
+  const paymentStatusOptions = ["Unpaid", "Paid", "Refunded"];
+  const orderStatusOptions = [
+    "Processing",
+    "Shipped",
+    "Delivered",
+    "Cancelled",
+  ];
 
   useEffect(() => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
+  const handleSearchCriteriaChange = (e) => setSearchCriteria(e.target.value);
+  const handleTabChange = (event, newValue) => setTabValue(newValue);
 
-  const handleFilterChange = (e) => {
-    setFilterStatus(e.target.value);
-  };
-
-  const handleOpenOrderDetail = (order) => {
+  const handleOpenModal = (order) => {
     setSelectedOrder(order);
-    setOpenOrderDetail(true);
+    setUpdatedShippingStatus(order.shippingAddress);
+    setUpdatedPaymentStatus(order.paymentStatus);
+    setUpdatedShippingAddress(order.shippingAddress);
+    setUpdatedOrderStatus(order.status);
+    setCancelOrder(order.status === "Cancelled");
+    setModalOpen(true);
   };
 
-  const handleCloseOrderDetail = () => {
-    setOpenOrderDetail(false);
-    setSelectedOrder(null);
+  const handleCloseModal = () => setModalOpen(false);
+
+  const handleUpdateOrderShippingStatus = () => {
+    if (selectedOrder) {
+      dispatch(
+        updateOrderShippingStatus({
+          orderId: selectedOrder._id,
+          orderStatus: cancelOrder ? "Cancelled" : updatedOrderStatus,
+        })
+      )
+        .unwrap()
+        .then(() => {
+          console.log("Shipping status updated successfully");
+          handleCloseModal();
+        })
+        .catch((error) => {
+          console.error("Failed to update shipping status:", error);
+        });
+    }
   };
 
-  const handleUpdateStatus = (orderId, newStatus) => {
-    dispatch(updateOrderStatus({ orderId, status: newStatus }))
+  const handleUpdateOrderPaymentStatus = () => {
+    if (selectedOrder) {
+      dispatch(
+        updateOrderPaymentStatus({
+          orderId: selectedOrder._id,
+          paymentStatus: updatedPaymentStatus,
+        })
+      )
+        .unwrap()
+        .then(() => {
+          console.log("Payment status updated successfully");
+          handleCloseModal();
+        })
+        .catch((error) => {
+          console.error("Failed to update payment status:", error);
+        });
+    }
+  };
+
+  const handleUpdateShippingAddress = () => {
+    if (selectedOrder && updatedShippingAddress) {
+      dispatch(
+        updateShippingAddress({
+          userId: selectedOrder.userId,
+          orderId: selectedOrder._id,
+          shippingAddress: updatedShippingAddress,
+        })
+      )
+        .unwrap()
+        .then(() => {
+          console.log("Shipping address updated successfully");
+          handleCloseModal();
+        })
+        .catch((error) => {
+          console.error("Failed to update shipping address:", error);
+        });
+    } else {
+      console.error("Selected order or shipping address is invalid.");
+    }
+  };
+
+  const handleCancelOrder = () => {
+    if (!["Processing", "Shipped"].includes(selectedOrder?.status)) {
+      console.error("Order cannot be cancelled in its current state");
+      return;
+    }
+
+    dispatch(
+      updateOrderShippingStatus({
+        orderId: selectedOrder._id,
+        orderStatus: "Cancelled",
+      })
+    )
       .unwrap()
-      .then(() => toast.success('Cập nhật trạng thái thành công!'))
-      .catch((err) => toast.error(`Lỗi: ${err}`));
+      .then(() => {
+        console.log("Order cancelled successfully");
+        handleCloseModal(); // Đóng modal nếu cần
+      })
+      .catch((error) => {
+        console.error("Failed to cancel order:", error);
+      });
   };
+
+  //   const handleUpdateOrder = () => {
+  //     if (selectedOrder) {
+  //       dispatch(
+  //         updateOrderStatus({
+  //           orderId: selectedOrder._id,
+  //           paymentStatus: updatedPaymentStatus,
+  //           orderStatus: cancelOrder ? "Cancelled" : updatedOrderStatus,
+  //           shippingAddress: updatedShippingAddress,
+  //         })
+  //       );
+  //     }
+  //     handleCloseModal();
+  //   };
 
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus ? order.status === filterStatus : true;
-    return matchesSearch && matchesStatus;
+    if (!searchTerm) return true;
+
+    if (searchCriteria === "customerName") {
+      return order.shippingAddress.fullName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    }
+
+    if (searchCriteria === "books.Isbn") {
+      return order.books.some((book) =>
+        book.Isbn?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    const value = order[searchCriteria];
+    return typeof value === "string"
+      ? value.toLowerCase().includes(searchTerm.toLowerCase())
+      : typeof value === "number" && value.toString().includes(searchTerm);
   });
+
+  const displayedOrders = filteredOrders.filter((order) => {
+    if (tabValue === 1) return order.status.toLowerCase() === "processing";
+    if (tabValue === 2) return order.status.toLowerCase() === "shipped";
+    if (tabValue === 3) return order.paymentStatus.toLowerCase() === "paid";
+    if (tabValue === 4) return order.status.toLowerCase() === "cancelled";
+    return true;
+  });
+
+  const getAvailableShippingStatus = (currentStatus) => {
+    switch (currentStatus) {
+      case "Processing":
+        return ["Shipped", "Delivered", "Returned", "Cancelled"];
+      case "Shipped":
+        return ["Delivered", "Returned", "Cancelled"];
+      case "Delivered":
+        return ["Returned", "Cancelled"];
+      case "Returned":
+      case "Cancelled":
+        return [];
+      default:
+        return [];
+    }
+  };
+
+  const getAvailablePaymentStatus = (currentPaymentStatus) => {
+    switch (currentPaymentStatus) {
+      case "Unpaid":
+        return ["Paid"];
+      case "Paid":
+        return ["Refunded"];
+      case "Refunded":
+        return [];
+      default:
+        return [];
+    }
+  };
+
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography>Error: {error}</Typography>;
 
   return (
     <Container>
-      <Typography variant="h4" sx={{ mb: 3 }}>Quản lý đơn hàng</Typography>
+      {/* Tabs lọc đơn hàng */}
+      <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tab label="Tất cả đơn hàng" />
+        <Tab label="Đơn đang xử lý" />
+        <Tab label="Đơn hàng đã gửi đi" />
+        <Tab label="Đơn hàng đã thanh toán" />
+        <Tab label="Đơn hàng đã bị huỷ" />
+      </Tabs>
 
-      <Box display="flex" justifyContent="space-between" mb={3}>
+      {/* Thanh tìm kiếm */}
+      <Box
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        mt={2}
+      >
+        <Select value={searchCriteria} onChange={handleSearchCriteriaChange}>
+          <MenuItem value="customerName">Tên khách hàng</MenuItem>
+          <MenuItem value="orderCode">Mã đơn hàng</MenuItem>
+          <MenuItem value="status">Trạng thái</MenuItem>
+          <MenuItem value="books.Isbn">ISBN</MenuItem>
+        </Select>
         <TextField
-          label="Tìm kiếm theo tên khách hàng"
+          label="Tìm kiếm đơn hàng"
           value={searchTerm}
           onChange={handleSearchChange}
-          sx={{ width: '300px' }}
+          sx={{ width: "300px", marginLeft: "10px" }}
         />
-        <Select
-          value={filterStatus}
-          onChange={handleFilterChange}
-          displayEmpty
-          sx={{ width: '200px' }}
-        >
-          <MenuItem value="">Tất cả trạng thái</MenuItem>
-          <MenuItem value="Processing">Đang xử lý</MenuItem>
-          <MenuItem value="Shipped">Đang giao</MenuItem>
-          <MenuItem value="Completed">Hoàn tất</MenuItem>
-          <MenuItem value="Cancelled">Đã hủy</MenuItem>
-        </Select>
       </Box>
 
-      {/* Danh sách đơn hàng */}
-      <TableContainer component={Paper}>
+      {/* Bảng danh sách đơn hàng */}
+      <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Mã đơn hàng</TableCell>
               <TableCell>Tên khách hàng</TableCell>
-              <TableCell>Ngày tạo</TableCell>
               <TableCell>Tổng tiền</TableCell>
-              <TableCell>Trạng thái</TableCell>
-              <TableCell>Thao tác</TableCell>
+              <TableCell>Trạng thái giao hàng</TableCell>
+              <TableCell>Trạng thái thanh toán</TableCell>
+              <TableCell>Thông tin chi tiết</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredOrders.map((order) => (
+            {displayedOrders.map((order) => (
               <TableRow key={order._id}>
-                <TableCell>{order._id}</TableCell>
-                <TableCell>{order.customerName}</TableCell>
-                <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell>${order.totalAmount}</TableCell>
+                <TableCell>{order.orderCode || "N/A"}</TableCell>
                 <TableCell>
-                  <Select
-                    value={order.status}
-                    onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
+                  {order.shippingAddress.fullName || "Không rõ"}
+                </TableCell>
+                <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      color:
+                        order.status === "Cancelled"
+                          ? "red"
+                          : order.status === "Delivered"
+                          ? "green"
+                          : "blue",
+                      fontWeight: "bold",
+                    }}
                   >
-                    <MenuItem value="Processing">Đang xử lý</MenuItem>
-                    <MenuItem value="Shipped">Đang giao</MenuItem>
-                    <MenuItem value="Completed">Hoàn tất</MenuItem>
-                    <MenuItem value="Cancelled">Đã hủy</MenuItem>
-                  </Select>
+                    {order.status}
+                  </Typography>
                 </TableCell>
                 <TableCell>
-                  <Button onClick={() => handleOpenOrderDetail(order)}>
-                    Xem chi tiết
+                  <Typography
+                    sx={{
+                      color:
+                        order.paymentStatus === "Paid"
+                          ? "green"
+                          : order.paymentStatus === "Refunded"
+                          ? "orange"
+                          : "purple",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {order.paymentStatus}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>Thông tin chi tiết</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography variant="h6" mb={2}>
+                        📚 Chi tiết sách
+                      </Typography>
+                      {order.books.map((book, index) => (
+                        <Box
+                          key={index}
+                          p={1}
+                          border="1px solid #ddd"
+                          borderRadius="8px"
+                          mb={2}
+                        >
+                          <Typography>
+                            <b>Tên sách:</b> {book.name}
+                          </Typography>
+                          <Typography>
+                            <b>ISBN:</b> {book.Isbn || "Không có ISBN"}
+                          </Typography>
+                          <Typography>
+                            <b>Số lượng:</b> {book.quantity}
+                          </Typography>
+                          <Typography>
+                            <b>Giá:</b> ${book.price.toFixed(2)}
+                          </Typography>
+                          <Typography>
+                            <b>Tổng:</b> $
+                            {(book.price * book.quantity).toFixed(2)}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleOpenModal(order)}
+                  >
+                    Cập nhật
                   </Button>
                 </TableCell>
               </TableRow>
@@ -137,33 +369,155 @@ const OrderPage = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal Chi tiết đơn hàng */}
-      {selectedOrder && (
-        <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail} maxWidth="md" fullWidth>
-          <DialogTitle>Chi tiết đơn hàng</DialogTitle>
-          <DialogContent>
-            <Typography>Mã đơn hàng: {selectedOrder._id}</Typography>
-            <Typography>Tên khách hàng: {selectedOrder.customerName}</Typography>
-            <Typography>Email: {selectedOrder.customerEmail}</Typography>
-            <Typography>Ngày đặt hàng: {new Date(selectedOrder.createdAt).toLocaleDateString()}</Typography>
-            <Typography>Tổng tiền: ${selectedOrder.totalAmount}</Typography>
+      {/* Modal cập nhật đơn hàng */}
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box
+          p={4}
+          style={{
+            backgroundColor: "white",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "600px",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            borderRadius: "8px",
+            boxShadow: 24,
+          }}
+        >
+          <Typography variant="h6" mb={2}>
+            Cập nhật đơn hàng
+          </Typography>
 
-            <Typography variant="h6" sx={{ mt: 2 }}>Danh sách sản phẩm</Typography>
-            {selectedOrder.items.map((item, index) => (
-              <Box key={index} sx={{ mt: 1 }}>
-                <Typography>- {item.bookName} (x{item.quantity}) - ${item.price}</Typography>
-              </Box>
-            ))}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseOrderDetail} color="secondary">
-              Đóng
+          {/* Trạng thái giao hàng */}
+          <Typography>Trạng thái giao hàng</Typography>
+          <Select
+            fullWidth
+            value={updatedOrderStatus}
+            onChange={(e) => setUpdatedOrderStatus(e.target.value)}
+          >
+            {getAvailableShippingStatus(selectedOrder?.status).map(
+              (status, index) => (
+                <MenuItem key={index} value={status}>
+                  {status}
+                </MenuItem>
+              )
+            )}
+          </Select>
+          {/* Thông báo lỗi cho trạng thái giao hàng */}
+          {getAvailableShippingStatus(selectedOrder?.status).length === 0 && (
+            <Typography color="error" sx={{ mt: 1 }}>
+              Không thể cập nhật trạng thái giao hàng vì đơn hàng đã bị hủy hoặc
+              trả lại.
+            </Typography>
+          )}
+          {/* Trạng thái thanh toán */}
+          <Typography sx={{ mt: 2 }}>Trạng thái thanh toán</Typography>
+          {selectedOrder?.status === "Cancelled" ? (
+            <Typography color="error">
+              Không thể cập nhật trạng thái thanh toán vì đơn hàng đã bị hủy.
+            </Typography>
+          ) : getAvailablePaymentStatus(selectedOrder?.paymentStatus).length ===
+            0 ? (
+            <Typography color="error" sx={{ mt: 1 }}>
+              Không thể cập nhật trạng thái thanh toán vì đã được hoàn tiền.
+            </Typography>
+          ) : (
+            <Select
+              fullWidth
+              value={updatedPaymentStatus}
+              onChange={(e) => setUpdatedPaymentStatus(e.target.value)}
+            >
+              {getAvailablePaymentStatus(selectedOrder?.paymentStatus).map(
+                (status, index) => (
+                  <MenuItem key={index} value={status}>
+                    {status}
+                  </MenuItem>
+                )
+              )}
+            </Select>
+          )}
+
+          {/* Địa chỉ giao hàng */}
+          <Typography sx={{ mt: 2 }}>Địa chỉ giao hàng</Typography>
+          {selectedOrder?.status === "Processing" ? (
+            Object.keys(updatedShippingAddress).map((key, index) => (
+              <TextField
+                key={index}
+                label={key}
+                value={updatedShippingAddress[key]}
+                onChange={(e) =>
+                  setUpdatedShippingAddress({
+                    ...updatedShippingAddress,
+                    [key]: e.target.value,
+                  })
+                }
+                fullWidth
+                sx={{ mt: 1 }}
+              />
+            ))
+          ) : (
+            <Typography color="error" sx={{ mt: 2 }}>
+              Địa chỉ giao hàng chỉ có thể được cập nhật khi đơn hàng chưa gửi
+              đi, nếu cần thiết thay đổi hãy gọi đơn vị vận chuyển.
+            </Typography>
+          )}
+
+          <Box mt={2}>
+            {["Processing", "Shipped"].includes(selectedOrder?.status) && (
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleCancelOrder}
+              >
+                Hủy đơn hàng
+              </Button>
+            )}
+
+            <Button
+              variant="contained"
+              sx={{ ml: 2 }}
+              onClick={() => {
+                // Kiểm tra trạng thái giao hàng trước khi gọi API
+                if (
+                  updatedOrderStatus &&
+                  updatedOrderStatus !== selectedOrder.status &&
+                  getAvailableShippingStatus(selectedOrder.status).includes(
+                    updatedOrderStatus
+                  )
+                ) {
+                  handleUpdateOrderShippingStatus();
+                }
+
+                // Kiểm tra trạng thái thanh toán trước khi gọi API
+                if (
+                  updatedPaymentStatus &&
+                  updatedPaymentStatus !== selectedOrder.paymentStatus &&
+                  getAvailablePaymentStatus(
+                    selectedOrder.paymentStatus
+                  ).includes(updatedPaymentStatus)
+                ) {
+                  handleUpdateOrderPaymentStatus();
+                }
+
+                // Cập nhật địa chỉ giao hàng
+                if (
+                  JSON.stringify(updatedShippingAddress) !==
+                    JSON.stringify(selectedOrder.shippingAddress) &&
+                  selectedOrder.status === "Processing"
+                ) {
+                  handleUpdateShippingAddress();
+                }
+              }}
+            >
+              Xác nhận cập nhật
             </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+          </Box>
+        </Box>
+      </Modal>
     </Container>
   );
 };
 
-export default OrderPage;
+export default OrdersPage;
