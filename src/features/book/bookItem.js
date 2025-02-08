@@ -26,7 +26,7 @@ const BookItem = ({
   handlePrevPage,
 }) => {
   const dispatch = useDispatch();
-  const { wishlist } = useSelector((state) => state.wishlist); 
+  const { wishlist } = useSelector((state) => state.wishlist);
   const cart = useSelector((state) => state.cart.cart);
   const bookList = Array.isArray(books) ? books : [];
 
@@ -41,17 +41,19 @@ const BookItem = ({
   };
 
   const isBookInWishlist = (bookId) => {
-    return wishlist.includes(bookId); 
+    return wishlist.includes(bookId);
   };
 
   const handleAddToCart = (book) => {
-    dispatch(addToCart({
-      bookId: book._id,
-      name: book.title,
-      price: book.price,
-      discountedPrice: book.discountedPrice,
-      img: book.img, 
-    }));
+    dispatch(
+      addToCart({
+        bookId: book._id,
+        name: book.title,
+        price: book.price,
+        discountedPrice: book.discountedPrice,
+        img: book.img,
+      })
+    );
   };
 
   const isBookInCart = (bookId) => {
@@ -112,12 +114,12 @@ const BookItem = ({
                   onClick={() => handleBookClick(book._id)}
                   sx={{ p: 1, cursor: "pointer", flexGrow: 1 }}
                 >
-                  {book.title}
+                  {book.name}
                 </Typography>
 
                 {/* Hiển thị thông tin giá */}
                 <Box sx={{ p: 2, paddingTop: "20px" }}>
-                  {book.discountedPrice ? (
+                  {book.discountedPrice && book.discountedPrice < book.price ? (
                     <>
                       <Typography
                         variant="body2"
@@ -152,7 +154,9 @@ const BookItem = ({
                   >
                     <AddShoppingCartIcon
                       sx={{
-                        color: isBookInCart(book._id) ? "secondary.main" : "#0000FF",
+                        color: isBookInCart(book._id)
+                          ? "secondary.main"
+                          : "#0000FF",
                       }}
                     />
                   </IconButton>
@@ -165,7 +169,7 @@ const BookItem = ({
                         color: isBookInWishlist(book._id)
                           ? "secondary.main"
                           : "#0000FF",
-                      }} 
+                      }}
                     />
                   </IconButton>
                 </Box>
@@ -176,14 +180,22 @@ const BookItem = ({
       </Grid>
 
       {/* Nút phân trang */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginTop="16px">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginTop="16px"
+      >
         <IconButton onClick={handlePrevPage} disabled={currentPage === 1}>
           <ArrowLeftIcon />
         </IconButton>
         <Typography variant="body1">
           {currentPage} of {totalPages}
         </Typography>
-        <IconButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
           <ArrowRightIcon />
         </IconButton>
       </Box>

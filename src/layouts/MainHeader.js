@@ -38,13 +38,9 @@ function MainHeader() {
 
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
 
   const handleLogout = () => {
     logout(wishlist, user, () => {
@@ -54,220 +50,75 @@ function MainHeader() {
     });
   };
 
-  const handleProfileClick = () => {
-    setAnchorEl(null); 
-    navigate(`/user/${user._id}`); 
-  };
-
-  const handleSearch = (query) => {
-    if (query.trim()) {
-      navigate(`/books?search=${query.trim()}`);
-    }
-  };
-
-  useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
-
-  const handleCategoryMenuOpen = (event) => {
-    setCategoryAnchorEl(event.currentTarget);
-  };
-
-  const handleCategoryMenuClose = () => {
-    setCategoryAnchorEl(null);
-  };
-
-  const handleCategoryClick = (categoryId) => {
-    handleCategoryMenuClose();
-    navigate(`/books?category=${categoryId}`);
-  };
-
-  // Khi click biểu tượng giỏ hàng
-  const handleCartClick = () => {
-    dispatch(triggerCartReload()); 
-    navigate("/cart", { state: { activeTab: "yourCart" } }); 
-  };
-
   return (
     <Box>
       <AppBar position="static" color="primary">
-        <Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "80px" }}>
           {/* Logo */}
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 1, ml: 2, marginTop: 2 }}
-          >
-            <LogoB sx={{ width: 100, height: 100 }} />
+          <IconButton color="inherit" sx={{ ml: 2 }}>
+            <LogoB sx={{ width: 100, height: 100, mt: 4 }} />
           </IconButton>
 
-          {/* Search Box */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              flexGrow: 1,
-              maxWidth: "400px",
-              mx: 2,
-              backgroundColor: "white",
-              borderRadius: 1,
-              marginRight: 80,
-            }}
-          >
-            <SearchInput handleSubmit={handleSearch} />
+          {/* Navigation Links */}
+          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
+            <Typography variant="h7" sx={{ cursor: "pointer", color: "#ffffff", mx: 2 }} onMouseEnter={(e) => setCategoryAnchorEl(e.currentTarget)}>
+              Shop by Category
+            </Typography>
+            <Menu
+              anchorEl={categoryAnchorEl}
+              open={Boolean(categoryAnchorEl)}
+              onClose={() => setCategoryAnchorEl(null)}
+              MenuListProps={{ onMouseLeave: () => setCategoryAnchorEl(null) }}
+            >
+              {categories.map((category) => (
+                <MenuItem key={category._id} onClick={() => navigate(`/books?category=${category._id}`)}>
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </Menu>
+
+            <RouterLink to="/best-seller" style={{ textDecoration: "none", color: "white", margin: "0 16px" }}>Best Seller</RouterLink>
+            <RouterLink to="/help" style={{ textDecoration: "none", color: "white", margin: "0 16px" }}>Contact Us</RouterLink>
           </Box>
 
-          {/* User Menu, Wishlist, Cart */}
-          <Box sx={{ display: "flex", alignItems: "center", mx: 2 }}>
-            {/* Wishlist */}
-            <RouterLink to={"/wishlist"}>
-              <IconButton
-                size="large"
-                color="inherit"
-                aria-label="wishlist"
-                sx={{ mr: 2 }}
-              >
+          {/* Search Box */}
+          <Box sx={{ display: "flex", alignItems: "center", width: "500px !important", mx: 2, backgroundColor: "white", borderRadius: 1 }}>
+            <SearchInput handleSubmit={(query) => navigate(`/books?search=${query.trim()}`)} />
+          </Box>
+
+          {/* User, Wishlist, Cart */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <RouterLink to="/wishlist">
+              <IconButton color="inherit" sx={{ mr: 2 }}>
                 <Badge badgeContent={wishlistCount} color="secondary">
                   <FavoriteBorderIcon />
                 </Badge>
               </IconButton>
             </RouterLink>
 
-            {/* Cart */}
-            <IconButton
-              size="large"
-              color="inherit"
-              aria-label="cart"
-              sx={{ color: "blue", mr: 2 }}
-              onClick={handleCartClick}
-            >
+            <IconButton color="inherit" sx={{ color: "blue", mr: 2 }} onClick={() => navigate("/cart", { state: { activeTab: "yourCart" } })}>
               <Badge badgeContent={cartItemCount} color="secondary">
                 <ShoppingCartOutlinedIcon />
               </Badge>
             </IconButton>
 
-            {/* User Login/Logout */}
             {!isAuthenticated ? (
-              <Typography
-                sx={{
-                  color: "white",
-                  textDecoration: "none",
-                  cursor: "pointer",
-                  margin: "0 8px",
-                }}
-                onClick={() =>
-                  navigate("/login", { state: { from: window.location.pathname } })
-                }
-              >
+              <Typography sx={{ color: "white", cursor: "pointer" }} onClick={() => navigate("/login", { state: { from: window.location.pathname } })}>
                 Login
               </Typography>
             ) : (
-              <div>
-                <Typography
-                  onClick={handleMenu}
-                  variant="h6"
-                  sx={{
-                    flexGrow: 1,
-                    fontFamily: "Arial",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "white",
-                    cursor: "pointer",
-                    "&:hover": { opacity: 0.8 },
-                  }}
-                >
+              <Box>
+                <Typography onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ cursor: "pointer", color: "white" }}>
                   {user.name || "User"}
                 </Typography>
-
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
-                  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                  transformOrigin={{ vertical: "top", horizontal: "left" }}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                  sx={{ mr: 0 }}
-                >
-                  <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                  <MenuItem onClick={() => navigate(`/user/${user._id}`)}>Profile</MenuItem>
                   <MenuItem onClick={handleLogout}>Log out</MenuItem>
                 </Menu>
-              </div>
+              </Box>
             )}
           </Box>
         </Toolbar>
-
-        {/* Navigation Links */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-around",
-            alignItems: "center",
-            mt: 1,
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{ cursor: "pointer", color: "#ffffff" }}
-            onMouseEnter={handleCategoryMenuOpen}
-          >
-            Shop by Category
-          </Typography>
-
-          <Menu
-            anchorEl={categoryAnchorEl}
-            open={Boolean(categoryAnchorEl)}
-            onClose={handleCategoryMenuClose}
-            onMouseLeave={handleCategoryMenuClose}
-            MenuListProps={{ onMouseLeave: handleCategoryMenuClose }}
-          >
-            {categories.length > 0 ? (
-              categories.map((category) => (
-                <MenuItem
-                  key={category._id}
-                  onClick={() => handleCategoryClick(category._id)}
-                  sx={{
-                    backgroundColor: "#ffffff",
-                    color: "#000000",
-                    "&:hover": {
-                      backgroundColor: "#f0f0f0",
-                    },
-                  }}
-                >
-                  {category.categoryName}
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem disabled>No categories available</MenuItem>
-            )}
-          </Menu>
-
-          <RouterLink to={"/best-seller"} style={{ textDecoration: "none" }}>
-            <Typography
-              sx={{
-                mx: 3,
-                color: "white",
-                fontSize: "16px",
-                fontWeight: "bold",
-              }}
-            >
-              Best Seller
-            </Typography>
-          </RouterLink>
-          <RouterLink to={"/help"} style={{ textDecoration: "none" }}>
-            <Typography
-              sx={{
-                mx: 3,
-                color: "white",
-                fontSize: "16px",
-                fontWeight: "bold",
-              }}
-            >
-              Contact Us
-            </Typography>
-          </RouterLink>
-        </Box>
       </AppBar>
     </Box>
   );

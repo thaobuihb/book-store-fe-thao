@@ -56,6 +56,53 @@ const OrdersPage = () => {
     "Cancelled",
   ];
 
+  const getAvailableShippingStatus = (currentStatus) => {
+    switch (currentStatus) {
+      case "Processing":
+        return ["Shipped", "Delivered", "Returned", "Cancelled"];
+      case "Shipped":
+        return ["Delivered", "Returned", "Cancelled"];
+      case "Delivered":
+        return ["Returned", "Cancelled"];
+      case "Returned":
+      case "Cancelled":
+        return [];
+      default:
+        return [];
+    }
+  };
+
+  const getAvailablePaymentStatus = (
+    currentPaymentStatus,
+    currentOrderStatus
+  ) => {
+    if (currentOrderStatus === "Returned" && currentPaymentStatus === "Paid") {
+      return ["Refunded"];
+    }
+    switch (currentPaymentStatus) {
+      case "Unpaid":
+        return ["Paid"];
+      case "Paid":
+        return currentOrderStatus === "Cancelled" ? ["Refunded"] : [];
+      case "Refunded":
+        return [];
+      default:
+        return [];
+    }
+  };
+
+  const availableShippingStatus = getAvailableShippingStatus(
+    selectedOrder?.status
+  );
+  const availablePaymentStatus = getAvailablePaymentStatus(
+    selectedOrder?.paymentStatus,
+    selectedOrder?.status
+  );
+
+  const cannotUpdateOrder =
+    getAvailableShippingStatus(selectedOrder?.status).length === 0 &&
+    getAvailablePaymentStatus(selectedOrder?.paymentStatus).length === 0;
+
   useEffect(() => {
     dispatch(fetchOrders());
   }, [dispatch]);
@@ -151,7 +198,7 @@ const OrdersPage = () => {
       .unwrap()
       .then(() => {
         console.log("Order cancelled successfully");
-        handleCloseModal(); // Đóng modal nếu cần
+        handleCloseModal();
       })
       .catch((error) => {
         console.error("Failed to cancel order:", error);
@@ -200,35 +247,6 @@ const OrdersPage = () => {
     if (tabValue === 4) return order.status.toLowerCase() === "cancelled";
     return true;
   });
-
-  const getAvailableShippingStatus = (currentStatus) => {
-    switch (currentStatus) {
-      case "Processing":
-        return ["Shipped", "Delivered", "Returned", "Cancelled"];
-      case "Shipped":
-        return ["Delivered", "Returned", "Cancelled"];
-      case "Delivered":
-        return ["Returned", "Cancelled"];
-      case "Returned":
-      case "Cancelled":
-        return [];
-      default:
-        return [];
-    }
-  };
-
-  const getAvailablePaymentStatus = (currentPaymentStatus) => {
-    switch (currentPaymentStatus) {
-      case "Unpaid":
-        return ["Paid"];
-      case "Paid":
-        return ["Refunded"];
-      case "Refunded":
-        return [];
-      default:
-        return [];
-    }
-  };
 
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography>Error: {error}</Typography>;
@@ -352,6 +370,22 @@ const OrdersPage = () => {
                           </Typography>
                         </Box>
                       ))}
+                      <Typography variant="h6" mt={2}>
+                        👤 Thông tin người mua
+                      </Typography>
+                      <Typography>
+                        <b>Họ và tên:</b> {order.shippingAddress.fullName}
+                      </Typography>
+                      <Typography>
+                        <b>Email:</b> {order.customerEmail}
+                      </Typography>
+                      <Typography>
+                        <b>Số điện thoại:</b> {order.shippingAddress.phone}
+                      </Typography>
+                      <Typography>
+                        <b>Địa chỉ:</b>{" "}
+                        {`${order.shippingAddress.country}, ${order.shippingAddress.city}, ${order.shippingAddress.state}, ${order.shippingAddress.ward}, ${order.shippingAddress.addressLine}`}
+                      </Typography>
                     </AccordionDetails>
                   </Accordion>
                 </TableCell>
@@ -390,12 +424,23 @@ const OrdersPage = () => {
             Cập nhật đơn hàng
           </Typography>
 
+          {/* Hiển thị thông báo nếu không thể cập nhật đơn hàng */}
+          {cannotUpdateOrder && (
+            <Typography
+              color="error"
+              sx={{ mb: 2, fontWeight: "bold", textAlign: "center" }}
+            >
+              KHÔNG THỂ CẬP NHẬT ĐƠN HÀNG
+            </Typography>
+          )}
+
           {/* Trạng thái giao hàng */}
           <Typography>Trạng thái giao hàng</Typography>
           <Select
             fullWidth
             value={updatedOrderStatus}
             onChange={(e) => setUpdatedOrderStatus(e.target.value)}
+            disabled={cannotUpdateOrder}
           >
             {getAvailableShippingStatus(selectedOrder?.status).map(
               (status, index) => (
@@ -405,13 +450,13 @@ const OrdersPage = () => {
               )
             )}
           </Select>
-          {/* Thông báo lỗi cho trạng thái giao hàng */}
           {getAvailableShippingStatus(selectedOrder?.status).length === 0 && (
             <Typography color="error" sx={{ mt: 1 }}>
               Không thể cập nhật trạng thái giao hàng vì đơn hàng đã bị hủy hoặc
               trả lại.
             </Typography>
           )}
+
           {/* Trạng thái thanh toán */}
           <Typography sx={{ mt: 2 }}>Trạng thái thanh toán</Typography>
           {selectedOrder?.status === "Cancelled" ? (
@@ -428,14 +473,16 @@ const OrdersPage = () => {
               fullWidth
               value={updatedPaymentStatus}
               onChange={(e) => setUpdatedPaymentStatus(e.target.value)}
+              disabled={cannotUpdateOrder}
             >
-              {getAvailablePaymentStatus(selectedOrder?.paymentStatus).map(
-                (status, index) => (
-                  <MenuItem key={index} value={status}>
-                    {status}
-                  </MenuItem>
-                )
-              )}
+              {getAvailablePaymentStatus(
+                selectedOrder?.paymentStatus,
+                selectedOrder?.status
+              ).map((status, index) => (
+                <MenuItem key={index} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
             </Select>
           )}
 
@@ -455,6 +502,7 @@ const OrdersPage = () => {
                 }
                 fullWidth
                 sx={{ mt: 1 }}
+                disabled={cannotUpdateOrder}
               />
             ))
           ) : (
@@ -464,22 +512,25 @@ const OrdersPage = () => {
             </Typography>
           )}
 
+          {/* Nút xác nhận */}
           <Box mt={2}>
-            {["Processing", "Shipped"].includes(selectedOrder?.status) && (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleCancelOrder}
-              >
-                Hủy đơn hàng
-              </Button>
-            )}
+            {["Processing", "Shipped"].includes(selectedOrder?.status) &&
+              !cannotUpdateOrder && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleCancelOrder}
+                >
+                  Hủy đơn hàng
+                </Button>
+              )}
 
             <Button
               variant="contained"
               sx={{ ml: 2 }}
               onClick={() => {
-                // Kiểm tra trạng thái giao hàng trước khi gọi API
+                if (cannotUpdateOrder) return;
+
                 if (
                   updatedOrderStatus &&
                   updatedOrderStatus !== selectedOrder.status &&
@@ -490,7 +541,6 @@ const OrdersPage = () => {
                   handleUpdateOrderShippingStatus();
                 }
 
-                // Kiểm tra trạng thái thanh toán trước khi gọi API
                 if (
                   updatedPaymentStatus &&
                   updatedPaymentStatus !== selectedOrder.paymentStatus &&
@@ -501,7 +551,6 @@ const OrdersPage = () => {
                   handleUpdateOrderPaymentStatus();
                 }
 
-                // Cập nhật địa chỉ giao hàng
                 if (
                   JSON.stringify(updatedShippingAddress) !==
                     JSON.stringify(selectedOrder.shippingAddress) &&
@@ -510,6 +559,7 @@ const OrdersPage = () => {
                   handleUpdateShippingAddress();
                 }
               }}
+              disabled={cannotUpdateOrder}
             >
               Xác nhận cập nhật
             </Button>
