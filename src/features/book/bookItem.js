@@ -6,29 +6,21 @@ import {
   IconButton,
   Typography,
   Box,
+  CardContent,
+  Tooltip,
 } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { useNavigate } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { toggleBookInWishlist } from "../wishlist/wishlistSlice";
 import { addToCart } from "../cart/cartSlice";
 
-const BookItem = ({
-  title,
-  books,
-  currentPage,
-  totalPages,
-  handleNextPage,
-  handlePrevPage,
-}) => {
+const BookItem = ({ title, books }) => {
   const dispatch = useDispatch();
   const { wishlist } = useSelector((state) => state.wishlist);
   const cart = useSelector((state) => state.cart.cart);
-  const bookList = Array.isArray(books) ? books : [];
 
   const navigate = useNavigate();
 
@@ -38,10 +30,6 @@ const BookItem = ({
 
   const handleAddToWishlist = (bookId) => {
     dispatch(toggleBookInWishlist(bookId));
-  };
-
-  const isBookInWishlist = (bookId) => {
-    return wishlist.includes(bookId);
   };
 
   const handleAddToCart = (book) => {
@@ -56,97 +44,144 @@ const BookItem = ({
     );
   };
 
-  const isBookInCart = (bookId) => {
-    return cart.some((item) => item.bookId === bookId);
-  };
-
   return (
     <section>
       <Typography
         component="h4"
-        align="left"
         gutterBottom
-        sx={{ fontSize: "25px", fontWeight: "bold" }}
+        sx={{ fontSize: "25px", fontWeight: "bold", textAlign: "center" }}
       >
         {title}
       </Typography>
-      <Grid container spacing={5} justifyContent="center">
-        {bookList.length === 0 ? (
+      <Grid container spacing={0.5} justifyContent="center">
+        {books.length === 0 ? (
           <Typography variant="body1" color="textSecondary">
             No books available.
           </Typography>
         ) : (
-          bookList.map((book) => (
+          books.map((book) => (
             <Grid
-              item
-              xs={2.3}
-              sm={2.3}
-              md={2.3}
+            item xs={6} sm={4} md={3} lg={1.7} xl={1.5}
               key={book._id}
-              display="flex"
-              justifyContent="center"
+              sx={{ display: "flex", justifyContent: "center" }}
             >
               <Card
                 sx={{
+                  width: "160px",
+                  height: "380px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  minHeight: 350,
+                  alignItems: "center",
+                  padding: "10px",
+                  boxShadow: 3,
                 }}
               >
-                {/* Bìa sách */}
-                <CardMedia
-                  component="img"
-                  image={book.img}
-                  alt={book.title}
-                  onClick={() => handleBookClick(book._id)}
+                {/* Ảnh bìa sách */}
+                <Box
                   sx={{
-                    height: 220,
-                    objectFit: "contain",
-                    cursor: "pointer",
+                    width: "140px",
+                    height: "180px",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                />
-
-                {/* Tiêu đề sách */}
-                <Typography
-                  variant="h6"
-                  component="h2"
-                  onClick={() => handleBookClick(book._id)}
-                  sx={{ p: 1, cursor: "pointer", flexGrow: 1 }}
                 >
-                  {book.name}
-                </Typography>
-
-                {/* Hiển thị thông tin giá */}
-                <Box sx={{ p: 2, paddingTop: "20px" }}>
-                  {book.discountedPrice && book.discountedPrice < book.price ? (
-                    <>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt={book.title}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleBookClick(book._id)}
+                  />
+                </Box>
+                <CardContent
+                  sx={{ textAlign: "center", width: "100%", minHeight: "80px" }}
+                >
+                  {/* Tiêu đề sách */}
+                  <Tooltip
+                    title={
                       <Typography
-                        variant="body2"
-                        sx={{ textDecoration: "line-through", color: "gray" }}
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: "bold",
+                          color: "#fff",
+                          padding: "5px",
+                        }}
                       >
+                        {book.name}
+                      </Typography>
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "13px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxHeight: "40px",
+                        whiteSpace: "normal",
+                      }}
+                    >
+                      {book.name}
+                    </Typography>
+                  </Tooltip>
+                  <Box
+                    sx={{
+                      mt: 1,
+                      minHeight: "50px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {book.discountedPrice &&
+                    book.discountedPrice < book.price ? (
+                      <>
+                        <Typography
+                          variant="body2"
+                          sx={{ textDecoration: "line-through", color: "gray" }}
+                        >
+                          {`$${book.price}`}
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: "bold", color: "green" }}
+                        >
+                          {`$${book.discountedPrice}`}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                         {`$${book.price}`}
                       </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: "bold", color: "green" }}
-                      >
-                        {`$${book.discountedPrice}`}
-                      </Typography>
-                    </>
-                  ) : (
-                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                      {`$${book.price}`}
-                    </Typography>
-                  )}
-                </Box>
+                    )}
+                  </Box>
+                </CardContent>
 
-                {/* Icon giỏ hàng và wishlist */}
+                {/* Icon giỏ hàng và wishlist - Đặt trong Box để cố định vị trí */}
                 <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  sx={{ padding: "5px", marginTop: "auto" }}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "10px",
+                    width: "100%",
+                    paddingBottom: "10px",
+                  }}
                 >
                   <IconButton
                     color="secondary"
@@ -154,7 +189,7 @@ const BookItem = ({
                   >
                     <AddShoppingCartIcon
                       sx={{
-                        color: isBookInCart(book._id)
+                        color: cart.some((item) => item.bookId === book._id)
                           ? "secondary.main"
                           : "#0000FF",
                       }}
@@ -166,7 +201,7 @@ const BookItem = ({
                   >
                     <FavoriteIcon
                       sx={{
-                        color: isBookInWishlist(book._id)
+                        color: wishlist.includes(book._id)
                           ? "secondary.main"
                           : "#0000FF",
                       }}
@@ -178,27 +213,6 @@ const BookItem = ({
           ))
         )}
       </Grid>
-
-      {/* Nút phân trang */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        marginTop="16px"
-      >
-        <IconButton onClick={handlePrevPage} disabled={currentPage === 1}>
-          <ArrowLeftIcon />
-        </IconButton>
-        <Typography variant="body1">
-          {currentPage} of {totalPages}
-        </Typography>
-        <IconButton
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          <ArrowRightIcon />
-        </IconButton>
-      </Box>
     </section>
   );
 };

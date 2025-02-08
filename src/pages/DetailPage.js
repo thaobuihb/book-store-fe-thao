@@ -10,6 +10,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import BookItem from "../features/book/bookItem";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 const DetailPage = () => {
   const { bookId } = useParams();
@@ -60,9 +61,9 @@ const DetailPage = () => {
   };
 
   const handleBuyNow = (useId) => {
-    console.log("Book data in Buy Now:", book); 
+    console.log("Book data in Buy Now:", book);
     const isBookInCart = cart.some((item) => item.bookId === book._id);
-  
+
     if (!isBookInCart) {
       dispatch(
         addToCart({
@@ -75,14 +76,13 @@ const DetailPage = () => {
         })
       );
     }
-  
-    
+
     const orderDetails = {
       items: [
         {
           img: book.img,
-          _id: book._id, 
-          bookId: book._id, 
+          _id: book._id,
+          bookId: book._id,
           name: book.name,
           price: book.discountedPrice || book.price,
           quantity: quantity,
@@ -92,13 +92,13 @@ const DetailPage = () => {
       totalAmount: parseFloat((book.discountedPrice || book.price) * quantity),
     };
 
-    console.log("Order Details for Buy Now:123456", orderDetails); 
-  
+    // console.log("Order Details for Buy Now:123456", orderDetails);
+
     localStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
-  
+
     navigate(`/order/${useId}`, { state: orderDetails });
   };
-  
+
   return (
     <Box sx={{ padding: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", m: 10 }}>
@@ -117,13 +117,6 @@ const DetailPage = () => {
             <Typography sx={{ fontSize: "1.1rem" }} variant="body2">
               Descriptions: {book?.description}
             </Typography>
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="h6">Reviews: {book?.review}</Typography>
-              <Typography variant="h6">Rating: {book?.rating}</Typography>
-              <Button variant="outlined" sx={{ mt: 1 }}>
-                Write a Review
-              </Button>
-            </Box>
           </Box>
         </Box>
 
@@ -137,7 +130,7 @@ const DetailPage = () => {
             borderRadius: 1,
           }}
         >
-          <Box sx={{ m: 5 }}>
+          <Box sx={{ m: 3 }}>
             <Typography sx={{ m: 5 }} variant="h6">
               Price: ${book?.price}
             </Typography>
@@ -154,7 +147,7 @@ const DetailPage = () => {
               Publication Date: {book?.publicationDate}
             </Typography>
             <Typography sx={{ m: 5 }} variant="body2">
-              ISBN: {book?.isbn}
+              ISBN: {book?.Isbn}
             </Typography>
             <Typography sx={{ m: 5 }} variant="body2">
               Category: {book?.categoryName}
@@ -175,22 +168,22 @@ const DetailPage = () => {
                 <AddIcon />
               </IconButton>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<ShoppingCartOutlinedIcon />}
-              sx={{ m: 2 }}
-              onClick={handleAddToCart}
+            <IconButton
+            onClick={handleAddToCart}
+            sx={{
+              color: "#0000FF",
+            }}>
+              <ShoppingCartOutlinedIcon />
+
+            </IconButton>
+            <IconButton
+            onClick={handleBuyNow}
+            sx={{
+              color: "#0000FF",
+            }}
             >
-              Add to Cart
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              sx={{ m: 2 }}
-              onClick={handleBuyNow}
-            >
-              Buy Now
-            </Button>
+              <MonetizationOnIcon/>
+            </IconButton>
             <IconButton
               color="primary"
               onClick={handleAddToWishlist}
