@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -12,37 +12,71 @@ import {
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useNavigate } from "react-router-dom";
-
+import { useSpring, animated } from "@react-spring/web";
+import FlyingIcon from "./FlyingIcon";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleBookInWishlist } from "../wishlist/wishlistSlice";
 import { addToCart } from "../cart/cartSlice";
 
 const BookItem = ({ title, books }) => {
   const dispatch = useDispatch();
+
   const { wishlist } = useSelector((state) => state.wishlist);
   const cart = useSelector((state) => state.cart.cart);
-
   const navigate = useNavigate();
+
+  const [flyingIcons, setFlyingIcons] = useState([]);
+
+  
+  const handleFlyIcon = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const target = document.getElementById("cart-icon");
+
+    if (!target) {
+      console.warn("Cart icon not found!");
+      return;
+    }
+
+    const targetRect = target.getBoundingClientRect();
+    const newIcon = {
+      id: Date.now(),
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+      targetX: targetRect.left + targetRect.width / 2,
+      targetY: targetRect.top + targetRect.height / 2,
+    };
+
+    setFlyingIcons((prevIcons) => [...prevIcons, newIcon]);
+
+    console.log("Added new flying icon:", newIcon);
+  console.log("Updated flyingIcons:", [...flyingIcons, newIcon]);
+  };
+
+  const removeFlyingIcon = (id) => {
+    setFlyingIcons((prevIcons) => prevIcons.filter((icon) => icon.id !== id));
+  };
 
   const handleBookClick = (bookId) => {
     navigate(`/book/${bookId}`);
   };
 
-  const handleAddToWishlist = (bookId) => {
-    dispatch(toggleBookInWishlist(bookId));
+  const handleAddToCart = (event, book) => {
+    handleFlyIcon(event);
+
+    setTimeout(() => {
+      dispatch(addToCart(book));
+    }, 500);
   };
 
-  const handleAddToCart = (book) => {
-    dispatch(
-      addToCart({
-        bookId: book._id,
-        name: book.title,
-        price: book.price,
-        discountedPrice: book.discountedPrice,
-        img: book.img,
-      })
-    );
+  const handleAddToWishlist = (bookId) => {
+    if (typeof bookId !== "string") {
+      console.error("Invalid bookId:", bookId);
+      return;
+    }
+    dispatch(toggleBookInWishlist(bookId));
   };
+  
+  
 
   return (
     <section>
@@ -61,7 +95,12 @@ const BookItem = ({ title, books }) => {
         ) : (
           books.map((book) => (
             <Grid
-            item xs={6} sm={4} md={3} lg={1.7} xl={1.5}
+              item
+              xs={6}
+              sm={4}
+              md={3}
+              lg={1.7}
+              xl={1.5}
               key={book._id}
               sx={{ display: "flex", justifyContent: "center" }}
             >
@@ -185,7 +224,7 @@ const BookItem = ({ title, books }) => {
                 >
                   <IconButton
                     color="secondary"
-                    onClick={() => handleAddToCart(book)}
+                    onClick={(e) => handleAddToCart(e, book)}
                   >
                     <AddShoppingCartIcon
                       sx={{
@@ -197,7 +236,7 @@ const BookItem = ({ title, books }) => {
                   </IconButton>
                   <IconButton
                     color="secondary"
-                    onClick={() => handleAddToWishlist(book._id)}
+                    onClick={(e) => handleAddToWishlist(book._id)}
                   >
                     <FavoriteIcon
                       sx={{
@@ -213,6 +252,9 @@ const BookItem = ({ title, books }) => {
           ))
         )}
       </Grid>
+      {flyingIcons.map((icon) => (
+        <FlyingIcon key={icon.id} icon={icon} onAnimationEnd={removeFlyingIcon} />
+      ))}
     </section>
   );
 };

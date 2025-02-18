@@ -15,14 +15,16 @@ export const loadWishlistFromLocalStorage = () => {
 
 const saveWishlistToLocalStorage = (wishlist) => {
   try {
-    const wishlistArray = Array.isArray(wishlist) ? wishlist.slice() : [];
-    console.log("Saving to localStorage:", wishlistArray);
-    const serializedState = JSON.stringify(wishlist);
-    localStorage.setItem("wishlist", serializedState); 
+    const sanitizedWishlist = wishlist.map((item) => 
+      typeof item === "object" && item !== null ? item.bookId || item._id : item
+    );
+    console.log("Saving to localStorage:", sanitizedWishlist);
+    localStorage.setItem("wishlist", JSON.stringify(sanitizedWishlist));
   } catch (e) {
     console.error("Không thể lưu wishlist vào localStorage", e);
   }
 };
+
 
 // Initial state
 const initialState = {
@@ -46,8 +48,9 @@ const wishlistSlice = createSlice({
     },
     addBookToWishlistSuccess(state, action) {
       if (!state.wishlist.includes(action.payload)) {
-        state.wishlist.push(action.payload); 
-        saveWishlistToLocalStorage(state.wishlist); 
+        state.wishlist.push(action.payload);
+        console.log("Wishlist before saving:", state.wishlist);
+        saveWishlistToLocalStorage(state.wishlist);
       }
       state.isLoading = false;
     },
