@@ -7,6 +7,7 @@ function MainLayout() {
   return (
     <Stack sx={{ minHeight: "100vh" }}>
       <MainHeader />
+      <Box sx={{ height: "80px" }} />
 
       <Outlet />
 

@@ -14,6 +14,8 @@ import HomePage from "../pages/homePage";
 import WishlistPage from "../pages/WishlistPage";
 import BookPage from "../pages/BookPage";
 import ThankYouPage from "../pages/ThankYouPage";
+import BestSellerPage from "../pages/BestSellerPage";
+
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -50,6 +52,7 @@ function Router() {
         <Route path="/help" element={<HelpCenter />} />
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="thank-you" element={<ThankYouPage />} />
+        <Route path="/best-seller" element={<BestSellerPage />} />
       </Route>
 
       {/* Blank Layout */}

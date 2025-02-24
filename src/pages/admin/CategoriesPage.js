@@ -16,11 +16,12 @@ import {
   addCategory,
   updateCategory,
   deleteCategory,
+  clearError,
 } from "../../features/admin/adminSlice";
 
 const CategoriesPage = () => {
   const dispatch = useDispatch();
-  const { categories = [], loading, error } = useSelector((state) => state.admin);
+  const { categories = [], loading } = useSelector((state) => state.admin);
 
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -33,6 +34,12 @@ const CategoriesPage = () => {
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
+
+  // useEffect(() => {
+  //   if (categoryForm.categoryName.trim() !== "") {
+  //     dispatch(clearError()); // Xóa lỗi khi người dùng nhập lại
+  //   }
+  // }, [categoryForm.categoryName, dispatch]);
 
   const handleOpenAddModal = () => {
     setCategoryForm({ categoryName: "", description: "" });
@@ -64,13 +71,28 @@ const CategoriesPage = () => {
 
   const handleAddCategory = () => {
     dispatch(addCategory(categoryForm))
-      .unwrap()
-      .then(() => {
-        console.log("Category added successfully");
-        handleCloseAddModal();
-      })
-      .catch((error) => console.error("Failed to add category:", error));
+  .unwrap()
+  .then(() => {
+    console.log("✅ Danh mục đã được thêm thành công!");
+    dispatch(fetchCategories()); // Cập nhật danh mục
+  })
+  .catch((error) => {
+    console.error("❌ Lỗi khi thêm danh mục:", error);
+  });
   };
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    console.log("🔥 Redux error state:", error);
+  }, [error]);
+
+  useEffect(() => {
+    if (categoryForm.categoryName.trim() !== "") {
+      dispatch(clearError());
+    }
+  }, [categoryForm.categoryName, dispatch]);
 
   const handleUpdateCategory = () => {
     if (selectedCategory) {
@@ -104,46 +126,56 @@ const CategoriesPage = () => {
   return (
     <Box sx={{ maxWidth: 600, margin: "0 auto", padding: 4 }}>
       <Box display="flex" justifyContent="flex-end" mb={2}>
-        <Button variant="contained" color="primary" onClick={handleOpenAddModal}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenAddModal}
+        >
           Thêm Danh Mục
         </Button>
       </Box>
       <List>
-        {categories.map((category) => (
-          <ListItem
-            key={category._id}
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "16px",
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              marginBottom: "8px",
-            }}
-          >
-            <ListItemText
-              primary={category.categoryName}
-              secondary={category.description}
-            />
-            <Box display="flex" gap={1}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => handleOpenEditModal(category)}
+        {categories?.length > 0 ? (
+          categories.map((category) =>
+            category ? (
+              <ListItem
+                key={category._id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "16px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  marginBottom: "8px",
+                }}
               >
-                Sửa
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => handleDeleteCategory(category._id)}
-              >
-                Xóa
-              </Button>
-            </Box>
-          </ListItem>
-        ))}
+                <ListItemText
+                  primary={category.categoryName || "Không có tên danh mục"}
+                  secondary={category.description || "Không có mô tả"}
+                />
+                <Box display="flex" gap={1}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => handleOpenEditModal(category)}
+                  >
+                    Sửa
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleDeleteCategory(category._id)}
+                  >
+                    Xóa
+                  </Button>
+                </Box>
+              </ListItem>
+            ) : null
+          )
+        ) : (
+          <Typography>Không có danh mục nào.</Typography>
+        )}
       </List>
 
       {/* Modal Thêm Danh Mục */}
@@ -171,6 +203,8 @@ const CategoriesPage = () => {
             onChange={handleFormChange}
             fullWidth
             margin="normal"
+            error={!!errorMessage}
+            helperText={errorMessage}
           />
           <TextField
             label="Mô tả"

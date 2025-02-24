@@ -188,20 +188,6 @@ export const fetchOrders = createAsyncThunk(
   }
 );
 
-// // Update cả trạng thái thanh toán và giao hàng
-// export const updateOrderStatus = createAsyncThunk(
-//   'admin/updateOrderStatus',
-//   async ({ orderId, paymentStatus, orderStatus }, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.put(`/orders/${orderId}/payment-status`, { paymentStatus });
-//       await apiService.put(`/orders/${orderId}`, { status: orderStatus });
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(error.response?.data?.message || "Failed to update order status");
-//     }
-//   }
-// );
-
 // Cập nhật trạng thái giao hàng
 export const updateOrderShippingStatus = createAsyncThunk(
   "admin/updateOrderShippingStatus",
@@ -320,7 +306,9 @@ export const addManager = createAsyncThunk(
       const response = await apiService.post("/users/admin", newManager);
       return response.data; // Kết quả từ API
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to add manager");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to add manager"
+      );
     }
   }
 );
@@ -331,7 +319,7 @@ export const updateUser = createAsyncThunk(
   async ({ userId, updatedData }, { rejectWithValue }) => {
     try {
       const response = await apiService.put(`/users/${userId}`, updatedData);
-      return response.data; 
+      return response.data;
     } catch (error) {
       console.error("Error in updateUser API call:", error);
       return rejectWithValue(
@@ -340,7 +328,6 @@ export const updateUser = createAsyncThunk(
     }
   }
 );
-
 
 //Xoá người dùng
 export const deleteUser = createAsyncThunk(
@@ -357,13 +344,50 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+// thêm danh mục
+export const addCategory = createAsyncThunk(
+  "admin/addCategory",
+  async (newCategory, { rejectWithValue }) => {
+    console.log("🚀 Gửi request đến API với dữ liệu:", newCategory);
+
+    try {
+      const response = await apiService.post("/categories", newCategory);
+      console.log("✅ API Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Lỗi API khi thêm danh mục:", error);
+
+      if (error.response) {
+        console.error("🔴 Full Error Response:", error.response.data);
+
+        // Lấy `message` từ response
+        const errorMessage =
+          error.response.data?.message || "Lỗi không xác định từ API!";
+        console.log("🎯 API trả về message:", errorMessage);
+
+        return rejectWithValue(errorMessage);
+      } 
+      else if (error.request) {
+        console.error("⚠ Không có phản hồi từ API:", error.request);
+        return rejectWithValue("API không phản hồi hoặc lỗi kết nối!");
+      } 
+      else {
+        console.error("❌ Lỗi không xác định:", error.message);
+        return rejectWithValue("Lỗi không xác định!");
+      }
+    }
+  }
+);
+
+
+
 //Lấy category
 export const fetchCategories = createAsyncThunk(
   "admin/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiService.get("/categories/");
-      return response.data; 
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch categories"
@@ -377,25 +401,14 @@ export const updateCategory = createAsyncThunk(
   "admin/updateCategory",
   async ({ categoryId, updatedData }, { rejectWithValue }) => {
     try {
-      const response = await apiService.put(`/categories/${categoryId}`, updatedData);
-      return response.data; 
+      const response = await apiService.put(
+        `/categories/${categoryId}`,
+        updatedData
+      );
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update category"
-      );
-    }
-  }
-);
-// thêm danh mục
-export const addCategory = createAsyncThunk(
-  "admin/addCategory",
-  async (newCategory, { rejectWithValue }) => {
-    try {
-      const response = await apiService.post("/categories", newCategory);
-      return response.data; 
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to add category"
       );
     }
   }
@@ -407,7 +420,7 @@ export const deleteCategory = createAsyncThunk(
   async (categoryId, { rejectWithValue }) => {
     try {
       await apiService.delete(`/categories/${categoryId}`);
-      return categoryId; 
+      return categoryId;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to delete category"
@@ -435,7 +448,11 @@ const adminSlice = createSlice({
     error: null,
   },
 
-  reducers: {},
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -546,6 +563,34 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // Thêm danh mục
+
+      .addCase(addCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addCategory.fulfilled, (state, action) => {
+        console.log("✅ Danh mục mới từ API:", action.payload);
+        state.loading = false;
+        state.error = null;
+    
+        if (!Array.isArray(state.categories)) {
+          state.categories = [];
+        }
+    
+        state.categories.push(action.payload.data || action.payload);
+    })
+    
+      
+      .addCase(addCategory.rejected, (state, action) => {
+        console.error("❌ Redux nhận lỗi từ API:", action.payload);
+        console.error("🛑 Redux `error.message`:", action.error.message);
+        console.error("🛑 Redux `meta`:", action.meta);
+        
+        state.loading = false;
+        state.error = action.payload || "Không nhận được phản hồi từ API!";
+      })
+
       //lấy danh mục
       .addCase(fetchCategories.pending, (state) => {
         state.loading = true;
@@ -553,7 +598,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload;
+        state.categories = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
@@ -575,20 +620,6 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Thêm danh mục
-      .addCase(addCategory.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(addCategory.fulfilled, (state, action) => {
-        state.loading = false;
-        state.categories.push(action.payload); 
-      })
-      .addCase(addCategory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
       // Xóa danh mục
       .addCase(deleteCategory.pending, (state) => {
         state.loading = true;
@@ -739,7 +770,6 @@ const adminSlice = createSlice({
         state.loading = false;
         state.users = [...state.users, action.payload];
         state.error = null;
-
       })
       .addCase(addManager.rejected, (state, action) => {
         state.loading = false;
@@ -752,17 +782,20 @@ const adminSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
-      
+
         const updatedUser = action.payload;
         if (updatedUser && updatedUser._id) {
           state.users = state.users.map((user) =>
             user._id === updatedUser._id ? updatedUser : user
           );
         } else {
-          console.error("Invalid payload in updateUser action:", action.payload);
+          console.error(
+            "Invalid payload in updateUser action:",
+            action.payload
+          );
         }
         state.error = null;
-      })      
+      })
       .addCase(updateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to update user";
@@ -784,4 +817,5 @@ const adminSlice = createSlice({
   },
 });
 
+export const { clearError } = adminSlice.actions;
 export default adminSlice.reducer;

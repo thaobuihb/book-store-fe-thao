@@ -24,7 +24,7 @@ function MainHeader() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [categoryAnchorEl, setCategoryAnchorEl] = useState(null);
-  const categories = useSelector((state) => state.category.categories);
+  const categories = useSelector((state) => state.category.categories) || [];
 
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { logout } = useAuth();
@@ -51,7 +51,7 @@ function MainHeader() {
 
   return (
     <Box>
-      <AppBar position="fixed" color="primary" sx={{ zIndex: 1100 }}>
+      <AppBar position="fixed" color="primary" sx={{ zIndex: 1200 }}>
         <Toolbar
           sx={{
             display: "flex",
@@ -148,7 +148,7 @@ function MainHeader() {
             </RouterLink>
 
             <IconButton
-            id="cart-icon"
+              id="cart-icon"
               color="inherit"
               sx={{ color: "blue", mr: 2 }}
               onClick={() =>

@@ -18,7 +18,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { toggleBookInWishlist } from "../wishlist/wishlistSlice";
 import { addToCart } from "../cart/cartSlice";
 
-const BookItem = ({ title, books }) => {
+const BookItem = ({ title, books, showTotalSold = false }) => {
+  // console.log("BookItem nhận dữ liệu:", books);
   const dispatch = useDispatch();
 
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -88,7 +89,7 @@ const BookItem = ({ title, books }) => {
         {title}
       </Typography>
       <Grid container spacing={0.5} justifyContent="center">
-        {books.length === 0 ? (
+        {!books || books.length === 0 ? (
           <Typography variant="body1" color="textSecondary">
             No books available.
           </Typography>
@@ -175,10 +176,17 @@ const BookItem = ({ title, books }) => {
                         maxHeight: "40px",
                         whiteSpace: "normal",
                       }}
+                      onClick={() => handleBookClick(book._id)}
                     >
                       {book.name}
                     </Typography>
                   </Tooltip>
+                  {/* 🛒 Nếu là Best Seller Page, hiển thị số sách đã bán */}
+                  {showTotalSold && book.totalSold !== undefined && (
+                    <Typography variant="body2" sx={{ fontWeight: "bold", color: "gray", mt: 1 }}>
+                      🔥 Đã bán: {book.totalSold} cuốn
+                    </Typography>
+                  )}
                   <Box
                     sx={{
                       mt: 1,

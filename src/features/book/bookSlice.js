@@ -11,6 +11,7 @@ const initialState = {
   books: [],
   discountedBooks: [],
   newlyReleasedBooks: [],
+  bestSellerBooks: [],
   book: "",
   selectedBook: null,
   page: 1,
@@ -61,6 +62,9 @@ const bookSlice = createSlice({
     getCategoryOfBooksSuccess(state, action) {
       state.categoryOfBooks = action.payload.categories;
       state.errors = null;
+    },
+    getBestSellerBooksSuccess(state, action) {
+      state.bestSellerBooks = action.payload;
     },
     getBookDetailSuccess(state, action) {
       state.isLoading = false;
@@ -276,5 +280,21 @@ export const changeMinPrice = (minPrice) => (dispatch) => {
 export const changeMaxPrice = (maxPrice) => (dispatch) => {
   dispatch(bookSlice.actions.changeMaxPrice(maxPrice));
 };
+
+export const getBestSellerBooks = () => async (dispatch) => {
+  dispatch(bookSlice.actions.startLoading());
+  try {
+    console.log("Fetching Best Seller Books...");
+    const response = await apiService.get(`/books/best-seller`);
+    console.log("API Response:", response.data); // ✅ Kiểm tra dữ liệu trả về
+    dispatch(bookSlice.actions.getBestSellerBooksSuccess(response.data));
+    dispatch(bookSlice.actions.endLoading());
+  } catch (error) {
+    console.error("API Error:", error);
+    dispatch(bookSlice.actions.hasError(error.message));
+    toast.error(error.message);
+  }
+};
+
 
 export default bookSlice.reducer;

@@ -25,9 +25,9 @@ const DetailPage = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
 
   const [quantity, setQuantity] = useState(1);
+  const [isBookInCart, setIsBookInCart] = useState(false);
 
   useEffect(() => {
-    console.log("Fetching single book data for bookId:", bookId);
     dispatch(getBookWithCategory(bookId));
   }, [dispatch, bookId]);
 
@@ -58,10 +58,10 @@ const DetailPage = () => {
         quantity: quantity,
       })
     );
+    setIsBookInCart(true);
   };
 
   const handleBuyNow = (useId) => {
-    console.log("Book data in Buy Now:", book);
     const isBookInCart = cart.some((item) => item.bookId === book._id);
 
     if (!isBookInCart) {
@@ -91,8 +91,6 @@ const DetailPage = () => {
       ],
       totalAmount: parseFloat((book.discountedPrice || book.price) * quantity),
     };
-
-    // console.log("Order Details for Buy Now:123456", orderDetails);
 
     localStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
 
@@ -131,74 +129,107 @@ const DetailPage = () => {
           }}
         >
           <Box sx={{ m: 3 }}>
-            <Typography sx={{ m: 5 }} variant="h6">
+            <Typography sx={{ m: 2 }} variant="h6">
               Price: ${book?.price}
             </Typography>
-            <Typography sx={{ m: 5 }} variant="h6">
+            <Typography sx={{ m: 2 }} variant="h6">
               Discount: {book?.discountRate ? `${book.discountRate} %` : "0%"}
             </Typography>
-            <Typography sx={{ m: 5 }} variant="h6">
+            <Typography sx={{ m: 2 }} variant="h6">
               Discounted Price: ${book?.discountedPrice}
             </Typography>
-            <Typography sx={{ m: 5 }} variant="body2">
+            <Typography sx={{ m: 2 }} variant="h6">
               Publisher: {book?.publisher}
             </Typography>
-            <Typography sx={{ m: 5 }} variant="body2">
+            <Typography sx={{ m: 2 }} variant="h6">
               Publication Date: {book?.publicationDate}
             </Typography>
-            <Typography sx={{ m: 5 }} variant="body2">
+            <Typography sx={{ m: 2 }} variant="h6">
               ISBN: {book?.Isbn}
             </Typography>
-            <Typography sx={{ m: 5 }} variant="body2">
+            <Typography sx={{ m: 2 }} variant="h6">
               Category: {book?.categoryName}
             </Typography>
           </Box>
 
-          <Box sx={{ mt: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", m: 5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+              m: 5,
+            }}
+          >
+            {/* Bộ tăng giảm số lượng */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
               <IconButton sx={{ color: "black" }} onClick={handleDecrease}>
                 <RemoveIcon />
               </IconButton>
               <TextField
                 value={quantity}
-                sx={{ width: "50px", mx: 1 }}
+                sx={{
+                  width: "50px",
+                  "& input": { textAlign: "center" }, 
+                }}
                 inputProps={{ readOnly: true }}
               />
+
               <IconButton sx={{ color: "black" }} onClick={handleIncrease}>
                 <AddIcon />
               </IconButton>
             </Box>
-            <IconButton
-            onClick={handleAddToCart}
-            sx={{
-              color: "#0000FF",
-            }}>
-              <ShoppingCartOutlinedIcon />
 
-            </IconButton>
-            <IconButton
-            onClick={handleBuyNow}
-            sx={{
-              color: "#0000FF",
-            }}
-            >
-              <MonetizationOnIcon/>
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={handleAddToWishlist}
+            {/* Hàng chứa các IconButton */}
+            <Box
               sx={{
-                color: isBookInWishlist ? "secondary.main" : "#0000FF",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
               }}
             >
-              <FavoriteIcon />
-            </IconButton>
+              <IconButton
+                onClick={handleAddToCart}
+                sx={{
+                  color: isBookInCart ? "orange" : "#0000FF",
+                }}
+              >
+                <ShoppingCartOutlinedIcon />
+              </IconButton>
+
+              <IconButton
+                onClick={handleBuyNow}
+                sx={{
+                  color: "#0000FF",
+                }}
+              >
+                <MonetizationOnIcon />
+              </IconButton>
+
+              <IconButton
+                color="primary"
+                onClick={handleAddToWishlist}
+                sx={{
+                  color: isBookInWishlist ? "secondary.main" : "#0000FF",
+                }}
+              >
+                <FavoriteIcon />
+              </IconButton>
+            </Box>
           </Box>
         </Box>
       </Box>
 
       <Box>
-        <Typography variant="h6" sx={{ mt: 5, mb: 2 }}>
+        <Typography variant="h6" sx={{ mt: 5, mb: 2, fontWeight: "bold" }}>
           Books from the Same Category
         </Typography>
         <BookItem books={booksByCategory} />
