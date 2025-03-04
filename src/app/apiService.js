@@ -3,6 +3,15 @@ import { BASE_URL } from "./config";
 
 const apiService = axios.create({
   baseURL: BASE_URL,
+  headers: { 
+    "Content-Type": "application/json", 
+    "Accept": "application/json" 
+  },
+  // withCredentials: false,
+  // validateStatus: function (status) {
+  //   console.log("🔥 HTTP Status Code:", status);
+  //   return status >= 200 && status < 500; 
+  // }
 });
 
 apiService.interceptors.request.use(

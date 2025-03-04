@@ -45,7 +45,6 @@ const getFormattedDescription = (description, maxLength = 50, showFull) => {
 
 const BooksPage = () => {
   const dispatch = useDispatch();
-
   const { books, deletedBooks, categories, hasMore, loading, error } =
     useSelector((state) => ({
       books: state.admin.books.books || [],
@@ -55,8 +54,6 @@ const BooksPage = () => {
       loading: state.admin.loading,
       error: state.admin.error,
     }));
-
-  //   console.log("Danh mục từ Redux:", categories);
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
@@ -77,10 +74,25 @@ const BooksPage = () => {
     discountRate: "",
   });
 
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let tempErrors = {};
+
+    if (!newBook.name.trim()) tempErrors.name = "Không được để trống";
+    if (!newBook.price) tempErrors.price = "Không được để trống";
+    if (!newBook.publicationDate)
+      tempErrors.publicationDate = "Không được để trống";
+    if (!newBook.categoryId) tempErrors.categoryId = "Không được để trống";
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0; // Nếu không có lỗi trả về `true`
+  };
+
   const [bookToUpdate, setBookToUpdate] = useState({});
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [tabValue, setTabValue] = useState(0); // 0: Sách hiện tại, 1: Sách đã xóa
+  const [tabValue, setTabValue] = useState(0);
   const [showFullDescriptions, setShowFullDescriptions] = useState({});
 
   // Fetch data
@@ -131,6 +143,11 @@ const BooksPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      toast.error("Vui lòng điền đầy đủ thông tin trước khi thêm sách!");
+      return;
+    }
+
     const sanitizedBook = {
       ...newBook,
       price: Number(newBook.price),
@@ -142,6 +159,17 @@ const BooksPage = () => {
       .then(() => {
         toast.success("Thêm sách thành công!");
         setOpen(false);
+        setNewBook({
+          name: "",
+          author: "",
+          price: "",
+          publicationDate: "",
+          img: "",
+          description: "",
+          categoryId: "",
+          discountRate: "",
+        });
+        setErrors({}); // Xóa lỗi sau khi tạo sách thành công
       })
       .catch((err) => {
         toast.error(`Thêm sách thất bại: ${err}`);
@@ -276,7 +304,7 @@ const BooksPage = () => {
 
   const filteredBooks = (tabValue === 0 ? books : deletedBooks).filter(
     (book) => {
-      if (!searchTerm) return true; 
+      if (!searchTerm) return true;
       if (searchCriteria === "categoryId") {
         const category = categories.find((cat) => cat._id === book.category);
         return category
@@ -313,11 +341,11 @@ const BooksPage = () => {
             onChange={handleSearchCriteriaChange}
             sx={{ marginRight: "3px" }}
           >
+            <MenuItem value="Isbn">ISBN</MenuItem>
             <MenuItem value="name">Tên sách</MenuItem>
             <MenuItem value="author">Tác giả</MenuItem>
             <MenuItem value="price">Giá</MenuItem>
             <MenuItem value="categoryId">Danh mục</MenuItem>
-            <MenuItem value="Isbn">ISBN</MenuItem>
           </Select>
           <TextField
             label="Tìm kiếm sách"
@@ -431,6 +459,7 @@ const BooksPage = () => {
                     <Typography variant="h8" sx={{ fontWeight: "bold" }}>
                       {book.name}{" "}
                     </Typography>
+                    <Typography>ISBN: {book.Isbn}</Typography>
                     <Typography>Tác giả: {book.author}</Typography>
                     <Typography>Giá: ${book.price}</Typography>
                     <Typography>Danh mục: {book.categoryName}</Typography>
@@ -485,13 +514,15 @@ const BooksPage = () => {
             sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}
           >
             <TextField
-              label="Tên sách"
+              label="Tên sách *"
               name="name"
               value={newBook.name}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.name}
+              helperText={errors.name}
             />
+
             <TextField
               label="Tác giả"
               name="author"
@@ -499,33 +530,30 @@ const BooksPage = () => {
               onChange={handleChange}
               fullWidth
             />
+
             <TextField
-              label="Giá sách"
+              label="Giá sách *"
               name="price"
               type="number"
               value={newBook.price}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.price}
+              helperText={errors.price}
             />
+
             <TextField
-              label="Rating"
-              name="rating"
-              type="number"
-              value={newBook.rating}
-              onChange={handleChange}
-              fullWidth
-              inputProps={{ min: 0 }}
-            />
-            <TextField
-              label="Ngày xuất bản"
+              label="Ngày xuất bản *"
               name="publicationDate"
               type="date"
               value={newBook.publicationDate}
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
+              error={!!errors.publicationDate}
+              helperText={errors.publicationDate}
             />
+
             <TextField
               label="Ảnh (URL)"
               name="img"
@@ -533,6 +561,7 @@ const BooksPage = () => {
               onChange={handleChange}
               fullWidth
             />
+
             <TextField
               label="Mô tả"
               name="description"
@@ -542,6 +571,7 @@ const BooksPage = () => {
               onChange={handleChange}
               fullWidth
             />
+
             <TextField
               label="Tỉ lệ giảm giá (%)"
               name="discountRate"
@@ -550,16 +580,24 @@ const BooksPage = () => {
               onChange={handleChange}
               fullWidth
             />
-            <FormControl fullWidth margin="normal">
-              <InputLabel shrink sx={{ fontSize: "18px", color: "black" }}>
+            <FormControl fullWidth margin="normal" variant="outlined">
+              <InputLabel
+                shrink={true}
+                sx={{ fontSize: "18px", color: "black" }}
+              >
                 Danh mục
               </InputLabel>
               <Select
                 name="categoryId"
-                value={newBook.categoryId}
-                onChange={handleChange}
+                value={bookToUpdate.categoryId || ""}
+                onChange={handleUpdateChange}
+                displayEmpty
+
                 label="Danh mục"
               >
+                <MenuItem value="" disabled>
+                  Chọn danh mục
+                </MenuItem>
                 {categories.map((category) => (
                   <MenuItem key={category._id} value={category._id}>
                     {category.categoryName}
@@ -567,7 +605,6 @@ const BooksPage = () => {
                 ))}
               </Select>
             </FormControl>
-
           </Box>
         </DialogContent>
         <DialogActions>

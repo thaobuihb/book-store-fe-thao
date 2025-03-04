@@ -61,7 +61,7 @@ const WishlistPage = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
-        Your Wishlist
+        Sách yêu thích ❤️
       </Typography>
 
       {isLoading ? (
@@ -78,7 +78,7 @@ const WishlistPage = () => {
           color="textSecondary"
           sx={{ textAlign: "center" }}
         >
-          No books in your wishlist.
+          Không có sách nào trong danh sách yêu thích của bạn.
         </Typography>
       ) : (
         <Grid container spacing={3} justifyContent="center">
@@ -126,7 +126,7 @@ const WishlistPage = () => {
                       opacity: 0.9,
                     },
                   }}
-                  onClick={() => handleNavigateToDetail(book._id)} // Điều hướng khi click vào hình ảnh
+                  onClick={() => handleNavigateToDetail(book._id)} 
                 />
 
                 <CardContent
@@ -135,13 +135,13 @@ const WishlistPage = () => {
                     p: 2,
                     cursor: "pointer",
                   }}
-                  onClick={() => handleNavigateToDetail(book._id)} // Điều hướng khi click vào nội dung
+                  onClick={() => handleNavigateToDetail(book._id)} 
                 >
                   <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
                     {book.name}
                   </Typography>
                   <Typography variant="subtitle2" sx={{ color: "gray" }}>
-                    Author: {book.author}
+                    Tác giả: {book.author}
                   </Typography>
 
                   <Typography variant="body2" sx={{ mt: 1 }}>
@@ -175,11 +175,11 @@ const WishlistPage = () => {
                       fontWeight: "bold",
                     }}
                     onClick={(e) => {
-                      e.stopPropagation(); // Ngăn chặn sự kiện click điều hướng
+                      e.stopPropagation(); 
                       handleAddToCart(book);
                     }}
                   >
-                    ADD TO CART
+                    THÊM VÀO GIỎ HÀNG
                   </Button>
                 </CardContent>
               </Card>
@@ -198,12 +198,12 @@ const WishlistPage = () => {
         }}
         onClick={handleClearWishlist}
       >
-        Clear wishlist
+        XOÁ
       </Typography>
 
       <Box sx={{ marginTop: 6, display: "flex", justifyContent: "center" }}>
         <Typography variant="h6" sx={{ marginRight: 2 }}>
-          Share your wishlist:
+          Chia sẻ danh sách của bạn:
         </Typography>
         <IconButton
           component="a"

@@ -31,6 +31,11 @@ const DetailPage = () => {
     dispatch(getBookWithCategory(bookId));
   }, [dispatch, bookId]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [booksByCategory]);
+  
+
   const handleDecrease = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
@@ -110,10 +115,10 @@ const DetailPage = () => {
           <Box component="a" sx={{ mt: 2 }}>
             <Typography variant="h5">{book?.name}</Typography>
             <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-              Author: {book?.author}
+              Tác giả: {book?.author}
             </Typography>
             <Typography sx={{ fontSize: "1.1rem" }} variant="body2">
-              Descriptions: {book?.description}
+              Giới thiệu: {book?.description}
             </Typography>
           </Box>
         </Box>
@@ -130,25 +135,25 @@ const DetailPage = () => {
         >
           <Box sx={{ m: 3 }}>
             <Typography sx={{ m: 2 }} variant="h6">
-              Price: ${book?.price}
+              Giá: ${book?.price}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Discount: {book?.discountRate ? `${book.discountRate} %` : "0%"}
+              Giảm giá: {book?.discountRate ? `${book.discountRate} %` : "0%"}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Discounted Price: ${book?.discountedPrice}
+              Giá đã giảm: ${book?.discountedPrice}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Publisher: {book?.publisher}
+              Nhà xuất bản: {book?.publisher}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Publication Date: {book?.publicationDate}
+              Ngày xuất bản: {book?.publicationDate}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
               ISBN: {book?.Isbn}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Category: {book?.categoryName}
+              Danh mục: {book?.categoryName}
             </Typography>
           </Box>
 
@@ -187,7 +192,6 @@ const DetailPage = () => {
               </IconButton>
             </Box>
 
-            {/* Hàng chứa các IconButton */}
             <Box
               sx={{
                 display: "flex",
@@ -230,7 +234,7 @@ const DetailPage = () => {
 
       <Box>
         <Typography variant="h6" sx={{ mt: 5, mb: 2, fontWeight: "bold" }}>
-          Books from the Same Category
+          Sách cùng danh mục
         </Typography>
         <BookItem books={booksByCategory} />
       </Box>

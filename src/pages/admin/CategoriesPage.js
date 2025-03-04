@@ -67,19 +67,36 @@ const CategoriesPage = () => {
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setCategoryForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "categoryName") {
+      setErrorMessage("");
+    }
   };
 
   const handleAddCategory = () => {
+    setErrorMessage(""); // Xóa lỗi trước khi gửi request
+
     dispatch(addCategory(categoryForm))
-  .unwrap()
-  .then(() => {
-    console.log("✅ Danh mục đã được thêm thành công!");
-    dispatch(fetchCategories()); // Cập nhật danh mục
-  })
-  .catch((error) => {
-    console.error("❌ Lỗi khi thêm danh mục:", error);
-  });
+      .unwrap()
+      .then(() => {
+        console.log("✅ Danh mục đã được thêm thành công!");
+        dispatch(fetchCategories()); // Cập nhật danh mục
+        handleCloseAddModal(); // Đóng modal sau khi thêm thành công
+      })
+      .catch((error) => {
+        console.error("❌ Lỗi khi thêm danh mục:", error);
+
+        // 🔥 Hiển thị lỗi từ Redux
+        if (typeof error === "string") {
+          setErrorMessage(error);
+        } else if (error?.message) {
+          setErrorMessage(error.message);
+        } else {
+          setErrorMessage("Lỗi không xác định từ API");
+        }
+      });
   };
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const [error, setError] = useState(null);
@@ -203,7 +220,7 @@ const CategoriesPage = () => {
             onChange={handleFormChange}
             fullWidth
             margin="normal"
-            error={!!errorMessage}
+            error={Boolean(errorMessage)}
             helperText={errorMessage}
           />
           <TextField

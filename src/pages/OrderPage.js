@@ -58,7 +58,7 @@ const OrderPage = () => {
     fullName: "",
     email: "",
     phone: "",
-    country: "",
+    country: "Việt Nam",
     city: "",
     district: "",
     ward: "",
@@ -77,17 +77,17 @@ const OrderPage = () => {
   // Điền thông tin người dùng nếu đã đăng nhập
   useEffect(() => {
     if (isAuthenticated && user) {
-      setFormData({
+      setFormData((prevData) => ({
         fullName: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        country: user.country || "",
+        country: user.country || prevData.country, 
         city: user.city || "",
         district: user.district || "",
         ward: user.ward || "",
         street: user.street || "",
         houseNumber: user.houseNumber || "",
-      });
+      }));
     }
   }, [isAuthenticated, user]);
 
@@ -171,7 +171,7 @@ const OrderPage = () => {
   
       if (!orderId) {
         console.error("Không tìm thấy `orderId` trong phản hồi:", response);
-        toast.error("Unable to retrieve order details.");
+        toast.error("Không thể xem chi tiết đơn hàng.");
         return;
       }
   
@@ -179,14 +179,14 @@ const OrderPage = () => {
       navigate("/thank-you", {
         state: {
           message: isAuthenticated
-            ? "Order placed successfully!"
-            : "Thank you for your order!",
+            ? "Đặt hàng thành công!"
+            : "Cảm ơn bạn đã đặt hàng!",
           orderId,
         },
       });
     } catch (error) {
       console.error("Lỗi khi thực hiện đặt hàng:", error);
-      toast.error("Failed to place the order. Please try again.");
+      toast.error("Không thể đặt hàng. Vui lòng thử lại.");
     }
   };
   

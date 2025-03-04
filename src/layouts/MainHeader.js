@@ -79,7 +79,7 @@ function MainHeader() {
               sx={{ cursor: "pointer", color: "#ffffff", mx: 2 }}
               onMouseEnter={(e) => setCategoryAnchorEl(e.currentTarget)}
             >
-              Shop by Category
+              Danh mục
             </Typography>
             <Menu
               anchorEl={categoryAnchorEl}
@@ -105,7 +105,7 @@ function MainHeader() {
                 margin: "0 16px",
               }}
             >
-              Best Seller
+              Sách bán chạy
             </RouterLink>
             <RouterLink
               to="/help"
@@ -115,7 +115,7 @@ function MainHeader() {
                 margin: "0 16px",
               }}
             >
-              Contact Us
+              Trung tâm hỗ trợ
             </RouterLink>
           </Box>
 
@@ -169,7 +169,7 @@ function MainHeader() {
                   })
                 }
               >
-                Login
+                Đăng nhập
               </Typography>
             ) : (
               <Box>
@@ -187,7 +187,7 @@ function MainHeader() {
                   <MenuItem onClick={() => navigate(`/user/${user._id}`)}>
                     Profile
                   </MenuItem>
-                  <MenuItem onClick={handleLogout}>Log out</MenuItem>
+                  <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
                 </Menu>
               </Box>
             )}

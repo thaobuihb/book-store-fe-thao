@@ -194,7 +194,7 @@ export const updateOrderShippingStatus = createAsyncThunk(
   async ({ orderId, orderStatus }, { rejectWithValue }) => {
     try {
       // Gọi API để cập nhật trạng thái giao hàng
-      const response = await apiService.put(`/orders/${orderId}`, {
+      const response = await apiService.put(`/orders/admin/${orderId}`, {
         status: orderStatus,
       });
       return response.data; // Trả về phản hồi từ API
@@ -248,7 +248,7 @@ export const cancelOrder = createAsyncThunk(
   async ({ orderId }, { rejectWithValue }) => {
     try {
       const response = await apiService.put(`/orders/${orderId}`, {
-        status: "Cancelled", // Trạng thái hủy
+        status: "Đã hủy", // Trạng thái hủy
       });
       return response.data;
     } catch (error) {
@@ -347,39 +347,31 @@ export const deleteUser = createAsyncThunk(
 // thêm danh mục
 export const addCategory = createAsyncThunk(
   "admin/addCategory",
-  async (newCategory, { rejectWithValue }) => {
-    console.log("🚀 Gửi request đến API với dữ liệu:", newCategory);
-
+  async (categoryData, { rejectWithValue }) => {
     try {
-      const response = await apiService.post("/categories", newCategory);
-      console.log("✅ API Response:", response.data);
+      console.log("🚀 Gửi request tới server:", categoryData);
+      const response = await apiService.post("/categories", categoryData);
+      console.log("✅ Response từ server:", response);
       return response.data;
     } catch (error) {
-      console.error("❌ Lỗi API khi thêm danh mục:", error);
+      console.error("🔥 Lỗi từ Axios:", error);
 
       if (error.response) {
-        console.error("🔴 Full Error Response:", error.response.data);
+        console.error("🔥 Full Response từ backend:", error.response);
+        console.error("🔥 Error Data:", JSON.stringify(error.response.data, null, 2));
 
-        // Lấy `message` từ response
-        const errorMessage =
-          error.response.data?.message || "Lỗi không xác định từ API!";
-        console.log("🎯 API trả về message:", errorMessage);
-
+        const errorMessage = error.response.data?.message || "Lỗi không xác định từ API";
         return rejectWithValue(errorMessage);
-      } 
-      else if (error.request) {
-        console.error("⚠ Không có phản hồi từ API:", error.request);
-        return rejectWithValue("API không phản hồi hoặc lỗi kết nối!");
-      } 
-      else {
-        console.error("❌ Lỗi không xác định:", error.message);
-        return rejectWithValue("Lỗi không xác định!");
+      } else if (error.request) {
+        console.error("🔥 Lỗi request nhưng không có phản hồi từ backend:", error.request);
+        return rejectWithValue("Không thể kết nối đến server!");
+      } else {
+        console.error("🔥 Lỗi không xác định:", error.message);
+        return rejectWithValue(error.message || "Lỗi không xác định từ Redux!");
       }
     }
   }
 );
-
-
 
 //Lấy category
 export const fetchCategories = createAsyncThunk(
@@ -566,31 +558,22 @@ const adminSlice = createSlice({
       // Thêm danh mục
 
       .addCase(addCategory.pending, (state) => {
+        // console.log("🚀 Redux: addCategory pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(addCategory.fulfilled, (state, action) => {
-        console.log("✅ Danh mục mới từ API:", action.payload);
+        // console.log("✅ Redux: addCategory fulfilled");
         state.loading = false;
-        state.error = null;
-    
-        if (!Array.isArray(state.categories)) {
-          state.categories = [];
-        }
-    
-        state.categories.push(action.payload.data || action.payload);
-    })
-    
-      
-      .addCase(addCategory.rejected, (state, action) => {
-        console.error("❌ Redux nhận lỗi từ API:", action.payload);
-        console.error("🛑 Redux `error.message`:", action.error.message);
-        console.error("🛑 Redux `meta`:", action.meta);
-        
-        state.loading = false;
-        state.error = action.payload || "Không nhận được phản hồi từ API!";
+        state.categories.push(action.payload);
       })
+      .addCase(addCategory.rejected, (state, action) => {
+        // console.log("❌ Redux: addCategory rejected", action);
+        // console.log("❌ Payload từ rejectWithValue:", action.payload);
 
+        state.loading = false;
+        state.error = action.payload || "Lỗi không xác định từ Redux!";
+      })
       //lấy danh mục
       .addCase(fetchCategories.pending, (state) => {
         state.loading = true;

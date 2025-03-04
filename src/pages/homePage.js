@@ -206,7 +206,7 @@ const Home = () => {
         sx={{ fontSize: "22px", fontWeight: "bold", mt: 3 }}
         align="left"
       >
-        New Releases
+        Sách mới phát hành
       </Typography>
 
       <Box display="flex" alignItems="center" justifyContent="center">
@@ -241,7 +241,7 @@ const Home = () => {
         sx={{ fontSize: "22px", fontWeight: "bold", mt: 3 }}
         align="left"
       >
-        Discount
+        Sách giảm giá
       </Typography>
 
       <Box display="flex" alignItems="center" justifyContent="center">
@@ -271,7 +271,7 @@ const Home = () => {
           gutterBottom
           sx={{ fontSize: "25px", fontWeight: "bold", mt: 3 }}
         >
-          Popular Categories in Books
+          Các danh mục phổ biến
         </Typography>
 
         <Grid container spacing={2} justifyContent="center" alignItems="center">
@@ -337,7 +337,7 @@ const Home = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      {category.count} books
+                      {category.count} sách
                     </Typography>
                   </CardActionArea>
                 </Card>
@@ -354,7 +354,7 @@ const Home = () => {
         sx={{ fontSize: "22px", fontWeight: "bold", mt: 3 }}
         align="left"
       >
-        Teens & YA Books
+        Sách thiếu nhi
       </Typography>
 
       <Box

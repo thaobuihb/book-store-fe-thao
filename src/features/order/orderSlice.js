@@ -137,6 +137,142 @@ export const fetchGuestOrderDetails = createAsyncThunk(
   }
 );
 
+
+// // Tạo đơn hàng cho người dùng đã đăng nhập
+// export const createOrder = createAsyncThunk(
+//   "orders/createOrder",
+//   async ({ userId, orderData }, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.post(`/orders/${userId}`, orderData);
+//       toast.success("Đơn hàng đã được tạo thành công!");
+//       return response.data;
+//     } catch (error) {
+//       const errorMessage =
+//         error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
+//       toast.error(errorMessage);
+//       return rejectWithValue(errorMessage);
+//     }
+//   }
+// );
+
+// // Tạo đơn hàng cho người dùng không đăng nhập
+// export const createGuestOrder = createAsyncThunk(
+//   "orders/createGuestOrder",
+//   async (orderData, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.post(`/orders/guest`, orderData);
+//       toast.success("Đơn hàng đã được tạo thành công!");
+//       return response.data;
+//     } catch (error) {
+//       const errorMessage =
+//         error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
+//       toast.error(errorMessage);
+//       return rejectWithValue(errorMessage);
+//     }
+//   }
+// );
+
+// // Lấy danh sách đơn hàng của người dùng
+// export const fetchOrders = createAsyncThunk(
+//   "orders/fetchOrders",
+//   async (userId, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.get(`/orders/${userId}`);
+//       return response.data;
+//     } catch (error) {
+//       const errorMessage =
+//         error.response?.data?.message || "Lỗi khi lấy danh sách đơn hàng.";
+//       toast.error(errorMessage);
+//       return rejectWithValue(errorMessage);
+//     }
+//   }
+// );
+
+// // Lấy chi tiết một đơn hàng
+// export const fetchOrderDetails = createAsyncThunk(
+//   "orders/fetchOrderDetails",
+//   async ({ userId, orderId }, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.get(`/orders/${userId}/${orderId}`);
+//       console.log("API Response for Order Details:", response.data);
+//       return response.data;
+//     } catch (error) {
+//       const errorMessage =
+//         error.response?.data?.message || "Lỗi khi lấy thông tin đơn hàng.";
+//       toast.error(errorMessage);
+//       return rejectWithValue(errorMessage);
+//     }
+//   }
+// );
+
+// // Cập nhật trạng thái đơn hàng (hủy đơn hàng)
+// export const updateOrderStatus = createAsyncThunk(
+//   "orders/updateOrderStatus",
+//   async ({ userId, orderId, status }, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.put(`/orders/${userId}/${orderId}`, {
+//         status,
+//       });
+//       toast.success("Trạng thái đơn hàng đã được cập nhật!");
+//       return response.data;
+//     } catch (error) {
+//       const errorMessage =
+//         error.response?.data?.message ||
+//         "Lỗi khi cập nhật trạng thái đơn hàng.";
+//       toast.error(errorMessage);
+//       return rejectWithValue(errorMessage);
+//     }
+//   }
+// );
+
+// export const fetchPurchaseHistory = createAsyncThunk(
+//   "orders/fetchPurchaseHistory",
+//   async (userId, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.get(
+//         `/orders/purchase-history/${userId}`
+//       );
+//       // console.log("API response for purchase history:%%%%%%%%%%", response.data);
+
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Failed to fetch purchase history"
+//       );
+//     }
+//   }
+// );
+
+// export const cancelOrder = createAsyncThunk(
+//   "orders/cancelOrder",
+//   async ({ userId, orderId }, { rejectWithValue }) => {
+//     try {
+//       const response = await apiService.put(`/orders/${userId}/${orderId}`, {
+//         status: "Cancelled",
+//       });
+//       return { userId, orderId, updatedOrder: response.data };
+//     } catch (error) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Failed to cancel order"
+//       );
+//     }
+//   }
+// );
+
+
+// export const fetchGuestOrderDetails = createAsyncThunk(
+//   "orders/fetchGuestOrderDetails",
+//   async (orderCode, { rejectWithValue }) => {
+//     try {
+//       console.log("Fetching API: ", `/orders/guest/${orderCode}`);
+//       const response = await apiService.get(`/orders/guest/${orderCode}`);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data?.message || "Failed to fetch guest order details");
+//     }
+//   }
+// );
+
 // Khởi tạo slice
 const orderSlice = createSlice({
   name: "orders",

@@ -220,7 +220,6 @@ const BookItem = ({ title, books, showTotalSold = false }) => {
                   </Box>
                 </CardContent>
 
-                {/* Icon giỏ hàng và wishlist - Đặt trong Box để cố định vị trí */}
                 <Box
                   sx={{
                     display: "flex",
