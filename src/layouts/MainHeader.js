@@ -45,7 +45,7 @@ function MainHeader() {
     logout(wishlist, user, () => {
       dispatch(logoutSuccess());
       dispatch(clearWishlistOnLogout());
-      navigate("/", { replace: true });
+      navigate("/");
     });
   };
 

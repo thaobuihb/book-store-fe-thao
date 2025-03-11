@@ -112,7 +112,7 @@ export const cancelOrder = createAsyncThunk(
   async ({ userId, orderId }, { rejectWithValue }) => {
     try {
       const response = await apiService.put(`/orders/${userId}/${orderId}`, {
-        status: "Cancelled",
+        status: "Đã hủy",
       });
       return { userId, orderId, updatedOrder: response.data };
     } catch (error) {
@@ -128,150 +128,39 @@ export const fetchGuestOrderDetails = createAsyncThunk(
   "orders/fetchGuestOrderDetails",
   async (orderCode, { rejectWithValue }) => {
     try {
-      console.log("Fetching API: ", `/orders/guest/${orderCode}`);
+      console.log("📡 Fetching API:", `/orders/guest/${orderCode}`);
+
       const response = await apiService.get(`/orders/guest/${orderCode}`);
-      return response.data;
+      
+      console.log("🔹 Full API Response:", response);
+
+      if (!response || typeof response !== "object") {
+        console.error("❌ API response is invalid:", response);
+        return rejectWithValue("Invalid response from API");
+      }
+
+      console.log("🟢 API trả về dữ liệu đơn hàng:", response);
+      return response; // Sửa lại chỗ này (đừng dùng `response.data`)
     } catch (error) {
+      console.error("❌ Error Fetching Guest Order:", error.response);
       return rejectWithValue(error.response?.data?.message || "Failed to fetch guest order details");
     }
   }
 );
 
 
-// // Tạo đơn hàng cho người dùng đã đăng nhập
-// export const createOrder = createAsyncThunk(
-//   "orders/createOrder",
-//   async ({ userId, orderData }, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.post(`/orders/${userId}`, orderData);
-//       toast.success("Đơn hàng đã được tạo thành công!");
-//       return response.data;
-//     } catch (error) {
-//       const errorMessage =
-//         error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
-//       toast.error(errorMessage);
-//       return rejectWithValue(errorMessage);
-//     }
-//   }
-// );
-
-// // Tạo đơn hàng cho người dùng không đăng nhập
-// export const createGuestOrder = createAsyncThunk(
-//   "orders/createGuestOrder",
-//   async (orderData, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.post(`/orders/guest`, orderData);
-//       toast.success("Đơn hàng đã được tạo thành công!");
-//       return response.data;
-//     } catch (error) {
-//       const errorMessage =
-//         error.response?.data?.message || "Lỗi khi tạo đơn hàng.";
-//       toast.error(errorMessage);
-//       return rejectWithValue(errorMessage);
-//     }
-//   }
-// );
-
-// // Lấy danh sách đơn hàng của người dùng
-// export const fetchOrders = createAsyncThunk(
-//   "orders/fetchOrders",
-//   async (userId, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.get(`/orders/${userId}`);
-//       return response.data;
-//     } catch (error) {
-//       const errorMessage =
-//         error.response?.data?.message || "Lỗi khi lấy danh sách đơn hàng.";
-//       toast.error(errorMessage);
-//       return rejectWithValue(errorMessage);
-//     }
-//   }
-// );
-
-// // Lấy chi tiết một đơn hàng
-// export const fetchOrderDetails = createAsyncThunk(
-//   "orders/fetchOrderDetails",
-//   async ({ userId, orderId }, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.get(`/orders/${userId}/${orderId}`);
-//       console.log("API Response for Order Details:", response.data);
-//       return response.data;
-//     } catch (error) {
-//       const errorMessage =
-//         error.response?.data?.message || "Lỗi khi lấy thông tin đơn hàng.";
-//       toast.error(errorMessage);
-//       return rejectWithValue(errorMessage);
-//     }
-//   }
-// );
-
-// // Cập nhật trạng thái đơn hàng (hủy đơn hàng)
-// export const updateOrderStatus = createAsyncThunk(
-//   "orders/updateOrderStatus",
-//   async ({ userId, orderId, status }, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.put(`/orders/${userId}/${orderId}`, {
-//         status,
-//       });
-//       toast.success("Trạng thái đơn hàng đã được cập nhật!");
-//       return response.data;
-//     } catch (error) {
-//       const errorMessage =
-//         error.response?.data?.message ||
-//         "Lỗi khi cập nhật trạng thái đơn hàng.";
-//       toast.error(errorMessage);
-//       return rejectWithValue(errorMessage);
-//     }
-//   }
-// );
-
-// export const fetchPurchaseHistory = createAsyncThunk(
-//   "orders/fetchPurchaseHistory",
-//   async (userId, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.get(
-//         `/orders/purchase-history/${userId}`
-//       );
-//       // console.log("API response for purchase history:%%%%%%%%%%", response.data);
-
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(
-//         error.response?.data?.message || "Failed to fetch purchase history"
-//       );
-//     }
-//   }
-// );
-
-// export const cancelOrder = createAsyncThunk(
-//   "orders/cancelOrder",
-//   async ({ userId, orderId }, { rejectWithValue }) => {
-//     try {
-//       const response = await apiService.put(`/orders/${userId}/${orderId}`, {
-//         status: "Cancelled",
-//       });
-//       return { userId, orderId, updatedOrder: response.data };
-//     } catch (error) {
-//       return rejectWithValue(
-//         error.response?.data?.message || "Failed to cancel order"
-//       );
-//     }
-//   }
-// );
-
-
-// export const fetchGuestOrderDetails = createAsyncThunk(
-//   "orders/fetchGuestOrderDetails",
-//   async (orderCode, { rejectWithValue }) => {
-//     try {
-//       console.log("Fetching API: ", `/orders/guest/${orderCode}`);
-//       const response = await apiService.get(`/orders/guest/${orderCode}`);
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(error.response?.data?.message || "Failed to fetch guest order details");
-//     }
-//   }
-// );
+export const searchOrderByCode = createAsyncThunk(
+  "order/searchOrderByCode",
+  async (orderCode, { rejectWithValue }) => {
+    try {
+      const response = await apiService.get(`/orders/find/${orderCode}`);
+      // console.log("🔹 API Response:", response.data);
+      return response.data; 
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Order not found");
+    }
+  }
+);
 
 // Khởi tạo slice
 const orderSlice = createSlice({
@@ -280,6 +169,8 @@ const orderSlice = createSlice({
     orders: [],
     orderDetails: null,
     purchaseHistory: [],
+    searchResult: null,
+    searchError: null, 
     isLoading: false,
     error: null,
   },
@@ -289,6 +180,10 @@ const orderSlice = createSlice({
     },
     clearOrderDetails(state) {
       state.orderDetails = null;
+    },
+    clearSearchResult: (state) => {
+      state.searchResult = null;
+      state.searchError = null;
     },
   },
   extraReducers: (builder) => {
@@ -400,22 +295,39 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+      //lay don hang khach
       .addCase(fetchGuestOrderDetails.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(fetchGuestOrderDetails.fulfilled, (state, action) => {
+        console.log("🟢 Redux cập nhật state với đơn hàng khách:", action.payload);
         state.isLoading = false;
         state.orderDetails = action.payload;
       })
       .addCase(fetchGuestOrderDetails.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })
+      // tim don hang theo ma
+      .addCase(searchOrderByCode.pending, (state) => {
+        state.isLoading = true;
+        state.searchResult = null;
+        state.searchError = null;
+      })
+      .addCase(searchOrderByCode.fulfilled, (state, action) => {
+        state.isLoading = false;
+        console.log("🔍 Dữ liệu sau khi tìm đơn hàng:", action.payload);
+        state.searchResult = action.payload;
+      })
+      .addCase(searchOrderByCode.rejected, (state, action) => {
+        state.isLoading = false;
+        state.searchError = action.payload || "Order not found";
+      })
   },
 });
 
 // Export reducers và actions
-export const { clearError, clearOrderDetails } = orderSlice.actions;
+export const { clearError, clearOrderDetails, clearSearchResult } = orderSlice.actions;
 export const selectOrderDetails = (state) => state.order.orderDetails || null;
 export default orderSlice.reducer;
