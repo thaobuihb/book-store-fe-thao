@@ -304,11 +304,23 @@ export const addManager = createAsyncThunk(
   async (newManager, { rejectWithValue }) => {
     try {
       const response = await apiService.post("/users/admin", newManager);
-      return response.data; // Kết quả từ API
+      return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to add manager"
-      );
+      console.error("🔥 Lỗi từ Axios:", error);
+
+      if (error.response) {
+        console.error("🔥 Full Response status:", error.response.status);
+        console.error("🔥 Error Data:", JSON.stringify(error.response.data, null, 2));
+        
+        // Return the complete error response data object
+        return rejectWithValue(error.response.data);
+      } else if (error.request) {
+        console.error("🔥 Lỗi request nhưng không có phản hồi từ backend");
+        return rejectWithValue({ success: false, message: "Không thể kết nối đến server!" });
+      } else {
+        console.error("🔥 Lỗi không xác định:", error.message);
+        return rejectWithValue({ success: false, message: error.message || "Lỗi không xác định từ Redux!" });
+      }
     }
   }
 );
@@ -344,7 +356,6 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
-// thêm danh mục
 export const addCategory = createAsyncThunk(
   "admin/addCategory",
   async (categoryData, { rejectWithValue }) => {
@@ -357,22 +368,21 @@ export const addCategory = createAsyncThunk(
       console.error("🔥 Lỗi từ Axios:", error);
 
       if (error.response) {
-        console.error("🔥 Full Response từ backend:", error.response);
+        console.error("🔥 Full Response status:", error.response.status);
         console.error("🔥 Error Data:", JSON.stringify(error.response.data, null, 2));
-
-        const errorMessage = error.response.data?.message || "Lỗi không xác định từ API";
-        return rejectWithValue(errorMessage);
+        
+        // Return the complete error response data object
+        return rejectWithValue(error.response.data);
       } else if (error.request) {
-        console.error("🔥 Lỗi request nhưng không có phản hồi từ backend:", error.request);
-        return rejectWithValue("Không thể kết nối đến server!");
+        console.error("🔥 Lỗi request nhưng không có phản hồi từ backend");
+        return rejectWithValue({ success: false, message: "Không thể kết nối đến server!" });
       } else {
         console.error("🔥 Lỗi không xác định:", error.message);
-        return rejectWithValue(error.message || "Lỗi không xác định từ Redux!");
+        return rejectWithValue({ success: false, message: error.message || "Lỗi không xác định từ Redux!" });
       }
     }
   }
 );
-
 //Lấy category
 export const fetchCategories = createAsyncThunk(
   "admin/fetchCategories",
@@ -568,11 +578,20 @@ const adminSlice = createSlice({
         state.categories.push(action.payload);
       })
       .addCase(addCategory.rejected, (state, action) => {
-        // console.log("❌ Redux: addCategory rejected", action);
-        // console.log("❌ Payload từ rejectWithValue:", action.payload);
-
         state.loading = false;
-        state.error = action.payload || "Lỗi không xác định từ Redux!";
+        console.log("🔥 Rejected action payload:", JSON.stringify(action.payload, null, 2));
+        
+        // Handle the error object directly - action.payload is the entire error object
+        if (typeof action.payload === 'object') {
+          // If payload is the object returned from your API
+          state.error = action.payload.message || "Unknown Error 123";
+        } else if (typeof action.payload === 'string') {
+          // If payload is a string
+          state.error = action.payload;
+        } else {
+          // Fallback
+          state.error = action.error?.message || "Unknown Error 123";
+        }
       })
       //lấy danh mục
       .addCase(fetchCategories.pending, (state) => {
@@ -756,7 +775,13 @@ const adminSlice = createSlice({
       })
       .addCase(addManager.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        if (typeof action.payload === 'object') {
+          state.error = action.payload.message || "Unknown Error";
+        } else if (typeof action.payload === 'string') {
+          state.error = action.payload;
+        } else {
+          state.error = action.error?.message || "Unknown Error";
+        }
       })
       //cập nhật thông tin người dùng
       .addCase(updateUser.pending, (state) => {

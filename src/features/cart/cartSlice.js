@@ -2,32 +2,36 @@ import { createSlice } from "@reduxjs/toolkit";
 import apiService from "../../app/apiService";
 import { toast } from "react-toastify";
 
-export const loadCartFromLocalStorage = () => {
+export const loadCartFromSessionStorage = () => {
   try {
-    const serializedState = localStorage.getItem("cart");
+    const serializedState = sessionStorage.getItem("cart");
     return serializedState ? JSON.parse(serializedState) : [];
   } catch (e) {
     return [];
   }
 };
 
-const saveCartToLocalStorage = (cart) => {
+const saveCartToSessionStorage = (cart) => {
   try {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    sessionStorage.setItem("cart", JSON.stringify(cart));
   } catch (e) {
-    console.error("Không thể lưu giỏ hàng vào localStorage", e);
+    console.error("Không thể lưu giỏ hàng vào sessionStorage", e);
   }
 };
 
-const removeCartFromLocalStorage = () => {
-  localStorage.removeItem("cart");
+const removeCartFromSessionStorage = () => {
+  sessionStorage.removeItem("cart");
 };
 
+
+
 const initialState = {
-  cart: loadCartFromLocalStorage(),
+  cart: loadCartFromSessionStorage(),
+  // cart: loadCartFromLocalStorage(),
   detailedCart: [],
   isLoading: false,
   error: null,
+  totalItems: loadCartFromSessionStorage().reduce((total, item) => total + item.quantity, 0),
 };
 
 const cartSlice = createSlice({
@@ -52,6 +56,17 @@ const cartSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
+    // addBookToCartSuccess(state, action) {
+    //   const book = action.payload;
+    //   const existingItem = state.cart.find(item => item.bookId === book.bookId);
+    //   if (existingItem) {
+    //     existingItem.quantity += book.quantity; 
+    //   } else {
+    //     state.cart.push({ ...book, quantity: book.quantity }); 
+    //   }
+    //   saveCartToLocalStorage(state.cart);
+    //   state.isLoading = false;
+    // },
     addBookToCartSuccess(state, action) {
       const book = action.payload;
       const existingItem = state.cart.find(item => item.bookId === book.bookId);
@@ -60,41 +75,86 @@ const cartSlice = createSlice({
       } else {
         state.cart.push({ ...book, quantity: book.quantity }); 
       }
-      saveCartToLocalStorage(state.cart);
+      state.totalItems = state.cart.reduce((total, item) => total + item.quantity, 0);
+      saveCartToSessionStorage(state.cart);
       state.isLoading = false;
     },
+    // removeBookFromCartSuccess(state, action) {
+    //   state.cart = state.cart.filter((book) => book.bookId !== action.payload);
+    //   state.detailedCart = state.detailedCart.filter((book) => book.bookId !== action.payload); // Cập nhật cả detailedCart nếu cần
+    //   saveCartToLocalStorage(state.cart);
+    //   state.isLoading = false;
+    // },
+
     removeBookFromCartSuccess(state, action) {
       state.cart = state.cart.filter((book) => book.bookId !== action.payload);
-      state.detailedCart = state.detailedCart.filter((book) => book.bookId !== action.payload); // Cập nhật cả detailedCart nếu cần
-      saveCartToLocalStorage(state.cart);
+      state.detailedCart = state.detailedCart.filter((book) => book.bookId !== action.payload);
+      state.totalItems = state.cart.reduce((total, item) => total + item.quantity, 0);
+      saveCartToSessionStorage(state.cart);
       state.isLoading = false;
     },
+    
+    // updateCartQuantitySuccess(state, action) {
+    //   const { bookId, quantity } = action.payload;
+    //   const item = state.cart.find(book => book.bookId === bookId);
+    //   if (item) {
+    //     item.quantity = quantity;
+    //   }
+    //   saveCartToLocalStorage(state.cart);
+    //   state.isLoading = false;
+    // },
+
     updateCartQuantitySuccess(state, action) {
       const { bookId, quantity } = action.payload;
       const item = state.cart.find(book => book.bookId === bookId);
       if (item) {
         item.quantity = quantity;
       }
-      saveCartToLocalStorage(state.cart);
+      state.totalItems = state.cart.reduce((total, item) => total + item.quantity, 0);
+      saveCartToSessionStorage(state.cart);
       state.isLoading = false;
     },
+    
+
+    // clearCart(state) {
+    //   state.cart = [];
+    //   state.detailedCart = [];
+    //   removeCartFromLocalStorage();
+    //   state.isLoading = false;
+    // },
+
     clearCart(state) {
       state.cart = [];
       state.detailedCart = [];
-      removeCartFromLocalStorage();
+      removeCartFromSessionStorage();
       state.isLoading = false;
     },
+
+    // syncCartFromBackendSuccess(state, action) {
+    //   state.cart = action.payload;
+    //   saveCartToLocalStorage(state.cart);
+    //   state.isLoading = false;
+    // },
+
     syncCartFromBackendSuccess(state, action) {
       state.cart = action.payload;
-      saveCartToLocalStorage(state.cart);
+      saveCartToSessionStorage(state.cart);
       state.isLoading = false;
     },
+    
+    // clearAllCartItemsSuccess(state) {
+    //   state.cart = [];
+    //   state.detailedCart = [];
+    //   removeCartFromLocalStorage();
+    //   state.isLoading = false;
+    // },
+
     clearAllCartItemsSuccess(state) {
-      state.cart = [];
-      state.detailedCart = [];
-      removeCartFromLocalStorage();
-      state.isLoading = false;
-    },
+        state.cart = [];
+        state.detailedCart = [];
+        removeCartFromSessionStorage();
+        state.isLoading = false;
+      },
     loadCartDetailsSuccess(state, action) {
       state.detailedCart = action.payload.map(book => ({
         ...book,
@@ -147,15 +207,31 @@ export const addToCart = (book) => async (dispatch, getState) => {
 
 
 
+// export const syncCartAfterLogin = (userId) => async (dispatch) => {
+//   dispatch(startLoading());
+
+//   const localCart = loadCartFromLocalStorage();
+
+//   try {
+//     const response = await apiService.post(`/carts/sync`, { userId, cart: localCart });
+//     dispatch(syncCartFromBackendSuccess(response.data));
+//     saveCartToLocalStorage(response.data);
+//     toast.success("Cart synced successfully");
+//   } catch (error) {
+//     dispatch(hasError(error.message));
+//     toast.error("Error syncing cart");
+//   }
+// };
+
 export const syncCartAfterLogin = (userId) => async (dispatch) => {
   dispatch(startLoading());
 
-  const localCart = loadCartFromLocalStorage();
+  const sessionCart = loadCartFromSessionStorage();
 
   try {
-    const response = await apiService.post(`/carts/sync`, { userId, cart: localCart });
+    const response = await apiService.post(`/carts/sync`, { userId, cart: sessionCart });
     dispatch(syncCartFromBackendSuccess(response.data));
-    saveCartToLocalStorage(response.data);
+    saveCartToSessionStorage(response.data);
     toast.success("Cart synced successfully");
   } catch (error) {
     dispatch(hasError(error.message));
@@ -163,9 +239,15 @@ export const syncCartAfterLogin = (userId) => async (dispatch) => {
   }
 };
 
+
+// export const clearCartOnLogout = () => (dispatch) => {
+//   dispatch(clearCart());
+//   localStorage.removeItem("cart");
+// };
+
 export const clearCartOnLogout = () => (dispatch) => {
   dispatch(clearCart());
-  localStorage.removeItem("cart");
+  sessionStorage.removeItem("cart"); // Xóa giỏ hàng khi đăng xuất
 };
 
 

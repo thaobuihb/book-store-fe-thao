@@ -19,6 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
 import { logoutSuccess } from "../features/user/userSlice";
 import { getCategories } from "../features/category/categorySlice";
+import {loadCart} from "../features/cart/cartSlice"
 
 function MainHeader() {
   const navigate = useNavigate();

@@ -16,7 +16,9 @@ import {
   CircularProgress,
   Select,
   MenuItem,
+  IconButton
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers,
@@ -29,9 +31,9 @@ const UsersPage = () => {
   const dispatch = useDispatch();
   const { users = [], loading, error } = useSelector((state) => state.admin);
 
-  const [addModalOpen, setAddModalOpen] = useState(false); // Modal Thêm quản lý
-  const [editModalOpen, setEditModalOpen] = useState(false); // Modal Sửa vai trò
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false); // Modal Xóa người dùng
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [newManager, setNewManager] = useState({
     name: "",
@@ -40,6 +42,11 @@ const UsersPage = () => {
   });
   const [selectedUser, setSelectedUser] = useState(null);
   const [updatedRole, setUpdatedRole] = useState("");
+
+  const [errors, setErrors] = useState({});
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -73,10 +80,67 @@ const UsersPage = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setNewManager((prev) => ({ ...prev, [name]: value }));
+    
+    setNewManager((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "password" && { confirmPassword: "" }), 
+    }));
+  
+    if (name === "confirmPassword" && value !== newManager.password) {
+      setErrors((prevErrors) => ({ ...prevErrors, confirmPassword: "Mật khẩu không khớp" }));
+    } else {
+      setErrors((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name]; 
+        if (name === "password") delete updatedErrors.confirmPassword; 
+        return updatedErrors;
+      });
+    }
   };
+  
 
   const handleAddManager = () => {
+    const newErrors = {};
+
+    if (newManager.password !== newManager.confirmPassword) {
+      newErrors.confirmPassword = "Mật khẩu không khớp";
+    }  
+
+    // ✅ Kiểm tra tên
+    if (!newManager.name.trim()) newErrors.name = "Vui lòng nhập tên.";
+
+    // ✅ Kiểm tra email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newManager.email.trim()) {
+      newErrors.email = "Vui lòng nhập email.";
+    } else if (!emailRegex.test(newManager.email)) {
+      newErrors.email = "Email không hợp lệ.";
+    } else if (users.some((user) => user.email === newManager.email)) {
+      newErrors.email = "Email đã tồn tại, vui lòng chọn email khác.";
+    }
+
+    // ✅ Kiểm tra mật khẩu
+    const password = newManager.password.trim();
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!password) {
+      newErrors.password = "Vui lòng nhập mật khẩu.";
+    } else if (password.length < 8) {
+      newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự.";
+    } else if (!passwordRegex.test(password)) {
+      newErrors.password =
+        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+
     dispatch(addManager(newManager))
       .unwrap()
       .then(() => {
@@ -133,7 +197,6 @@ const UsersPage = () => {
       >
         Thêm quản lý
       </Button>
-
       {/* Bảng Người Dùng */}
       <TableContainer component={Paper}>
         <Table>
@@ -181,7 +244,6 @@ const UsersPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
       {/* Modal Thêm Quản Lý */}
       <Modal open={addModalOpen} onClose={handleCloseAddModal}>
         <Box
@@ -200,6 +262,8 @@ const UsersPage = () => {
           <Typography variant="h6" gutterBottom>
             Thêm Quản Lý
           </Typography>
+
+          {/* Ô nhập Tên */}
           <TextField
             label="Tên"
             name="name"
@@ -207,7 +271,14 @@ const UsersPage = () => {
             onChange={handleFormChange}
             fullWidth
             margin="normal"
+            error={!!errors.name}
+            helperText={errors.name}
+            placeholder="Nhập tên quản lý"
+            autoComplete="off"
+            autoFocus
           />
+
+          {/* Ô nhập Email */}
           <TextField
             label="Email"
             name="email"
@@ -215,7 +286,13 @@ const UsersPage = () => {
             onChange={handleFormChange}
             fullWidth
             margin="normal"
+            error={!!errors.email}
+            helperText={errors.email}
+            placeholder="Nhập email hợp lệ"
+            autoComplete="off"
           />
+
+          {/* Ô nhập Mật khẩu + Hiển thị mật khẩu */}
           <TextField
             label="Mật khẩu"
             name="password"
@@ -223,8 +300,49 @@ const UsersPage = () => {
             onChange={handleFormChange}
             fullWidth
             margin="normal"
-            type="password"
+            type={showPassword ? "text" : "password"}
+            error={!!errors.password}
+            helperText={errors.password}
+            placeholder="Mật khẩu mạnh (8+ ký tự, chữ hoa, số, ký tự đặc biệt)"
+            autoComplete="new-password"
+            InputProps={{
+              endAdornment: (
+                <IconButton
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              ),
+            }}
           />
+
+          {/* Ô nhập lại mật khẩu + Hiển thị mật khẩu */}
+          <TextField
+            label="Xác nhận mật khẩu"
+            name="confirmPassword"
+            value={newManager.confirmPassword}
+            onChange={handleFormChange}
+            fullWidth
+            margin="normal"
+            type={showConfirmPassword ? "text" : "password"}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
+            placeholder="Nhập lại mật khẩu"
+            autoComplete="new-password"
+            InputProps={{
+              endAdornment: (
+                <IconButton
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  edge="end"
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              ),
+            }}
+          />
+
+          {/* Nút hành động */}
           <Box mt={2} display="flex" justifyContent="flex-end">
             <Button onClick={handleCloseAddModal} sx={{ mr: 2 }}>
               Hủy
@@ -234,12 +352,15 @@ const UsersPage = () => {
               onClick={handleAddManager}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : "Thêm"}
+              {loading ? (
+                <CircularProgress size={20} sx={{ color: "white", mr: 1 }} />
+              ) : (
+                "Thêm"
+              )}
             </Button>
           </Box>
         </Box>
       </Modal>
-
       {/* Modal Sửa Vai Trò */}
       <Modal open={editModalOpen} onClose={handleCloseEditModal}>
         <Box
@@ -284,7 +405,6 @@ const UsersPage = () => {
           </Box>
         </Box>
       </Modal>
-
       {/* Modal Xóa Người Dùng */}
       <Modal open={deleteModalOpen} onClose={handleCloseDeleteModal}>
         <Box

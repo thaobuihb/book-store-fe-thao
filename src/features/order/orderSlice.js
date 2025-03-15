@@ -162,6 +162,19 @@ export const searchOrderByCode = createAsyncThunk(
   }
 );
 
+export const cancelGuestOrder = createAsyncThunk(
+  "order/cancelGuestOrder",
+  async ({ orderCode }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.put(`/orders/guest/cancel/${orderCode}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+
 // Khởi tạo slice
 const orderSlice = createSlice({
   name: "orders",
@@ -182,7 +195,7 @@ const orderSlice = createSlice({
       state.orderDetails = null;
     },
     clearSearchResult: (state) => {
-      state.searchResult = null;
+      state.searchResult = [];
       state.searchError = null;
     },
   },
@@ -324,6 +337,16 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.searchError = action.payload || "Order not found";
       })
+      // .addCase(cancelOrder.fulfilled, (state, action) => {
+      //   state.purchaseHistory = state.purchaseHistory.map(order =>
+      //     order._id === action.payload.orderId ? { ...order, status: "Đã hủy" } : order
+      //   );
+      // })
+      .addCase(cancelGuestOrder.fulfilled, (state, action) => {
+        state.purchaseHistory = state.purchaseHistory.map(order =>
+          order.orderCode === action.payload.orderCode ? { ...order, status: "Đã hủy" } : order
+        );
+      });
   },
 });
 

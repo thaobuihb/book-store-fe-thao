@@ -30,16 +30,18 @@ const CategoriesPage = () => {
     categoryName: "",
     description: "",
   });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (categoryForm.categoryName.trim() !== "") {
-  //     dispatch(clearError()); // Xóa lỗi khi người dùng nhập lại
-  //   }
-  // }, [categoryForm.categoryName, dispatch]);
+  useEffect(() => {
+    if (categoryForm.categoryName.trim() !== "") {
+      dispatch(clearError()); 
+    }
+  }, [categoryForm.categoryName, dispatch]);
 
   const handleOpenAddModal = () => {
     setCategoryForm({ categoryName: "", description: "" });
@@ -74,36 +76,26 @@ const CategoriesPage = () => {
   };
 
   const handleAddCategory = () => {
-    setErrorMessage(""); // Xóa lỗi trước khi gửi request
-
+    setErrorMessage(""); // Clear previous errors
+  
     dispatch(addCategory(categoryForm))
       .unwrap()
       .then(() => {
         console.log("✅ Danh mục đã được thêm thành công!");
-        dispatch(fetchCategories()); // Cập nhật danh mục
-        handleCloseAddModal(); // Đóng modal sau khi thêm thành công
+        dispatch(fetchCategories()); 
+        handleCloseAddModal(); 
       })
       .catch((error) => {
         console.error("❌ Lỗi khi thêm danh mục:", error);
-
-        // 🔥 Hiển thị lỗi từ Redux
-        if (typeof error === "string") {
+        if (typeof error === 'string') {
           setErrorMessage(error);
-        } else if (error?.message) {
+        } else if (error && typeof error === 'object' && error.message) {
           setErrorMessage(error.message);
         } else {
           setErrorMessage("Lỗi không xác định từ API");
         }
       });
   };
-
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    console.log("🔥 Redux error state:", error);
-  }, [error]);
 
   useEffect(() => {
     if (categoryForm.categoryName.trim() !== "") {

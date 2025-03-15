@@ -1,6 +1,8 @@
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiService from '../../app/apiService';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
+// import { clearSearchResult } from '../order/orderSlice';
 
 const initialState = {
   user: null,
@@ -43,7 +45,7 @@ const userSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
     },
-    logoutSuccess(state) {
+    logoutSuccess(state,) {
       state.user = null;
       state.isAuthenticated = false;
     },

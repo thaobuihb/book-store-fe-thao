@@ -17,16 +17,10 @@ import useAuth from "../hooks/useAuth";
 import { FormProvider, FTextField } from "../components/form";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
 
-const RegisterSchema = Yup.object().shape({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
-  passwordConfirmation: Yup.string()
-    .required("Please confirm your password")
-    .oneOf([Yup.ref("password")], "Passwords must match"),
-});
+import { RegisterSchema } from "../utils/validationSchemas";
+import store from "../app/store";
+
 
 const defaultValues = {
   name: "",
@@ -55,20 +49,30 @@ function RegisterPage() {
   } = methods;
 
   const onSubmit = async (data) => {
-    const { name, email, password } = data;
-    const from = location.state?.from?.pathname || "/"; // Lấy trang trước đó hoặc mặc định là trang chủ
+    console.log("Redux state before register:", store.getState().auth); 
 
+    const { name, email, password } = data;
+    const from = location.state?.from?.pathname || "/"; 
+  
     try {
-      await auth.register({ name, email, password }, () => {
-        auth.login({ email, password }, () => {
-          navigate(from, { replace: true });
-        });
+      await auth.register({ name, email: email.trim(), password }, (error) => {
+        console.log("Redux state after register:", store.getState().auth); 
+
+        if (error) {
+          reset();
+          setError("responseError", { message: error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại." });
+          return; 
+        }
+  
+        navigate(from, { replace: true });
       });
     } catch (error) {
       reset();
-      setError("responseError", error);
+      setError("responseError", { message: "Đăng ký thất bại. Vui lòng thử lại." });
     }
   };
+  
+  
 
   return (
     <Container maxWidth="xs">

@@ -97,7 +97,9 @@ const DetailPage = () => {
       totalAmount: parseFloat((book.discountedPrice || book.price) * quantity),
     };
 
-    localStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
+    // localStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
+    sessionStorage.setItem("buyNowOrder", JSON.stringify(orderDetails));
+
 
     navigate(`/order/${useId}`, { state: orderDetails });
   };

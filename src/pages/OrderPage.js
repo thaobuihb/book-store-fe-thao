@@ -37,21 +37,30 @@ const OrderPage = () => {
       return location.state;
     }
 
-    const savedOrder = localStorage.getItem("orderDetails");
+    // const savedOrder = localStorage.getItem("orderDetails");
+    // if (savedOrder) {
+    //   console.log("Dữ liệu từ localStorage:", JSON.parse(savedOrder));
+    //   return JSON.parse(savedOrder);
+    // }
+
+    const savedOrder = sessionStorage.getItem("orderDetails");
     if (savedOrder) {
       console.log("Dữ liệu từ localStorage:", JSON.parse(savedOrder));
       return JSON.parse(savedOrder);
     }
-
     console.log("Không có dữ liệu trong state hoặc localStorage");
     return { items: [], totalAmount: 0 };
   });
 
   // Cập nhật `localStorage` khi `orderDetails` thay đổi
+  // useEffect(() => {
+  //   localStorage.setItem("orderDetails", JSON.stringify(orderDetails));
+  //   console.log("Order Details from localStorage or state:", orderDetails);
+  // }, [orderDetails]);
   useEffect(() => {
-    localStorage.setItem("orderDetails", JSON.stringify(orderDetails));
-    console.log("Order Details from localStorage or state:", orderDetails);
-  }, [orderDetails]);
+      sessionStorage.setItem("orderDetails", JSON.stringify(orderDetails));
+      console.log("Order Details from localStorage or state:", orderDetails);
+    }, [orderDetails]);
 
   // Dữ liệu biểu mẫu địa chỉ
   const [formData, setFormData] = useState({

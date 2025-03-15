@@ -10,6 +10,9 @@ import {
   clearCartOnLogout,
 } from "../features/cart/cartSlice";
 import { loginSuccess, logoutSuccess } from "../features/user/userSlice";
+import { clearSearchResult } from "../features/order/orderSlice";
+import { fetchPurchaseHistory } from "../features/order/orderSlice";
+
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -22,6 +25,7 @@ const initialState = {
 const INITIALIZE = "AUTH.INITIALIZE";
 const LOGIN_SUCCESS = "AUTH.LOGIN_SUCCESS";
 const REGISTER_SUCCESS = "AUTH.REGISTER_SUCCESS";
+const REGISTER_FAIL = "REGISTER_FAIL";
 const LOGOUT = "AUTH.LOGOUT";
 
 const reducer = (state, action) => {
@@ -52,6 +56,11 @@ const reducer = (state, action) => {
         isAuthenticated: false,
         user: null,
       };
+      case REGISTER_FAIL:
+            return {
+                ...state,
+                error: action.payload
+            };
     default:
       return state;
   }
@@ -140,9 +149,11 @@ function AuthProvider({ children }) {
       });
 
       reduxDispatch(loginSuccess(user));
-      reduxDispatch(syncWishlistAfterLogin(user._id));
-      reduxDispatch(syncCartAfterLogin(user._id));
-
+      setTimeout(() => {
+        reduxDispatch(fetchPurchaseHistory(user._id)); 
+        reduxDispatch(syncWishlistAfterLogin(user._id));
+        reduxDispatch(syncCartAfterLogin(user._id));
+      }, 500); 
       if (callback) callback();
       return user;
     } catch (error) {
@@ -150,22 +161,54 @@ function AuthProvider({ children }) {
     }
   };
 
+
   const register = async ({ name, email, password }, callback) => {
-    const response = await apiService.post("/users", {
-      name,
-      email,
-      password,
-    });
+    try {
+      const response = await apiService.post("/users", { name, email, password });
+  
+      if (!response.data || !response.data.accessToken) {
+        throw new Error("Invalid response from server");
+      }
+  
+      const { user, accessToken } = response.data;
+  
+      // Lưu token vào session/localStorage
+      setSession(accessToken);
+  
+      // Cập nhật AuthContext
+      dispatch({
+        type: REGISTER_SUCCESS,
+        payload: { user },
+      });
+  
+      // Cập nhật Redux ngay lập tức
+      reduxDispatch(loginSuccess(user));
+  
+      setTimeout(() => {
+        reduxDispatch(fetchPurchaseHistory(user._id)); 
+        reduxDispatch(syncWishlistAfterLogin(user._id));
+        reduxDispatch(syncCartAfterLogin(user._id));
+      }, 500); 
 
-    const { user, accessToken } = response.data;
-    setSession(accessToken);
-    dispatch({
-      type: REGISTER_SUCCESS,
-      payload: { user },
-    });
-
-    callback();
+      toast.success("Đăng ký thành công!");
+  
+      // Gọi callback khi đã hoàn tất
+      if (typeof callback === "function") {
+        callback(null);
+      }
+    } catch (error) {
+      dispatch({
+        type: REGISTER_FAIL,
+        payload: error.response?.data?.message || "Đăng ký thất bại",
+      });
+  
+      if (typeof callback === "function") {
+        callback(error);
+      }
+    }
   };
+  
+  
 
   const logout = async (wishlist, user, callback) => {
     try {
@@ -192,6 +235,7 @@ function AuthProvider({ children }) {
       }
 
       reduxDispatch(logoutSuccess());
+      reduxDispatch(clearSearchResult());
       await initialize();
       toast.success("Logged out successfully!");
       if (callback) callback();

@@ -63,7 +63,7 @@ const WishlistPage = () => {
       <Typography variant="h4" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
         Sách yêu thích ❤️
       </Typography>
-
+  
       {isLoading ? (
         <Typography
           variant="h6"
@@ -73,173 +73,184 @@ const WishlistPage = () => {
           Loading your wishlist...
         </Typography>
       ) : detailedWishlist.length === 0 ? (
-        <Typography
-          variant="h6"
-          color="textSecondary"
-          sx={{ textAlign: "center" }}
-        >
-          Không có sách nào trong danh sách yêu thích của bạn.
-        </Typography>
+        <Box sx={{ textAlign: "center", mt: 4 }}>
+          <Typography variant="h6" color="textSecondary">
+            Không có sách nào trong danh sách yêu thích của bạn.
+          </Typography>
+
+          {/* Nút Xem Tiếp */}
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3 }}
+            onClick={() => navigate("/")}
+          >
+            Xem Tiếp
+          </Button>
+        </Box>
       ) : (
-        <Grid container spacing={3} justifyContent="center">
-          {detailedWishlist.map((book, index) => (
-            <Grid item xs={12} sm={6} md={3} key={book._id || index}>
-              <Card
-                sx={{
-                  position: "relative",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  minHeight: 400,
-                  transition: "0.3s",
-                  "&:hover": {
-                    boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
-                  },
-                }}
-              >
-                <IconButton
-                  onClick={() => handleRemoveFromWishlist(book._id)}
+        <>
+          {/* Danh sách sách */}
+          <Grid container spacing={3} justifyContent="center">
+            {detailedWishlist.map((book, index) => (
+              <Grid item xs={12} sm={6} md={3} key={book._id || index}>
+                <Card
                   sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    color: "red",
-                    zIndex: 1,
-                    visibility: "visible",
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    minHeight: 400,
+                    transition: "0.3s",
                     "&:hover": {
-                      opacity: 1,
+                      boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
                     },
                   }}
                 >
-                  <DeleteIcon />
-                </IconButton>
-
-                <CardMedia
-                  component="img"
-                  image={book.img || "/default-book.jpg"}
-                  alt={book.name}
-                  sx={{
-                    height: 250,
-                    objectFit: "cover",
-                    cursor: "pointer",
-                    "&:hover": {
-                      opacity: 0.9,
-                    },
-                  }}
-                  onClick={() => handleNavigateToDetail(book._id)} 
-                />
-
-                <CardContent
-                  sx={{
-                    textAlign: "center",
-                    p: 2,
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleNavigateToDetail(book._id)} 
-                >
-                  <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-                    {book.name}
-                  </Typography>
-                  <Typography variant="subtitle2" sx={{ color: "gray" }}>
-                    Tác giả: {book.author}
-                  </Typography>
-
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    {book.discountedPrice ? (
-                      <>
-                        <span
-                          style={{
-                            textDecoration: "line-through",
-                            color: "gray",
-                          }}
-                        >
-                          ${book.price}
-                        </span>{" "}
-                        <span style={{ fontWeight: "bold", color: "green" }}>
-                          ${book.discountedPrice}
-                        </span>
-                      </>
-                    ) : (
-                      <span style={{ fontWeight: "bold" }}>${book.price}</span>
-                    )}
-                  </Typography>
-
-                  <Button
-                    variant="contained"
-                    color="primary"
+                  <IconButton
+                    onClick={() => handleRemoveFromWishlist(book._id)}
                     sx={{
-                      marginTop: 2,
-                      display: "block",
-                      marginLeft: "auto",
-                      marginRight: "auto",
-                      fontWeight: "bold",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation(); 
-                      handleAddToCart(book);
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      color: "red",
+                      zIndex: 1,
                     }}
                   >
-                    THÊM VÀO GIỎ HÀNG
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    <DeleteIcon />
+                  </IconButton>
+  
+                  <CardMedia
+                    component="img"
+                    image={book.img || "/default-book.jpg"}
+                    alt={book.name}
+                    sx={{
+                      height: 250,
+                      objectFit: "cover",
+                      cursor: "pointer",
+                      "&:hover": {
+                        opacity: 0.9,
+                      },
+                    }}
+                    onClick={() => handleNavigateToDetail(book._id)}
+                  />
+  
+                  <CardContent
+                    sx={{
+                      textAlign: "center",
+                      p: 2,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleNavigateToDetail(book._id)}
+                  >
+                    <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                      {book.name}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ color: "gray" }}>
+                      Tác giả: {book.author}
+                    </Typography>
+  
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      {book.discountedPrice ? (
+                        <>
+                          <span
+                            style={{
+                              textDecoration: "line-through",
+                              color: "gray",
+                            }}
+                          >
+                            ${book.price}
+                          </span>{" "}
+                          <span style={{ fontWeight: "bold", color: "green" }}>
+                            ${book.discountedPrice}
+                          </span>
+                        </>
+                      ) : (
+                        <span style={{ fontWeight: "bold" }}>${book.price}</span>
+                      )}
+                    </Typography>
+  
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        marginTop: 2,
+                        display: "block",
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        fontWeight: "bold",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(book);
+                      }}
+                    >
+                      THÊM VÀO GIỎ HÀNG
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+  
+          {/* Ẩn phần này nếu wishlist trống */}
+          {detailedWishlist.length > 0 && (
+            <>
+              <Typography
+                variant="body2"
+                sx={{
+                  marginTop: 2,
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  textAlign: "center",
+                }}
+                onClick={handleClearWishlist}
+              >
+                XOÁ
+              </Typography>
+  
+              <Box sx={{ marginTop: 6, display: "flex", justifyContent: "center" }}>
+                <Typography variant="h6" sx={{ marginRight: 2 }}>
+                  Chia sẻ danh sách của bạn:
+                </Typography>
+                <IconButton
+                  component="a"
+                  href="https://www.facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FacebookIcon sx={{ color: "#4267B2", fontSize: 30 }} />
+                </IconButton>
+                <IconButton
+                  component="a"
+                  href="https://www.instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <InstagramIcon sx={{ color: "#E1306C", fontSize: 30 }} />
+                </IconButton>
+                <IconButton
+                  component="a"
+                  href="https://www.twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <TwitterIcon sx={{ color: "#1DA1F2", fontSize: 30 }} />
+                </IconButton>
+                <IconButton
+                  component="a"
+                  href="https://www.linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <LinkedInIcon sx={{ color: "#0077B5", fontSize: 30 }} />
+                </IconButton>
+              </Box>
+            </>
+          )}
+        </>
       )}
-
-      <Typography
-        variant="body2"
-        sx={{
-          marginTop: 2,
-          cursor: "pointer",
-          textDecoration: "underline",
-          textAlign: "center",
-        }}
-        onClick={handleClearWishlist}
-      >
-        XOÁ
-      </Typography>
-
-      <Box sx={{ marginTop: 6, display: "flex", justifyContent: "center" }}>
-        <Typography variant="h6" sx={{ marginRight: 2 }}>
-          Chia sẻ danh sách của bạn:
-        </Typography>
-        <IconButton
-          component="a"
-          href="https://www.facebook.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <FacebookIcon sx={{ color: "#4267B2", fontSize: 30 }} />
-        </IconButton>
-        <IconButton
-          component="a"
-          href="https://www.instagram.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <InstagramIcon sx={{ color: "#E1306C", fontSize: 30 }} />
-        </IconButton>
-        <IconButton
-          component="a"
-          href="https://www.twitter.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <TwitterIcon sx={{ color: "#1DA1F2", fontSize: 30 }} />
-        </IconButton>
-        <IconButton
-          component="a"
-          href="https://www.linkedin.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <LinkedInIcon sx={{ color: "#0077B5", fontSize: 30 }} />
-        </IconButton>
-      </Box>
     </Box>
   );
-};
-
+}  
 export default WishlistPage;

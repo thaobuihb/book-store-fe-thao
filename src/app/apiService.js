@@ -44,10 +44,13 @@ apiService.interceptors.response.use(
   },
   function (error) {
     console.log("RESPONSE ERROR", { error });
-    const message = error.response?.data?.errors?.message || "Unknown Error";
-    return Promise.reject({ message });
+    const message = 
+      error.response?.data?.message || 
+      error.response?.data?.errors?.message ||
+      error.message ||
+      "Unknown Error";
+    return Promise.reject({ success: false, message });
   }
 );
-
 
 export default apiService;
