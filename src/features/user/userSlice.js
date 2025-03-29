@@ -6,10 +6,13 @@ import apiService from '../../app/apiService';
 
 const initialState = {
   user: null,
+  resetUrl: null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
   isUpdateSuccess: false,
+  isForgotSuccess: false,
+  isResetSuccess: false,
 };
 
 export const getCurrentUserProfile = createAsyncThunk(
@@ -37,6 +40,30 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+export const forgotPassword = createAsyncThunk(
+  'user/forgotPassword',
+  async (email, { rejectWithValue }) => {
+    try {
+      const res = await apiService.post('/auth/forgot-password', { email });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || 'Something went wrong');
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'user/resetPassword',
+  async ({ token, password }, { rejectWithValue }) => {
+    try {
+      const res = await apiService.post('/auth/reset-password', { token, password });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue({ success: false, message: error.message || "Lỗi không xác định từ Redux!" });
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -51,6 +78,12 @@ const userSlice = createSlice({
     },
     resetUpdateStatus(state) {
       state.isUpdateSuccess = false;
+    },
+    resetAuthStatus(state) {
+      state.error = null;
+      state.isForgotSuccess = false;
+      state.isResetSuccess = false;
+      state.resetUrl = null;
     }
   },
   extraReducers: (builder) => {
@@ -82,9 +115,51 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.isUpdateSuccess = false;
-      });
+      })
+      // Forgot Password
+  .addCase(forgotPassword.pending, (state) => {
+    state.isLoading = true;
+    state.error = null;
+    state.isForgotSuccess = false;
+  })
+  .addCase(forgotPassword.fulfilled, (state, action) => {
+    state.isLoading = false;
+    state.isForgotSuccess = true;
+    state.resetUrl = action.payload?.resetUrl || null;  
+  })
+  .addCase(forgotPassword.rejected, (state, action) => {
+    state.isLoading = false;
+    state.error = action.payload;
+    state.isForgotSuccess = false;
+  })
+
+  // Reset Password
+  .addCase(resetPassword.pending, (state) => {
+    state.isLoading = true;
+    state.error = null;
+    state.isResetSuccess = false;
+  })
+  .addCase(resetPassword.fulfilled, (state, action) => {
+    state.isLoading = false;
+    state.isResetSuccess = true;
+  })
+  .addCase(resetPassword.rejected, (state, action) => {
+    state.isLoading = false;
+    state.isResetSuccess = false;
+  
+    console.log("❌ Reset Password Error Payload:", JSON.stringify(action.payload, null, 2));
+  
+    if (typeof action.payload === 'object') {
+      state.error = action.payload.message || "Unknown Error";
+    } else if (typeof action.payload === 'string') {
+      state.error = action.payload;
+    } else {
+      state.error = action.error?.message || "Unknown Error";
+    }
+  });
+  
   },
 });
 
-export const { loginSuccess, logoutSuccess, resetUpdateStatus } = userSlice.actions;
+export const { loginSuccess, logoutSuccess, resetUpdateStatus, resetAuthStatus, } = userSlice.actions;
 export default userSlice.reducer;

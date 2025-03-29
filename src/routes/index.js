@@ -15,7 +15,8 @@ import WishlistPage from "../pages/WishlistPage";
 import BookPage from "../pages/BookPage";
 import ThankYouPage from "../pages/ThankYouPage";
 import BestSellerPage from "../pages/BestSellerPage";
-
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -40,7 +41,11 @@ function Router() {
       {/* Main Layout */}
       <Route
         element={
-          user?.role === "admin" ? <Navigate to="/admin/dashboard" /> : <MainLayout />
+          user?.role === "admin" ? (
+            <Navigate to="/admin/dashboard" />
+          ) : (
+            <MainLayout />
+          )
         }
       >
         <Route path="/" element={<HomePage />} />
@@ -59,6 +64,8 @@ function Router() {
       <Route element={<BlankLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 

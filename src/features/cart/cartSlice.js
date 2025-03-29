@@ -27,7 +27,6 @@ const removeCartFromSessionStorage = () => {
 
 const initialState = {
   cart: loadCartFromSessionStorage(),
-  // cart: loadCartFromLocalStorage(),
   detailedCart: [],
   isLoading: false,
   error: null,
@@ -56,17 +55,7 @@ const cartSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
-    // addBookToCartSuccess(state, action) {
-    //   const book = action.payload;
-    //   const existingItem = state.cart.find(item => item.bookId === book.bookId);
-    //   if (existingItem) {
-    //     existingItem.quantity += book.quantity; 
-    //   } else {
-    //     state.cart.push({ ...book, quantity: book.quantity }); 
-    //   }
-    //   saveCartToLocalStorage(state.cart);
-    //   state.isLoading = false;
-    // },
+    
     addBookToCartSuccess(state, action) {
       const book = action.payload;
       const existingItem = state.cart.find(item => item.bookId === book.bookId);
@@ -79,12 +68,7 @@ const cartSlice = createSlice({
       saveCartToSessionStorage(state.cart);
       state.isLoading = false;
     },
-    // removeBookFromCartSuccess(state, action) {
-    //   state.cart = state.cart.filter((book) => book.bookId !== action.payload);
-    //   state.detailedCart = state.detailedCart.filter((book) => book.bookId !== action.payload); // Cập nhật cả detailedCart nếu cần
-    //   saveCartToLocalStorage(state.cart);
-    //   state.isLoading = false;
-    // },
+  
 
     removeBookFromCartSuccess(state, action) {
       state.cart = state.cart.filter((book) => book.bookId !== action.payload);
@@ -94,15 +78,6 @@ const cartSlice = createSlice({
       state.isLoading = false;
     },
     
-    // updateCartQuantitySuccess(state, action) {
-    //   const { bookId, quantity } = action.payload;
-    //   const item = state.cart.find(book => book.bookId === bookId);
-    //   if (item) {
-    //     item.quantity = quantity;
-    //   }
-    //   saveCartToLocalStorage(state.cart);
-    //   state.isLoading = false;
-    // },
 
     updateCartQuantitySuccess(state, action) {
       const { bookId, quantity } = action.payload;
@@ -116,13 +91,6 @@ const cartSlice = createSlice({
     },
     
 
-    // clearCart(state) {
-    //   state.cart = [];
-    //   state.detailedCart = [];
-    //   removeCartFromLocalStorage();
-    //   state.isLoading = false;
-    // },
-
     clearCart(state) {
       state.cart = [];
       state.detailedCart = [];
@@ -130,24 +98,12 @@ const cartSlice = createSlice({
       state.isLoading = false;
     },
 
-    // syncCartFromBackendSuccess(state, action) {
-    //   state.cart = action.payload;
-    //   saveCartToLocalStorage(state.cart);
-    //   state.isLoading = false;
-    // },
-
     syncCartFromBackendSuccess(state, action) {
       state.cart = action.payload;
       saveCartToSessionStorage(state.cart);
       state.isLoading = false;
     },
     
-    // clearAllCartItemsSuccess(state) {
-    //   state.cart = [];
-    //   state.detailedCart = [];
-    //   removeCartFromLocalStorage();
-    //   state.isLoading = false;
-    // },
 
     clearAllCartItemsSuccess(state) {
         state.cart = [];
@@ -197,31 +153,13 @@ export const addToCart = (book) => async (dispatch, getState) => {
       await apiService.post("/carts", payload);
     }
     dispatch(addBookToCartSuccess(payload)); 
-    toast.success("Book added to the cart");
+    // toast.success("Book added to the cart");
   } catch (error) {
     dispatch(hasError(error.message));
-    toast.error("Error adding book to cart");
+    // toast.error("Error adding book to cart");
   }
 };
 
-
-
-
-// export const syncCartAfterLogin = (userId) => async (dispatch) => {
-//   dispatch(startLoading());
-
-//   const localCart = loadCartFromLocalStorage();
-
-//   try {
-//     const response = await apiService.post(`/carts/sync`, { userId, cart: localCart });
-//     dispatch(syncCartFromBackendSuccess(response.data));
-//     saveCartToLocalStorage(response.data);
-//     toast.success("Cart synced successfully");
-//   } catch (error) {
-//     dispatch(hasError(error.message));
-//     toast.error("Error syncing cart");
-//   }
-// };
 
 export const syncCartAfterLogin = (userId) => async (dispatch) => {
   dispatch(startLoading());
@@ -232,22 +170,17 @@ export const syncCartAfterLogin = (userId) => async (dispatch) => {
     const response = await apiService.post(`/carts/sync`, { userId, cart: sessionCart });
     dispatch(syncCartFromBackendSuccess(response.data));
     saveCartToSessionStorage(response.data);
-    toast.success("Cart synced successfully");
+    // toast.success("Cart synced successfully");
   } catch (error) {
     dispatch(hasError(error.message));
-    toast.error("Error syncing cart");
+    // toast.error("Error syncing cart");
   }
 };
 
 
-// export const clearCartOnLogout = () => (dispatch) => {
-//   dispatch(clearCart());
-//   localStorage.removeItem("cart");
-// };
-
 export const clearCartOnLogout = () => (dispatch) => {
   dispatch(clearCart());
-  sessionStorage.removeItem("cart"); // Xóa giỏ hàng khi đăng xuất
+  sessionStorage.removeItem("cart"); 
 };
 
 
@@ -257,22 +190,14 @@ export const clearAllCartItems = () => async (dispatch, getState) => {
 
   try {
     if (isAuthenticated && user) {
-      // console.log("User is authenticated, attempting to clear cart on server.");
       
-      // Gửi yêu cầu DELETE để xóa giỏ hàng trên server
       const response = await apiService.delete(`/carts`);
-      // console.log("Server response for clearing cart:", response);
     } else {
-      // console.log("User not authenticated, clearing cart from localStorage.");
-      
-      // Xóa giỏ hàng khỏi localStorage nếu người dùng chưa đăng nhập
-      localStorage.removeItem("cart");
+      sessionStorage.removeItem("cart");
     }
 
-    // Cập nhật Redux store
     dispatch(clearAllCartItemsSuccess());
-    // console.log("Cart cleared successfully in Redux.");
-    toast.success("Cart cleared successfully");
+    toast.success("Coá giỏ hàng thành công");
   } catch (error) {
     console.error("Error clearing cart:", error.message);
     dispatch(hasError(error.message));

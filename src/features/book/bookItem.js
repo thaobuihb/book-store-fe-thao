@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Grid,
   Card,
@@ -12,7 +12,6 @@ import {
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useNavigate } from "react-router-dom";
-import { useSpring, animated } from "@react-spring/web";
 import FlyingIcon from "./FlyingIcon";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleBookInWishlist } from "../wishlist/wishlistSlice";

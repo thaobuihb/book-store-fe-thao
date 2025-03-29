@@ -237,7 +237,7 @@ function AuthProvider({ children }) {
       reduxDispatch(logoutSuccess());
       reduxDispatch(clearSearchResult());
       await initialize();
-      toast.success("Logged out successfully!");
+      // toast.success("Logged out successfully!");
       if (callback) callback();
     } catch (error) {
       toast.error("Logout failed. Please try again.");

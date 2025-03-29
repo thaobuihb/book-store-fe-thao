@@ -46,6 +46,8 @@ apiService.interceptors.response.use(
     console.log("RESPONSE ERROR", { error });
     const message = 
       error.response?.data?.message || 
+      error.response?.data?.error ||
+      error.response?.data?.errors?.[0]?.msg || 
       error.response?.data?.errors?.message ||
       error.message ||
       "Unknown Error";

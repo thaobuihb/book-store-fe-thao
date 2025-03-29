@@ -24,3 +24,18 @@ export const RegisterSchema = Yup.object().shape({
     .required("Vui lòng xác nhận mật khẩu của bạn")
     .oneOf([Yup.ref("password")], "Mật khẩu phải trùng khớp"),
 });
+
+export const PasswordOnlySchema = Yup.object().shape({
+  password: Yup.string()
+    .required("Không thể để trống")
+    .min(8, "Mật khẩu phải tối thiểu 8 ký tự")
+    .max(100, "Mật khẩu không dài quá 100 ký tự")
+    .matches(/[A-Z]/, "Mật khẩu phải có ít nhất một chữ cái viết hoa")
+    .matches(/[a-z]/, "Mật khẩu phải có ít nhất một chữ cái thường")
+    .matches(/[0-9]/, "Mật khẩu phải có ít nhất một số")
+    .matches(/[@$!%*?&]/, "Mật khẩu phải có ít nhất một ký tự đặc biệt (@$!%*?&)"),
+
+  confirmPassword: Yup.string()
+    .required("Vui lòng xác nhận mật khẩu của bạn")
+    .oneOf([Yup.ref("password")], "Mật khẩu phải trùng khớp"),
+});
