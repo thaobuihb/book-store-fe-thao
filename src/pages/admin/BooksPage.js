@@ -86,7 +86,7 @@ const BooksPage = () => {
     if (!newBook.categoryId) tempErrors.categoryId = "Không được để trống";
 
     setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0; 
+    return Object.keys(tempErrors).length === 0;
   };
 
   const [bookToUpdate, setBookToUpdate] = useState({});
@@ -147,23 +147,23 @@ const BooksPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     console.log("📦 newBook:", newBook);
-  
+
     const sanitizedBook = {
       ...newBook,
       price: Number(newBook.price),
       discountRate: Number(newBook.discountRate || 0),
       categoryId: newBook.categoryId?.trim(),
     };
-  
+
     console.log("🚀 GỬI LÊN BACKEND:", sanitizedBook);
-  
+
     try {
       await dispatch(createBook(sanitizedBook)).unwrap();
-  
+
       toast.success("Thêm sách thành công!");
-  
+
       setOpen(false);
       setNewBook({
         name: "",
@@ -175,11 +175,11 @@ const BooksPage = () => {
         categoryId: "",
         discountRate: "",
       });
-  
+
       setErrors({});
     } catch (err) {
       console.error("🧨 unwrap().catch() => err =", err);
-  
+
       if (err && typeof err === "object" && err.errors) {
         setErrors(err.errors);
       } else {
@@ -187,7 +187,7 @@ const BooksPage = () => {
       }
     }
   };
-  
+
   // update
   const handleUpdateChange = (e) => {
     const { name, value } = e.target;
@@ -249,7 +249,7 @@ const BooksPage = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-  
+
     // 👉 Reset dữ liệu form và lỗi khi đóng modal
     setNewBook({
       name: "",
@@ -261,10 +261,9 @@ const BooksPage = () => {
       categoryId: "",
       discountRate: "",
     });
-  
+
     setErrors({});
   };
-  
 
   const handleOpenDeleteModal = (bookId) => {
     setBookToDelete(bookId);
@@ -614,7 +613,12 @@ const BooksPage = () => {
               onChange={handleChange}
               fullWidth
             />
-            <FormControl fullWidth margin="normal" variant="outlined">
+            <FormControl
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              error={!!errors.categoryId}
+            >
               <InputLabel
                 shrink={true}
                 sx={{ fontSize: "18px", color: "black" }}
@@ -624,10 +628,8 @@ const BooksPage = () => {
               <Select
                 name="categoryId"
                 value={newBook.categoryId || ""}
-                onChange={handleChange
-                }
+                onChange={handleChange}
                 displayEmpty
-
                 label="Danh mục"
               >
                 <MenuItem value="" disabled>
