@@ -11,6 +11,8 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import BookItem from "../features/book/bookItem";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import { useTranslation } from "react-i18next";
+
 
 const DetailPage = () => {
   const { bookId } = useParams();
@@ -26,6 +28,8 @@ const DetailPage = () => {
 
   const [quantity, setQuantity] = useState(1);
   const [isBookInCart, setIsBookInCart] = useState(false);
+  const { t } = useTranslation();
+
 
   useEffect(() => {
     dispatch(getBookWithCategory(bookId));
@@ -117,10 +121,10 @@ const DetailPage = () => {
           <Box component="a" sx={{ mt: 2 }}>
             <Typography variant="h5">{book?.name}</Typography>
             <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-              Tác giả: {book?.author}
+            {t('author')} {book?.author}
             </Typography>
             <Typography sx={{ fontSize: "1.1rem" }} variant="body2">
-              Giới thiệu: {book?.description}
+            {t('description')}: {book?.description}
             </Typography>
           </Box>
         </Box>
@@ -137,25 +141,25 @@ const DetailPage = () => {
         >
           <Box sx={{ m: 3 }}>
             <Typography sx={{ m: 2 }} variant="h6">
-              Giá: ${book?.price}
+            {t('price')}: ${book?.price}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Giảm giá: {book?.discountRate ? `${book.discountRate} %` : "0%"}
+            {t('discount')}: {book?.discountRate ? `${book.discountRate} %` : "0%"}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Giá đã giảm: ${book?.discountedPrice}
+            {t('discountedPrice')}: ${book?.discountedPrice}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Nhà xuất bản: {book?.publisher}
+            {t('publisher')}: {book?.publisher}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Ngày xuất bản: {book?.publicationDate}
+            {t('publicationDate')}: {book?.publicationDate}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              ISBN: {book?.Isbn}
+            {t('isbn')}: {book?.Isbn}
             </Typography>
             <Typography sx={{ m: 2 }} variant="h6">
-              Danh mục: {book?.categoryName}
+            {t('category')}: {book?.categoryName}
             </Typography>
           </Box>
 
@@ -236,7 +240,7 @@ const DetailPage = () => {
 
       <Box>
         <Typography variant="h6" sx={{ mt: 5, mb: 2, fontWeight: "bold" }}>
-          Sách cùng danh mục
+        {t('relatedBooks')}
         </Typography>
         <BookItem books={booksByCategory} />
       </Box>

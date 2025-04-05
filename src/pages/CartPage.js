@@ -44,6 +44,7 @@ import {
   clearSearchResult,
   cancelGuestOrder,
 } from "../features/order/orderSlice";
+import { useTranslation } from "react-i18next";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -56,6 +57,7 @@ const CartPage = () => {
   const cartReloadTrigger = useSelector(selectCartReloadTrigger);
   const purchaseHistory = useSelector(selectPurchaseHistory);
   const user = useSelector((state) => state.user?.user || null);
+  const { t } = useTranslation();
 
   const [selectedItems, setSelectedItems] = useState([]);
   const [expandedOrders, setExpandedOrders] = useState({});
@@ -97,9 +99,6 @@ const CartPage = () => {
     setSelectedItems(allBookIds);
   }, [cart]);
 
-  // useEffect(() => {
-  //   console.log("🔍 Kết quả tìm kiếm trong Redux:", searchResult);
-  // }, [searchResult]);
 
   const cartItems = detailedCart.map((book) => {
     const cartItem = cart.find((item) => item.bookId === book._id);
@@ -167,26 +166,6 @@ const CartPage = () => {
         : [...prev, bookId]
     );
   };
-
-  // const handleCancelOrder = async (orderId) => {
-  //   try {
-  //     const confirmation = window.confirm(
-  //       "Are you sure you want to cancel this order?"
-  //     );
-  //     if (!confirmation) return;
-
-  //     if (user?._id) {
-  //       await dispatch(cancelOrder({ userId: user._id, orderId })).unwrap();
-  //       dispatch(fetchPurchaseHistory(user._id));
-  //       alert("Order has been cancelled successfully!");
-  //     } else {
-  //       alert("You need to be logged in to cancel an order.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to cancel order:", error);
-  //     alert("Failed to cancel the order. Please try again later.");
-  //   }
-  // };
 
   const toggleExpand = (orderId) => {
     setExpandedOrders((prev) => ({
@@ -275,18 +254,19 @@ const CartPage = () => {
     handleCloseModal();
   };
 
+  
   return (
     <Container id="cart-page-container" tabIndex="-1">
       <Typography variant="h4" gutterBottom>
-        Mua hàng
+      {t('cartTitle')}
       </Typography>
       <Tabs
         value={currentTab}
         onChange={handleTabChange}
         aria-label="Cart and Purchase History"
       >
-        <Tab label="Giỏ hàng" id="tab-0" aria-controls="tabpanel-0" />
-        <Tab label="Lịch sử mua hàng" id="tab-1" aria-controls="tabpanel-1" />
+        <Tab label={t('cartTab')} id="tab-0" aria-controls="tabpanel-0" />
+        <Tab label={t('historyTab')} id="tab-1" aria-controls="tabpanel-1" />
       </Tabs>
 
       <Box
@@ -311,7 +291,7 @@ const CartPage = () => {
           {cartItems.length === 0 ? (
             <Box sx={{ textAlign: "center", mt: 4 }}>
             <Typography variant="h6" color="textSecondary">
-              Giỏ hàng trống
+            {t('emptyCart')}
             </Typography>
   
             {/* Nút Xem Tiếp */}
@@ -321,7 +301,7 @@ const CartPage = () => {
               sx={{ mt: 3 }}
               onClick={() => navigate("/")}
             >
-              Thêm
+              {t('addMore')}
             </Button>
           </Box>
           ) : (
@@ -351,7 +331,7 @@ const CartPage = () => {
                           <CardContent>
                             <Typography variant="h6">{item.name}</Typography>
                             <Typography variant="body1">
-                              Giá: ${item.discountedPrice || item.price}
+                            {t('price')}:${item.discountedPrice || item.price}
                             </Typography>
                             <Box
                               sx={{
@@ -393,7 +373,7 @@ const CartPage = () => {
                               </IconButton>
                             </Box>
                             <Typography variant="body1" sx={{ marginTop: 1 }}>
-                              Tổng: $
+                            {t('total')}: $
                               {(item.discountedPrice || item.price) *
                                 item.quantity}
                             </Typography>
@@ -422,7 +402,7 @@ const CartPage = () => {
                   }}
                 >
                   <Typography variant="h5" gutterBottom>
-                    Tổng: ${totalPrice.toFixed(2)}
+                  {t('total')}: ${totalPrice.toFixed(2)}
                   </Typography>
                   <Button
                     variant="contained"
@@ -432,7 +412,7 @@ const CartPage = () => {
                     onClick={handleProceedToCheckout}
                     disabled={selectedItems.length === 0}
                   >
-                    Thanh toán
+                     {t('checkout')}
                   </Button>
                   <Typography
                     variant="body2"
@@ -443,7 +423,7 @@ const CartPage = () => {
                     }}
                     onClick={handleClearCart}
                   >
-                    XOÁ
+                    {t('clearCart')}
                   </Typography>
                 </Box>
               </Grid>
@@ -457,14 +437,14 @@ const CartPage = () => {
           {/* Ô tìm kiếm đơn hàng */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, mt: 2 }}>
             <TextField
-              label="Nhập mã đơn hàng"
+              label={t('orderSearchPlaceholder')}
               variant="outlined"
               size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Button variant="contained" color="primary" onClick={handleSearch}>
-              Tìm kiếm
+            {t('search')}
             </Button>
             {searchResult && searchResult.orderCode && (
               <Button
@@ -472,7 +452,7 @@ const CartPage = () => {
                 color="secondary"
                 onClick={handleClearSearch}
               >
-                Xóa tìm kiếm
+                {t('clearSearch')}
               </Button>
             )}
           </Box>
@@ -487,10 +467,10 @@ const CartPage = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="h8">
-                      Mã đơn hàng: <strong>{searchResult.orderCode}</strong>
+                    {t('orderCode')}: <strong>{searchResult.orderCode}</strong>
                     </Typography>
                     <Typography>
-                      Trạng thái:{" "}
+                    {t('status')}:{" "}
                       <strong
                         style={{
                           color: statusColors[searchResult.status] || "black",
@@ -500,7 +480,7 @@ const CartPage = () => {
                       </strong>
                     </Typography>
                     <Typography>
-                      Ngày đặt:{" "}
+                    {t('orderDate')}:{" "}
                       {new Date(searchResult.createdAt).toLocaleDateString()}
                     </Typography>
                     <Typography>
@@ -512,27 +492,27 @@ const CartPage = () => {
 
                     {/* Hiển thị sách trong đơn hàng */}
                     <Typography sx={{ mt: 2 }}>
-                      <strong>Địa chỉ giao hàng:</strong>
+                      <strong>{t('address')}:</strong>
                     </Typography>
                     <Typography>
                       {searchResult?.shippingAddress?.fullName ||
-                        "Không có thông tin"}
+                        t('noName')}
                     </Typography>
                     <Typography>
                       {searchResult?.shippingAddress?.phone ||
-                        "Không có số điện thoại"}
+                        t('noPhone')}
                     </Typography>
                     <Typography>
                       {searchResult?.shippingAddress
                         ? `${
                             searchResult.shippingAddress.addressLine ||
-                            "Không có địa chỉ"
+                            t('noAddress')
                           }, 
-       ${searchResult.shippingAddress.city || "Không có thành phố"}, 
-       ${searchResult.shippingAddress.state || "Không có tiểu bang"}, 
-       ${searchResult.shippingAddress.zipcode || "Không có mã ZIP"}, 
-       ${searchResult.shippingAddress.country || "Không có quốc gia"}`
-                        : "Không có thông tin địa chỉ"}
+       ${searchResult.shippingAddress.city || t('noAddress')}, 
+       ${searchResult.shippingAddress.state || t('noAddress')}, 
+       ${searchResult.shippingAddress.zipcode || t('noZip')}, 
+       ${searchResult.shippingAddress.country || t('noCountry')}`
+                        : t('noAddress')}
                     </Typography>
                     {Array.isArray(searchResult?.books) &&
                     searchResult.books.length > 0 ? (
@@ -636,23 +616,22 @@ const CartPage = () => {
                     )}
                     {/* Modal Xác Nhận Huỷ Đơn */}
                     <Dialog open={openModal} onClose={handleCloseModal}>
-                      <DialogTitle>Xác nhận huỷ đơn hàng</DialogTitle>
+                      <DialogTitle>{t('confirmCancel')}</DialogTitle>
                       <DialogContent>
                         <DialogContentText>
-                          Bạn có chắc chắn muốn huỷ đơn hàng này không? Hành
-                          động này không thể hoàn tác.
+                        {t('confirmCancelText')}
                         </DialogContentText>
                       </DialogContent>
                       <DialogActions>
                         <Button onClick={handleCloseModal} color="primary">
-                          Không
+                        {t('no')}
                         </Button>
                         <Button
                           onClick={handleConfirmCancelOrder}
                           color="error"
                           variant="contained"
                         >
-                          Xác nhận
+                          {t('confirmCancel')}
                         </Button>
                       </DialogActions>
                     </Dialog>

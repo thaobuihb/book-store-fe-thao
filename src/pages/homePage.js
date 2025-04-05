@@ -21,6 +21,8 @@ import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import BookItem from "../features/book/bookItem";
 import PaginationControls from "../components/PaginationControls";
+import { useTranslation } from "react-i18next";
+
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -49,6 +51,8 @@ const Home = () => {
   };
 
   const [slideshowBooks, setSlideshowBooks] = useState([]);
+  const { t } = useTranslation();
+
 
   const getRandomBooks = useCallback(() => {
     const randomBooks = [];
@@ -206,7 +210,7 @@ const Home = () => {
         sx={{ fontSize: "22px", fontWeight: "bold", mt: 3 }}
         align="left"
       >
-        Sách mới phát hành
+        {t('home.newBooks')}
       </Typography>
 
       <Box display="flex" alignItems="center" justifyContent="center">
@@ -241,7 +245,7 @@ const Home = () => {
         sx={{ fontSize: "22px", fontWeight: "bold", mt: 3 }}
         align="left"
       >
-        Sách giảm giá
+        {t('home.discountedBooks')}
       </Typography>
 
       <Box display="flex" alignItems="center" justifyContent="center">
@@ -271,7 +275,7 @@ const Home = () => {
           gutterBottom
           sx={{ fontSize: "25px", fontWeight: "bold", mt: 3 }}
         >
-          Các danh mục phổ biến
+         {t('home.popularCategories')}
         </Typography>
 
         <Grid container spacing={2} justifyContent="center" alignItems="center">
@@ -346,7 +350,7 @@ const Home = () => {
         </Grid>
       </section>
 
-      {/* Các sách giảm giá*/}
+      {/* Sách thiếu nhi*/}
 
       <Typography
         component="h4"
@@ -354,7 +358,7 @@ const Home = () => {
         sx={{ fontSize: "22px", fontWeight: "bold", mt: 3 }}
         align="left"
       >
-        Sách thiếu nhi
+        {t('home.kidsBooks')}
       </Typography>
 
       <Box

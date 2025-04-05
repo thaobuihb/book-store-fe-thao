@@ -11,6 +11,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword, resetAuthStatus } from "../features/user/userSlice";
+import { useTranslation } from "react-i18next";
+
 
 function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ function ForgotPasswordPage() {
   );
   console.log("resetUrl in UI:", resetUrl);
   const [email, setEmail] = useState("");
+  const { t } = useTranslation();
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,12 +43,12 @@ function ForgotPasswordPage() {
       <form onSubmit={handleSubmit}>
         <Stack spacing={3} sx={{ mt: 4 }}>
           <Typography variant="h5" textAlign="center">
-            Forgot Your Password?
+          {t('forgotPasswordTitle')}
           </Typography>
 
           {isForgotSuccess && (
             <Alert severity="success">
-              Reset link has been sent successfully!
+              {t('resetSuccess')}
             </Alert>
           )}
 
@@ -58,7 +62,7 @@ function ForgotPasswordPage() {
                   navigate(`/reset-password/${token}`);
                 }}
               >
-                Click here to reset your password now
+                {t('resetNow')}
               </Button>
             </Alert>
           )}
@@ -67,7 +71,7 @@ function ForgotPasswordPage() {
 
           <TextField
             type="email"
-            label="Email address"
+            label={t('emailLabel')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
@@ -81,7 +85,7 @@ function ForgotPasswordPage() {
             disabled={isLoading}
             startIcon={isLoading && <CircularProgress size={20} />}
           >
-            {isLoading ? "Sending..." : "Send Reset Link"}
+            {isLoading ? t('sending') : t('sendLink')}
           </Button>
         </Stack>
       </form>

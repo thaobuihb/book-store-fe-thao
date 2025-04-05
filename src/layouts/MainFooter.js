@@ -1,7 +1,13 @@
 import React from "react";
 import { Link, Typography, Box } from "@mui/material";
+import { useTranslation } from "react-i18next";
+
 
 function MainFooter() {
+
+  const { t } = useTranslation();
+  const year = new Date().getFullYear();
+
   return (
     <Box sx={{ bgcolor: "primary.main", p: 0, m: 0 }}>
       <Box sx={{ bgcolor: "#B2EBF2", p: 0, m: 0, border: "none" }}>
@@ -13,11 +19,7 @@ function MainFooter() {
           align="center"
           sx={{ opacity: 0.8 }}
         >
-          Chào mừng bạn đến với BookStore - nơi hội tụ những cuốn sách hay nhất
-          dành cho mọi lứa tuổi. Chúng tôi cam kết mang đến cho bạn kho tàng
-          kiến ​​thức đa dạng, từ những tác phẩm kinh điển đến những cuốn sách
-          mới phát hành. Hãy để mỗi cuốn sách là một hành trình khám phá, nâng
-          cao kiến ​​thức thú vị và trải nghiệm cuộc sống phong phú hơn.{" "}
+          {t('footerIntro')}
         </Typography>
       </Box>
       <Typography
@@ -26,7 +28,7 @@ function MainFooter() {
         align="center"
         sx={{ textAlign: "center", p: 3 }}
       >
-        {"Bùi Thạo © "}
+        {t('copyright', { year })}{" "}
         <Link color="inherit" href="">
           BookStore
         </Link>{" "}

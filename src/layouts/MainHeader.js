@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
 import { logoutSuccess } from "../features/user/userSlice";
 import { getCategories } from "../features/category/categorySlice";
-import {loadCart} from "../features/cart/cartSlice"
+import { useTranslation } from "react-i18next";
 
 function MainHeader() {
   const navigate = useNavigate();
@@ -37,6 +37,16 @@ function MainHeader() {
   const wishlistCount = wishlist.length;
 
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [langAnchorEl, setLangAnchorEl] = useState(null);
+  const openLangMenu = Boolean(langAnchorEl);
+
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("language", lang);
+  };
 
   useEffect(() => {
     dispatch(getCategories());
@@ -80,7 +90,7 @@ function MainHeader() {
               sx={{ cursor: "pointer", color: "#ffffff", mx: 2 }}
               onMouseEnter={(e) => setCategoryAnchorEl(e.currentTarget)}
             >
-              Danh mục
+              {t("category")}
             </Typography>
             <Menu
               anchorEl={categoryAnchorEl}
@@ -106,7 +116,7 @@ function MainHeader() {
                 margin: "0 16px",
               }}
             >
-              Sách bán chạy
+              {t("bestSeller")}
             </RouterLink>
             <RouterLink
               to="/help"
@@ -116,8 +126,40 @@ function MainHeader() {
                 margin: "0 16px",
               }}
             >
-              Trung tâm hỗ trợ
+              {t("helpCenter")}
             </RouterLink>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", ml: 2, mr: 10 }}>
+            <Typography
+              onClick={(e) => setLangAnchorEl(e.currentTarget)}
+              sx={{ color: "white", cursor: "pointer", mx: 1 }}
+            >
+              {t("language")}
+            </Typography>
+
+            <Menu
+              anchorEl={langAnchorEl}
+              open={openLangMenu}
+              onClose={() => setLangAnchorEl(null)}
+            >
+              <MenuItem
+                onClick={() => {
+                  changeLanguage("vi");
+                  setLangAnchorEl(null);
+                }}
+              >
+                🇻🇳 Tiếng Việt
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  changeLanguage("en");
+                  setLangAnchorEl(null);
+                }}
+              >
+                🇬🇧 English
+              </MenuItem>
+            </Menu>
           </Box>
 
           {/* Search Box */}
@@ -170,7 +212,7 @@ function MainHeader() {
                   })
                 }
               >
-                Đăng nhập
+                {t("login")}
               </Typography>
             ) : (
               <Box>
@@ -180,15 +222,16 @@ function MainHeader() {
                 >
                   {user.name || "User"}
                 </Typography>
+
                 <Menu
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
                   onClose={() => setAnchorEl(null)}
                 >
                   <MenuItem onClick={() => navigate(`/user/${user._id}`)}>
-                    Profile
+                    {t("profile")}
                   </MenuItem>
-                  <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+                  <MenuItem onClick={handleLogout}>{t("logout")}</MenuItem>
                 </Menu>
               </Box>
             )}

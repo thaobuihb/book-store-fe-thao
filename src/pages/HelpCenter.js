@@ -4,8 +4,12 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import PinterestIcon from "@mui/icons-material/Pinterest";
+import { useTranslation } from "react-i18next";
+
 
 const ContactUs = () => {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -24,7 +28,7 @@ const ContactUs = () => {
         variant="h4"
         sx={{ fontWeight: "bold", mb: 4, fontSize: "3.5rem" }}
       >
-        We’re here for you
+        {t("contact.title")}
       </Typography>
 
       {/* Contact Section */}
@@ -32,8 +36,7 @@ const ContactUs = () => {
         variant="body1"
         sx={{ mb: 2, maxWidth: 700, fontSize: "1.2rem" }}
       >
-        Our friendly team is always here to assist via email. For other
-        inquiries, please contact us at
+        {t("contact.body")}
         <Link
           href="#"
           sx={{ ml: 1, color: "primary.main" }}
@@ -46,40 +49,39 @@ const ContactUs = () => {
         variant="h6"
         sx={{ fontWeight: "bold", mt: 3, fontSize: "2.5rem", color: "#4682B4" }}
       >
-        Support for Existing Orders
+        {t("contact.supportTitle")}
       </Typography>
       <Typography
         variant="body2"
         sx={{ mb: 4, maxWidth: 700, fontSize: "1.2rem" }}
       >
-        Please include your Order Number in the email subject line for faster
-        assistance.
+        {t("contact.supportNote")}
       </Typography>
       <Box sx={{ mb: 6 }}>
         <Typography
           variant="body2"
           sx={{ fontWeight: "bold", fontSize: "1.1rem" }}
         >
-          booksuna.com.vn
+          {t("contact.website")}
         </Typography>
         <Typography variant="body2" sx={{ fontSize: "1rem" }}>
-          orders.vn@booksuna.com
+        {t("contact.email")}
         </Typography>
       </Box>
 
       {/* Head Office */}
       <Box sx={{ mb: 6, textAlign: "center" }}>
         <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "2rem" }}>
-          Head Office
+        {t("contact.officeTitle")}
         </Typography>
         <Typography variant="body2" sx={{ fontSize: "1.2rem" }}>
-          123, Quan Thanh, Ba Dinh, Ha Noi
+        {t("contact.officeAddress1")}
         </Typography>
         <Typography variant="body2" sx={{ fontSize: "1.2rem" }}>
-          Viet Nam
+        {t("contact.officeAddress2")}
         </Typography>
         <Typography variant="body2" sx={{ fontSize: "1.2rem" }}>
-          +84 123-123-123
+        {t("contact.officePhone")}
         </Typography>
         <Typography variant="body2">
           <Link
@@ -94,7 +96,7 @@ const ContactUs = () => {
       {/* Connect Section */}
       <Box sx={{ mb: 6 }}>
         <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "2rem" }}>
-          Connect
+        {t("contact.connectTitle")}
         </Typography>
         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2 }}>
           <IconButton
@@ -132,10 +134,10 @@ const ContactUs = () => {
           variant="h4"
           sx={{ fontWeight: "bold", fontSize: "1.2rem", marginBottom: "1rem" }}
         >
-          Get In Touch
+          {t("contact.getInTouchTitle")}
         </Typography>
         <Typography variant="body1" sx={{ fontSize: "2.5rem" }}>
-          We look forward to hearing from you
+        {t("contact.getInTouchBody")}
         </Typography>
       </Box>
     </Box>

@@ -5,11 +5,13 @@ import { getCategories } from "../features/category/categorySlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Container } from "@mui/material";
 import BookItem from "../features/book/bookItem";
+import { useTranslation } from "react-i18next";
 
 function BookPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const { books, totalPages, currentPage } = useSelector((state) => state.book);
   const categories = useSelector((state) => state.category.categories);
@@ -34,7 +36,9 @@ function BookPage() {
         dispatch(getBooks(page, "", "", "", category));
 
         const selectedCategory = categories.find((cat) => cat._id === category);
-        setCategoryName(selectedCategory ? selectedCategory.categoryName : "Unknown Category");
+        setCategoryName(
+          selectedCategory ? selectedCategory.categoryName : "Unknown Category"
+        );
       }
     };
     fetchBooks();
@@ -44,7 +48,7 @@ function BookPage() {
     <Container>
       {search ? (
         <BookItem
-          title={`Search results for "${search}"`}
+          title={t("searchResults", { search })}
           books={books}
           currentPage={currentPage}
           totalPages={totalPages}
@@ -53,12 +57,16 @@ function BookPage() {
         />
       ) : (
         <BookItem
-          title={`Books in ${categoryName}`}
+          title={t("booksInCategory", { category: categoryName })}
           books={books}
           currentPage={currentPage}
           totalPages={totalPages}
-          handleNextPage={() => navigate(`?page=${page + 1}&category=${category}`)}
-          handlePrevPage={() => navigate(`?page=${page - 1}&category=${category}`)}
+          handleNextPage={() =>
+            navigate(`?page=${page + 1}&category=${category}`)
+          }
+          handlePrevPage={() =>
+            navigate(`?page=${page - 1}&category=${category}`)
+          }
         />
       )}
     </Container>
