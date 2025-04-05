@@ -14,6 +14,7 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -58,9 +59,9 @@ const OrderPage = () => {
   //   console.log("Order Details from localStorage or state:", orderDetails);
   // }, [orderDetails]);
   useEffect(() => {
-      sessionStorage.setItem("orderDetails", JSON.stringify(orderDetails));
-      console.log("Order Details from localStorage or state:", orderDetails);
-    }, [orderDetails]);
+    sessionStorage.setItem("orderDetails", JSON.stringify(orderDetails));
+    console.log("Order Details from localStorage or state:", orderDetails);
+  }, [orderDetails]);
 
   // Dữ liệu biểu mẫu địa chỉ
   const [formData, setFormData] = useState({
@@ -80,7 +81,7 @@ const OrderPage = () => {
   const [errors, setErrors] = useState({});
 
   // Tính toán chi phí vận chuyển và tổng thanh toán
-  const shippingFee = 3.0; 
+  const shippingFee = 3.0;
   const totalPayment = orderDetails.totalAmount + shippingFee;
 
   // Điền thông tin người dùng nếu đã đăng nhập
@@ -90,7 +91,7 @@ const OrderPage = () => {
         fullName: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        country: user.country || prevData.country, 
+        country: user.country || prevData.country,
         city: user.city || "",
         district: user.district || "",
         ward: user.ward || "",
@@ -141,7 +142,7 @@ const OrderPage = () => {
       toast.error("Form is invalid. Please correct the errors.");
       return;
     }
-  
+
     const orderData = {
       books: orderDetails.items.map((item) => ({
         bookId: item._id,
@@ -160,9 +161,9 @@ const OrderPage = () => {
       totalAmount: totalPayment,
       paymentMethods: paymentMethod,
     };
-  
+
     console.log("Dữ liệu gửi lên API:", orderData);
-  
+
     try {
       let response;
       if (isAuthenticated) {
@@ -172,18 +173,18 @@ const OrderPage = () => {
       } else {
         response = await dispatch(createGuestOrder(orderData)).unwrap();
       }
-  
+
       console.log("Đơn hàng đã được tạo thành công:", response);
-  
+
       // Lấy `orderId` từ phản hồi
       const orderId = isAuthenticated ? response?._id : response?.orderCode;
-  
+
       if (!orderId) {
         console.error("Không tìm thấy `orderId` trong phản hồi:", response);
         toast.error("Không thể xem chi tiết đơn hàng.");
         return;
       }
-  
+
       // Chuyển hướng đến trang cảm ơn
       navigate("/thank-you", {
         state: {
@@ -198,8 +199,7 @@ const OrderPage = () => {
       toast.error("Không thể đặt hàng. Vui lòng thử lại.");
     }
   };
-  
-  
+
   return (
     <Box sx={{ padding: 4 }}>
       {isLoading && <Typography variant="h6">Đang xử lý...</Typography>}
@@ -302,20 +302,95 @@ const OrderPage = () => {
                 <strong>Phí vận chuyển:</strong> $3.00
               </Typography>
               <Typography variant="h6" sx={{ mt: 1 }}>
-                <strong>Tổng thanh toán:</strong> $
-                {totalPayment.toFixed(2)}
+                <strong>Tổng thanh toán:</strong> ${totalPayment.toFixed(2)}
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ mt: 4, textAlign: "center" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              onClick={handlePlaceOrder}
-            >
-              Đặt hàng
-            </Button>
+          <Box sx={{ maxWidth: 150, margin: "0 auto", overflow: "hidden" }}>
+            {paymentMethod === "PayPal" ? (
+              <PayPalButtons
+                style={{
+                  layout: "horizontal",
+                  height: 40,
+                  width: "50%",
+                  label: "paypal",
+                  shape: "rect",
+                }}
+                forceReRender={[totalPayment]}
+                createOrder={(data, actions) => {
+                  if (!validateForm()) {
+                    toast.error("Vui lòng điền đầy đủ thông tin giao hàng.");
+                    return;
+                  }
+
+                  return actions.order.create({
+                    purchase_units: [
+                      {
+                        amount: {
+                          value: totalPayment.toFixed(2),
+                        },
+                      },
+                    ],
+                  });
+                }}
+                onApprove={async (data, actions) => {
+                  const details = await actions.order.capture();
+                  toast.success("Thanh toán thành công qua PayPal!");
+
+                  const orderData = {
+                    books: orderDetails.items.map((item) => ({
+                      bookId: item._id,
+                      quantity: item.quantity || 1,
+                    })),
+                    shippingAddress: {
+                      fullName: formData.fullName,
+                      phone: formData.phone,
+                      addressLine: `${formData.houseNumber}, ${formData.street}`,
+                      city: formData.city,
+                      state: formData.district,
+                      ward: formData.ward,
+                      zipcode: formData.zipcode || "",
+                      country: formData.country,
+                    },
+                    totalAmount: totalPayment,
+                    paymentMethods: "PayPal",
+                  };
+
+                  try {
+                    const res = isAuthenticated
+                      ? await dispatch(
+                          createOrder({ userId: user._id, orderData })
+                        ).unwrap()
+                      : await dispatch(createGuestOrder(orderData)).unwrap();
+
+                    const orderId = isAuthenticated ? res?._id : res?.orderCode;
+
+                    navigate("/thank-you", {
+                      state: {
+                        message: "Thanh toán thành công qua PayPal!",
+                        orderId,
+                      },
+                    });
+                  } catch (err) {
+                    console.error("❌ Lỗi khi tạo đơn hàng:", err);
+                    toast.error("Tạo đơn hàng thất bại sau thanh toán.");
+                  }
+                }}
+                onError={(err) => {
+                  console.error("❌ PayPal Error:", err);
+                  toast.error("Thanh toán thất bại.");
+                }}
+              />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={handlePlaceOrder}
+              >
+                Đặt hàng
+              </Button>
+            )}
           </Box>
         </Grid>
       </Grid>

@@ -26,32 +26,55 @@ export const createBook = createAsyncThunk(
   "admin/createBook",
   async (bookData, { rejectWithValue }) => {
     try {
-      console.log("Dữ liệu chuẩn bị gửi lên server:", bookData);
+      console.log("📦 Dữ liệu chuẩn bị gửi lên server:", bookData);
 
-      if (
-        !bookData.name ||
-        !bookData.price ||
-        !bookData.publicationDate ||
-        !bookData.categoryId
-      ) {
-        return rejectWithValue(
-          "Thiếu thông tin bắt buộc: Tên, Giá, Ngày xuất bản, Danh mục"
-        );
+      const clientErrors = {};
+      if (!bookData.name?.trim()) clientErrors.name = "Tên sách là bắt buộc";
+
+      const price = Number(bookData.price);
+      if (isNaN(price) || price < 0) {
+        clientErrors.price = "Giá sách phải là một số hợp lệ";
+      }
+
+      if (!bookData.publicationDate) {
+        clientErrors.publicationDate = "Ngày xuất bản là bắt buộc";
+      }
+
+      if (!bookData.categoryId?.trim()) {
+        clientErrors.categoryId = "Danh mục là bắt buộc";
+      }
+
+      if (!bookData.author?.trim()) clientErrors.author = "Tác giả là bắt buộc";
+
+      if (Object.keys(clientErrors).length > 0) {
+        return rejectWithValue({
+          message: "Validation Error",
+          errors: clientErrors,
+        });
       }
 
       const sanitizedBookData = {
         ...bookData,
-        price: Math.max(0, bookData.price),
-        discountRate: Math.max(0, bookData.discountRate || 0),
+        price,
+        discountRate: Math.max(0, Number(bookData.discountRate || 0)),
       };
 
       const response = await apiService.post("/books", sanitizedBookData);
-      console.log("Phản hồi từ server:", response.data);
+      console.log("✅ Phản hồi từ server:", response.data);
       return response.data;
+
     } catch (error) {
-      console.error("Chi tiết lỗi từ server:", error.response?.data);
+      console.error("🧨 Full lỗi từ server:", error?.response?.data);
+
       return rejectWithValue(
-        error.response?.data?.message || "Failed to create book"
+        error?.response?.data?.errors
+          ? error.response.data
+          : {
+              message:
+                error?.response?.data?.message ||
+                error.message ||
+                "Lỗi không xác định từ máy chủ",
+            }
       );
     }
   }
@@ -193,11 +216,10 @@ export const updateOrderShippingStatus = createAsyncThunk(
   "admin/updateOrderShippingStatus",
   async ({ orderId, orderStatus }, { rejectWithValue }) => {
     try {
-      // Gọi API để cập nhật trạng thái giao hàng
       const response = await apiService.put(`/orders/admin/${orderId}`, {
         status: orderStatus,
       });
-      return response.data; // Trả về phản hồi từ API
+      return response.data; 
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update shipping status"
@@ -581,15 +603,11 @@ const adminSlice = createSlice({
         state.loading = false;
         console.log("🔥 Rejected action payload:", JSON.stringify(action.payload, null, 2));
         
-        // Handle the error object directly - action.payload is the entire error object
         if (typeof action.payload === 'object') {
-          // If payload is the object returned from your API
           state.error = action.payload.message || "Unknown Error 123";
         } else if (typeof action.payload === 'string') {
-          // If payload is a string
           state.error = action.payload;
         } else {
-          // Fallback
           state.error = action.error?.message || "Unknown Error 123";
         }
       })
@@ -720,21 +738,6 @@ const adminSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      //Cập nhật trạng thái đơn hàng
-      // .addCase(updateOrderStatus.pending, (state) => {
-      //   state.loading = true;
-      // })
-      // .addCase(updateOrderStatus.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   const index = state.orders.findIndex(order => order._id === action.payload._id);
-      //   if (index !== -1) {
-      //     state.orders[index] = action.payload;
-      //   }
-      // })
-      // .addCase(updateOrderStatus.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error = action.payload;
-      // })
 
       // Xoá đơn hàng
       .addCase(deleteOrder.pending, (state) => {

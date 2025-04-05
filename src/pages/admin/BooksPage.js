@@ -86,7 +86,7 @@ const BooksPage = () => {
     if (!newBook.categoryId) tempErrors.categoryId = "Không được để trống";
 
     setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0; // Nếu không có lỗi trả về `true`
+    return Object.keys(tempErrors).length === 0; 
   };
 
   const [bookToUpdate, setBookToUpdate] = useState({});
@@ -134,48 +134,60 @@ const BooksPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewBook((prev) => ({ ...prev, [name]: value }));
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[name];
+      return newErrors;
+    });
   };
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      toast.error("Vui lòng điền đầy đủ thông tin trước khi thêm sách!");
-      return;
-    }
-
+  
+    console.log("📦 newBook:", newBook);
+  
     const sanitizedBook = {
       ...newBook,
       price: Number(newBook.price),
       discountRate: Number(newBook.discountRate || 0),
+      categoryId: newBook.categoryId?.trim(),
     };
-
-    dispatch(createBook(sanitizedBook))
-      .unwrap()
-      .then(() => {
-        toast.success("Thêm sách thành công!");
-        setOpen(false);
-        setNewBook({
-          name: "",
-          author: "",
-          price: "",
-          publicationDate: "",
-          img: "",
-          description: "",
-          categoryId: "",
-          discountRate: "",
-        });
-        setErrors({}); // Xóa lỗi sau khi tạo sách thành công
-      })
-      .catch((err) => {
-        toast.error(`Thêm sách thất bại: ${err}`);
+  
+    console.log("🚀 GỬI LÊN BACKEND:", sanitizedBook);
+  
+    try {
+      await dispatch(createBook(sanitizedBook)).unwrap();
+  
+      toast.success("Thêm sách thành công!");
+  
+      setOpen(false);
+      setNewBook({
+        name: "",
+        author: "",
+        price: "",
+        publicationDate: "",
+        img: "",
+        description: "",
+        categoryId: "",
+        discountRate: "",
       });
+  
+      setErrors({});
+    } catch (err) {
+      console.error("🧨 unwrap().catch() => err =", err);
+  
+      if (err && typeof err === "object" && err.errors) {
+        setErrors(err.errors);
+      } else {
+        setErrors({ general: err?.message || "Lỗi không xác định" });
+      }
+    }
   };
-
+  
   // update
   const handleUpdateChange = (e) => {
     const { name, value } = e.target;
@@ -235,7 +247,24 @@ const BooksPage = () => {
 
   //xoá sách
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+  
+    // 👉 Reset dữ liệu form và lỗi khi đóng modal
+    setNewBook({
+      name: "",
+      author: "",
+      price: "",
+      publicationDate: "",
+      img: "",
+      description: "",
+      categoryId: "",
+      discountRate: "",
+    });
+  
+    setErrors({});
+  };
+  
 
   const handleOpenDeleteModal = (bookId) => {
     setBookToDelete(bookId);
@@ -528,6 +557,8 @@ const BooksPage = () => {
               name="author"
               value={newBook.author}
               onChange={handleChange}
+              error={!!errors.author}
+              helperText={errors.author}
               fullWidth
             />
 
@@ -535,6 +566,7 @@ const BooksPage = () => {
               label="Giá sách *"
               name="price"
               type="number"
+              inputProps={{ min: 0 }}
               value={newBook.price}
               onChange={handleChange}
               fullWidth
@@ -550,6 +582,7 @@ const BooksPage = () => {
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
+              inputProps={{ max: new Date().toISOString().split("T")[0] }}
               error={!!errors.publicationDate}
               helperText={errors.publicationDate}
             />
@@ -576,6 +609,7 @@ const BooksPage = () => {
               label="Tỉ lệ giảm giá (%)"
               name="discountRate"
               type="number"
+              inputProps={{ min: 0, max: 100 }}
               value={newBook.discountRate}
               onChange={handleChange}
               fullWidth
@@ -589,8 +623,9 @@ const BooksPage = () => {
               </InputLabel>
               <Select
                 name="categoryId"
-                value={bookToUpdate.categoryId || ""}
-                onChange={handleUpdateChange}
+                value={newBook.categoryId || ""}
+                onChange={handleChange
+                }
                 displayEmpty
 
                 label="Danh mục"
