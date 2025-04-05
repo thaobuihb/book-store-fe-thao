@@ -1,70 +1,127 @@
-# Getting Started with Create React App
+Đây là giao diện người dùng của ứng dụng Book Store được xây dựng bằng **ReactJS** và **Material UI**, cho phép người dùng xem sách, thêm vào giỏ hàng, wishlist, đặt hàng và quản lý tài khoản; ad min có thể quản lý sách, đơn hàng, người dùng, danh mục...
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## Tính Năng Chính
 
-In the project directory, you can run:
+- Giỏ hàng, thêm/xoá/cập nhật số lượng sách
+- Wishlist cho cả khách và người dùng đăng nhập
+- Đăng ký / Đăng nhập / Đặt lại mật khẩu
+- Thanh toán đơn hàng (COD hoặc PayPal giả)
+- Xem lịch sử đơn hàng
+- Duyệt sách theo danh mục, sách mới, sách nổi bật, sách giảm giá
+- Trang admin: quản lý sách, người dùng, đơn hàng, danh mục
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Công Nghệ Sử Dụng
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- ReactJS (Hooks, Context API / Redux)
+- Material UI (MUI)
+- Axios (REST API communication)
+- React Router DOM
+- Formik + Yup (form validation)
+- Dayjs (xử lý thời gian)
+- React Toastify (thông báo)
+- LocalStorage + Sync hóa dữ liệu
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📦 Cài Đặt Dự Án
 
-### `npm run build`
+### Yêu cầu:
+- Node.js >= 16
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Bước 1: Clone project
+```bash
+git clone https://github.com/thaobuihb/book-store-fe-thao.git
+cd book-store-fe-thao
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Bước 2: Cài đặt dependencies
+```bash
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Bước 3: Cấu hình môi trường
 
-### `npm run eject`
+Tạo file `.env` trong thư mục `client`:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```env
+REACT_APP_BACKEND_API = http://localhost:5001/api
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Bước 4: Khởi chạy frontend
+```bash
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Truy cập tại: [http://localhost:3000](http://localhost:3000)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 📁 Cấu trúc thư mục
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+client/
+│
+├── public/
+├── src/
+│   ├── app/
+│   │   ├── apiService.js      # Quản lý gọi API
+│   │   ├── config.js          # Biến môi trường / cấu hình app
+│   │   └── store.js           # Redux store
+│   ├── components/            # Các component dùng chung (Button, Card, Modal...)
+│   ├── context/               # Context API (AuthContext.js quản lý xác thực người dùng)
+│   ├── features/              # Tính năng chia theo domain (admin, book, cart, order, category, user, wishlist)
+│   ├── hooks/                 # Custom hooks (useAuth.js, v.v.)
+│   ├── layout/                # Các thành phần bố cục như BlankLayout.js, MainHeader.js, MainFooter.js, MainLayout.js
+│   ├── pages/
+│   │   ├── BestSellerPage.js
+│   │   ├── BookPage.js
+│   │   ├── CartPage.js
+│   │   ├── DetailPage.js
+│   │   ├── ForgotPasswordPage.js
+│   │   ├── HelpCenter.js
+│   │   ├── HomePage.js
+│   │   ├── LoginPage.js
+│   │   ├── NotFoundPage.js
+│   │   ├── OrderPage.js
+│   │   ├── RegisterPage.js
+│   │   ├── ResetPasswordPage.js
+│   │   ├── ThankYouPage.js
+│   │   ├── UnauthorizedPage.js
+│   │   ├── UserProfilePage.js
+│   │   └── WishlistPage.js
+│   ├── pages/admin/
+│   │   ├── AdminLayout.js
+│   │   ├── BooksPage.js
+│   │   ├── CategoriesPage.js
+│   │   ├── DashboardPage.js
+│   │   ├── OrdersPage.js
+│   │   └── UsersPage.js
+│   ├── routers/               # Quản lý route: AuthRequire.js, AdminOnlyRoute.js, index.js
+│   ├── services/              # Gọi API theo domain 
+│   ├── theme/                 # Cấu hình giao diện Material UI 
+│   ├── utils/                 # Hàm tiện ích dùng chung 
+│   ├── App.js                 # Component gốc của ứng dụng
+│   └── index.js               # Điểm khởi chạy ứng dụng React
+└── .env
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## Lộ trình phát triển (Roadmap)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- [ ] Hỗ trợ giao diện Dark Mode
+- [ ] Thêm chức năng đánh giá & bình luận sách
+- [ ] Gợi ý sách theo hành vi và lịch sử người dùng
+- [ ] Đọc sách trực tuyến ngay trên website
+- [ ] Hỗ trợ nghe sách dạng audio (Audiobook)
+- [ ] Đa ngôn ngữ (Tiếng Việt / English)
+- [ ] Thanh toán trực tuyến thực tế (VNPAY, MoMo, PayPal)
+- [ ] Quản lý kho sách (dành cho admin)
+- [ ] Xuất hóa đơn điện tử PDF sau khi mua hàng
+- [ ] Trang dashboard nâng cao (thống kê doanh thu, lượt truy cập...)
+---
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
