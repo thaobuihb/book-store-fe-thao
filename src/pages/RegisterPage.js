@@ -20,7 +20,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import { RegisterSchema } from "../utils/validationSchemas";
 import store from "../app/store";
-
+import { useTranslation } from "react-i18next";
 
 const defaultValues = {
   name: "",
@@ -37,6 +37,8 @@ function RegisterPage() {
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
     useState(false);
 
+  const { t } = useTranslation();
+
   const methods = useForm({
     resolver: yupResolver(RegisterSchema),
     defaultValues,
@@ -49,30 +51,29 @@ function RegisterPage() {
   } = methods;
 
   const onSubmit = async (data) => {
-    console.log("Redux state before register:", store.getState().auth); 
+    // console.log("Redux state before register:", store.getState().auth);
 
     const { name, email, password } = data;
-    const from = location.state?.from?.pathname || "/"; 
-  
+    const from = location.state?.from?.pathname || "/";
+
     try {
       await auth.register({ name, email: email.trim(), password }, (error) => {
-        console.log("Redux state after register:", store.getState().auth); 
+        // console.log("Redux state after register:", store.getState().auth);
 
         if (error) {
           reset();
-          setError("responseError", { message: error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại." });
-          return; 
+          setError("responseError", { message: t("register.errorMessage") });
+
+          return;
         }
-  
+
         navigate(from, { replace: true });
       });
     } catch (error) {
       reset();
-      setError("responseError", { message: "Đăng ký thất bại. Vui lòng thử lại." });
+      setError("responseError", { message: t("register.errorMessage") });
     }
   };
-  
-  
 
   return (
     <Container maxWidth="xs">
@@ -82,17 +83,17 @@ function RegisterPage() {
             <Alert severity="error">{errors.responseError.message}</Alert>
           )}
           <Alert severity="info">
-            Already have an account?{" "}
+            {t("register.alreadyAccount")}{" "}
             <Link variant="subtitle2" component={RouterLink} to="/login">
-              Sign in
+              {t("register.signIn")}
             </Link>
           </Alert>
 
-          <FTextField name="name" label="Full name" />
-          <FTextField name="email" label="Email address" />
+          <FTextField name="name" label={t("register.name")} />
+          <FTextField name="email" label={t("register.email")} />
           <FTextField
             name="password"
-            label="Password"
+            label={t("register.password")}
             type={showPassword ? "text" : "password"}
             InputProps={{
               endAdornment: (
@@ -109,7 +110,7 @@ function RegisterPage() {
           />
           <FTextField
             name="passwordConfirmation"
-            label="Password Confirmation"
+            label={t("register.passwordConfirmation")}
             type={showPasswordConfirmation ? "text" : "password"}
             InputProps={{
               endAdornment: (
@@ -138,7 +139,7 @@ function RegisterPage() {
             variant="contained"
             loading={isSubmitting}
           >
-            Register
+            {t("register.button")}
           </LoadingButton>
         </Stack>
       </FormProvider>

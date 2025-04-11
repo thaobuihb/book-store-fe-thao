@@ -7,6 +7,7 @@ import {
   resetUpdateStatus,
 } from "../features/user/userSlice";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const UserProfileUpdate = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const UserProfileUpdate = () => {
   const { user, isAuthenticated, isUpdateSuccess, error } = useSelector(
     (state) => state.user
   );
+  const { t } = useTranslation();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -81,13 +83,13 @@ const UserProfileUpdate = () => {
     try {
       await dispatch(updateUserProfile(updatedData)).unwrap();
     } catch (err) {
-      setFormError("Có lỗi xảy ra khi cập nhật thông tin.");
+      setFormError(t("profileUpdate.updateError"));
     }
   };
 
   useEffect(() => {
     if (isUpdateSuccess) {
-      setSuccessMessage("Thông tin đã được cập nhật thành công!");
+      setSuccessMessage(t("profileUpdate.updateSuccess"));
       setFormError("");
 
       const timer = setTimeout(() => {
@@ -102,22 +104,26 @@ const UserProfileUpdate = () => {
   }, [isUpdateSuccess, error, navigate, dispatch]);
 
   return (
-    <Box sx={{ maxWidth: 600, margin: "auto", padding: 4, textAlign: "center" }}>
+    <Box
+      sx={{ maxWidth: 600, margin: "auto", padding: 4, textAlign: "center" }}
+    >
       <Typography variant="h4" gutterBottom>
-        Cập nhật thông tin cá nhân
+        {t("profileUpdate.title")}
       </Typography>
-      {formError && <Typography color="error">{formError}</Typography>}
-      {successMessage && <Typography color="primary">{successMessage}</Typography>}
+      {formError && <Typography color="error">{t("profileUpdate.updateError")}</Typography>}
+      {successMessage && (
+        <Typography color="primary">{successMessage}</Typography>
+      )}
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Tên"
+          label={t("profileUpdate.name")}
           fullWidth
           margin="normal"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <TextField
-          label="Email"
+          label={t("profileUpdate.email")}
           fullWidth
           margin="normal"
           value={email}
@@ -125,86 +131,91 @@ const UserProfileUpdate = () => {
           disabled
         />
         <TextField
-          label="Giới tính"
+          label={t("profileUpdate.gender")}
           select
           fullWidth
           margin="normal"
           value={gender}
           onChange={(e) => setGender(e.target.value)}
         >
-          <MenuItem value="nam">Nam</MenuItem>
-          <MenuItem value="nu">Nữ</MenuItem>
-          <MenuItem value="khac">Khác</MenuItem>
+          <MenuItem value="nam">{t("profileUpdate.male")}</MenuItem>
+          <MenuItem value="nu">{t("profileUpdate.female")}</MenuItem>
+          <MenuItem value="khac">{t("profileUpdate.other")}</MenuItem>
         </TextField>
         <TextField
-          label="Ngày sinh"
+          label={t("profileUpdate.birthday")}
           type="date"
           fullWidth
           margin="normal"
           InputLabelProps={{ shrink: true }}
-          inputProps={{ max: today }} // Không cho phép chọn ngày sau ngày hiện tại
+          inputProps={{ max: today }}
           value={birthday}
           onChange={(e) => setBirthday(e.target.value)}
         />
         <TextField
-          label="Tỉnh/Thành phố"
+          label={t("profileUpdate.city")}
           fullWidth
           margin="normal"
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
         <TextField
-          label="Quận/Huyện"
+          label={t("profileUpdate.district")}
           fullWidth
           margin="normal"
           value={district}
           onChange={(e) => setDistrict(e.target.value)}
         />
         <TextField
-          label="Xã/Phường/Thị trấn"
+          label={t("profileUpdate.ward")}
           fullWidth
           margin="normal"
           value={ward}
           onChange={(e) => setWard(e.target.value)}
         />
         <TextField
-          label="Đường"
+          label={t("profileUpdate.street")}
           fullWidth
           margin="normal"
           value={street}
           onChange={(e) => setStreet(e.target.value)}
         />
         <TextField
-          label="Số nhà"
+          label={t("profileUpdate.houseNumber")}
           fullWidth
           margin="normal"
           value={houseNumber}
           onChange={(e) => setHouseNumber(e.target.value)}
         />
         <TextField
-          label="Số điện thoại"
+          label={t("profileUpdate.phone")}
           fullWidth
           margin="normal"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
         <TextField
-          label="Mã bưu điện"
+          label={t("profileUpdate.zipcode")}
           fullWidth
           margin="normal"
           value={zipcode}
           onChange={(e) => setZipcode(e.target.value)}
         />
         <TextField
-          label="Mật khẩu mới (nếu muốn thay đổi)"
+          label={t("profileUpdate.newPassword")}
           type="password"
           fullWidth
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button type="submit" variant="contained" color="primary" sx={{ marginTop: 2 }}>
-          Cập nhật
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ marginTop: 2 }}
+        >
+          {t("profileUpdate.submit")}
         </Button>
       </form>
     </Box>

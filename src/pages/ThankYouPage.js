@@ -20,6 +20,7 @@ import {
 } from "../features/order/orderSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const ThankYouPage = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const ThankYouPage = () => {
   const orderDetails = useSelector(selectOrderDetails);
   const { isAuthenticated, user } = useAuth();
   const { isLoading, error } = useSelector((state) => state.order);
+  const { t } = useTranslation();
 
   // Fetch order details based on authentication status
   useEffect(() => {
@@ -90,13 +92,13 @@ const ThankYouPage = () => {
           fontStyle: "italic",
         }}
       >
-        Thank you for shopping at Susu Anna Bookstore!
+        {t("thankYou.title")}{" "}
       </Typography>
       {isLoading ? (
         <CircularProgress color="primary" />
       ) : error ? (
         <Typography color="error" variant="body1">
-          {error}
+          {t("thankYou.error")}
         </Typography>
       ) : orderDetails ? (
         <>
@@ -104,22 +106,29 @@ const ThankYouPage = () => {
             variant="h6"
             sx={{ textTransform: "uppercase", fontWeight: "bold" }}
           >
-            ORDER INFORMATION
-          </Typography>
-          <Typography>
-            <strong>Order Code: {orderDetails.orderCode}</strong>
-          </Typography>
-          <Typography variant="body1" sx={{ mt: 1 }}>
-            <strong>Shipping Fee: ${orderDetails.shippingFee || 3.0}</strong>
+            {t("thankYou.orderInfo")}
           </Typography>
           <Typography>
             <strong>
-              Total Amount: ${orderDetails.totalAmount.toFixed(2)}
+              {t("thankYou.orderCode")}: {orderDetails.orderCode}
+            </strong>
+          </Typography>
+          <Typography variant="body1" sx={{ mt: 1 }}>
+            <strong>
+              {t("thankYou.shippingFee")}: ${orderDetails.shippingFee || 3.0}
+            </strong>
+          </Typography>
+          <Typography>
+            <strong>
+              <strong>
+                {t("thankYou.totalAmount")}: $
+                {orderDetails.totalAmount.toFixed(2)}
+              </strong>
             </strong>
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3 }}>
-            Ordered Books:
+            {t("thankYou.booksOrdered")}
           </Typography>
           <Grid
             container
@@ -145,7 +154,9 @@ const ThankYouPage = () => {
                   >
                     <CardMedia
                       component="img"
-                      image={book.bookId?.img || book.img || "/default-book.jpg"}
+                      image={
+                        book.bookId?.img || book.img || "/default-book.jpg"
+                      }
                       alt={book.bookId?.name || book.name || "Book"}
                       sx={{
                         height: 140,
@@ -165,17 +176,18 @@ const ThankYouPage = () => {
                         {book.name || "Unknown Book"}
                       </Typography>
                       <Typography align="center">
-                        Quantity: {book.quantity || 0}
+                        {t("thankYou.quantity")}: {book.quantity || 0}
                       </Typography>
                       <Typography align="center">
-                        Price: ${book.price?.toFixed(2) || "N/A"}
+                        {t("thankYou.price")}: $
+                        {book.price?.toFixed(2) || "N/A"}
                       </Typography>
                     </CardContent>
                   </Card>
                 </Grid>
               ))
             ) : (
-              <Typography>No books found in this order.</Typography>
+              <Typography>{t("thankYou.noBooks")}</Typography>
             )}
           </Grid>
           <Box sx={{ marginTop: 4 }}>
@@ -186,13 +198,13 @@ const ThankYouPage = () => {
                 size="large"
                 onClick={() => navigate("/")}
               >
-                Keep Buying
+                <Typography>{t("thankYou.noBooks")}</Typography>
               </Button>
             </Tooltip>
           </Box>
         </>
       ) : (
-        <Typography>Order details not found.</Typography>
+        <Typography>{t("thankYou.notFound")}</Typography>
       )}
     </Box>
   );

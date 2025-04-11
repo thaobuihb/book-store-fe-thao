@@ -19,11 +19,14 @@ import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createOrder, createGuestOrder } from "../features/order/orderSlice";
+import { useTranslation } from "react-i18next";
 
 const OrderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+
+  const { t } = useTranslation();
 
   // Lấy trạng thái từ Redux
   const { isLoading = false, error = null } = useSelector(
@@ -138,8 +141,8 @@ const OrderPage = () => {
   // Xử lý đặt hàng
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
-      console.error("Form không hợp lệ:", formData, errors);
-      toast.error("Form is invalid. Please correct the errors.");
+      console.error(t("order.formInvalid"), formData, errors);
+      toast.error(t("order.formInvalid"));
       return;
     }
 
@@ -162,7 +165,7 @@ const OrderPage = () => {
       paymentMethods: paymentMethod,
     };
 
-    console.log("Dữ liệu gửi lên API:", orderData);
+    // console.log("Dữ liệu gửi lên API:", orderData);
 
     try {
       let response;
@@ -174,14 +177,15 @@ const OrderPage = () => {
         response = await dispatch(createGuestOrder(orderData)).unwrap();
       }
 
-      console.log("Đơn hàng đã được tạo thành công:", response);
+      // console.log("Đơn hàng đã được tạo thành công:", response);
 
       // Lấy `orderId` từ phản hồi
       const orderId = isAuthenticated ? response?._id : response?.orderCode;
 
       if (!orderId) {
-        console.error("Không tìm thấy `orderId` trong phản hồi:", response);
-        toast.error("Không thể xem chi tiết đơn hàng.");
+        console.error(t("order.orderIdMissing"), response);
+        toast.error(t("order.cannotViewOrder"));
+
         return;
       }
 
@@ -189,23 +193,25 @@ const OrderPage = () => {
       navigate("/thank-you", {
         state: {
           message: isAuthenticated
-            ? "Đặt hàng thành công!"
-            : "Cảm ơn bạn đã đặt hàng!",
+            ? t("order.successMessage")
+            : t("order.guestSuccessMessage"),
           orderId,
         },
       });
     } catch (error) {
-      console.error("Lỗi khi thực hiện đặt hàng:", error);
-      toast.error("Không thể đặt hàng. Vui lòng thử lại.");
+      console.error(t("order.placeOrderErrorLog"), error);
+      toast.error(t("order.placeOrderErrorToast"));
     }
   };
 
   return (
     <Box sx={{ padding: 4 }}>
-      {isLoading && <Typography variant="h6">Đang xử lý...</Typography>}
+      {isLoading && (
+        <Typography variant="h6">{t("order.processing")}</Typography>
+      )}
       {error && (
         <Typography variant="h6" color="error">
-          Lỗi: {error}
+          {t("order.error")}: {error}
         </Typography>
       )}
 
@@ -213,13 +219,13 @@ const OrderPage = () => {
         {/* Cột trái: Địa chỉ giao hàng */}
         <Grid item xs={12} md={6} sx={{ paddingRight: 5 }}>
           <Typography variant="h5" gutterBottom>
-            Địa chỉ giao hàng
+            {t("order.shippingAddress")}
           </Typography>
           <Box component="form" noValidate autoComplete="off">
             {Object.keys(formData).map((field, index) => (
               <TextField
                 key={index}
-                label={field}
+                label={t(`order.fields.${field}`)}
                 name={field}
                 value={formData[field]}
                 onChange={handleInputChange}
@@ -227,9 +233,7 @@ const OrderPage = () => {
                 margin="normal"
                 required
                 error={!!errors[field]}
-                helperText={
-                  errors[field] ? "Vui lòng điền thông tin còn thiếu" : ""
-                }
+                helperText={errors[field] ? t("order.missingField") : ""}
               />
             ))}
           </Box>
@@ -238,7 +242,7 @@ const OrderPage = () => {
         {/* Cột phải: Thông tin đơn hàng */}
         <Grid item xs={12} md={6} sx={{ paddingLeft: 5 }}>
           <Typography variant="h5" gutterBottom>
-            Kiểm tra lại đơn hàng
+            {t("order.reviewOrder")}
           </Typography>
           <Box>
             {orderDetails.items.map((item, index) => (
@@ -251,12 +255,14 @@ const OrderPage = () => {
                 />
                 <CardContent>
                   <Typography>{item.name}</Typography>
-                  <Typography>Số lượng: {item.quantity}</Typography>
                   <Typography>
-                    Giá: ${item.discountedPrice || item.price}
+                    {t("order.quantity")}: {item.quantity}
                   </Typography>
                   <Typography>
-                    Tổng: $
+                    {t("order.price")}: ${item.discountedPrice || item.price}
+                  </Typography>
+                  <Typography>
+                    {t("order.totalForItem")}: $
                     {item.quantity * (item.discountedPrice || item.price)}
                   </Typography>
                 </CardContent>
@@ -265,7 +271,7 @@ const OrderPage = () => {
           </Box>
           {/* Lựa chọn phương thức thanh toán */}
           <FormControl component="fieldset" sx={{ mt: 4 }}>
-            <FormLabel component="legend">Phương thức thanh toán</FormLabel>
+            <FormLabel component="legend">{t("order.paymentMethod")}</FormLabel>
             <RadioGroup
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
@@ -273,18 +279,18 @@ const OrderPage = () => {
               <FormControlLabel
                 value="After receive"
                 control={<Radio />}
-                label="Thanh toán khi nhận hàng (COD)"
+                label={t("order.cod")}
               />
               <FormControlLabel
                 value="PayPal"
                 control={<Radio />}
-                label="Thanh toán qua PayPal"
+                label={t("order.paypal")}
               />
             </RadioGroup>
           </FormControl>
           <Box sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>
-              Chi tiết thanh toán
+              {t("order.paymentDetails")}
             </Typography>
             <Box
               sx={{
@@ -295,14 +301,14 @@ const OrderPage = () => {
               }}
             >
               <Typography variant="body1">
-                <strong>Tổng tiền hàng:</strong> $
+                <strong>{t("order.subtotal")}:</strong> $
                 {orderDetails.totalAmount.toFixed(2)}
               </Typography>
               <Typography variant="body1" sx={{ mt: 1 }}>
-                <strong>Phí vận chuyển:</strong> $3.00
+                <strong>{t("order.shippingFee")}:</strong> $3.00
               </Typography>
               <Typography variant="h6" sx={{ mt: 1 }}>
-                <strong>Tổng thanh toán:</strong> ${totalPayment.toFixed(2)}
+                <strong>{t("order.total")}:</strong> ${totalPayment.toFixed(2)}
               </Typography>
             </Box>
           </Box>
@@ -319,7 +325,7 @@ const OrderPage = () => {
                 forceReRender={[totalPayment]}
                 createOrder={(data, actions) => {
                   if (!validateForm()) {
-                    toast.error("Vui lòng điền đầy đủ thông tin giao hàng.");
+                    toast.error(t("order.fillAddressFirst"));
                     return;
                   }
 
@@ -335,7 +341,7 @@ const OrderPage = () => {
                 }}
                 onApprove={async (data, actions) => {
                   const details = await actions.order.capture();
-                  toast.success("Thanh toán thành công qua PayPal!");
+                  toast.success(t("order.paypalSuccess"));
 
                   const orderData = {
                     books: orderDetails.items.map((item) => ({
@@ -367,18 +373,22 @@ const OrderPage = () => {
 
                     navigate("/thank-you", {
                       state: {
-                        message: "Thanh toán thành công qua PayPal!",
+                        message: t("order.paypalSuccess"),
                         orderId,
                       },
                     });
                   } catch (err) {
-                    console.error("❌ Lỗi khi tạo đơn hàng:", err);
-                    toast.error("Tạo đơn hàng thất bại sau thanh toán.");
+                    console.error(
+                      "❌",
+                      t("order.createOrderPaypalErrorLog"),
+                      err
+                    );
+                    toast.error(t("order.createOrderPaypalErrorToast"));
                   }
                 }}
                 onError={(err) => {
                   console.error("❌ PayPal Error:", err);
-                  toast.error("Thanh toán thất bại.");
+                  toast.error(t("order.paypalError"));
                 }}
               />
             ) : (
@@ -388,7 +398,7 @@ const OrderPage = () => {
                 size="large"
                 onClick={handlePlaceOrder}
               >
-                Đặt hàng
+                {t("order.placeOrder")}
               </Button>
             )}
           </Box>

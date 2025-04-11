@@ -16,10 +16,17 @@ import useAuth from "../hooks/useAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
+import { useTranslation } from "react-i18next";
 
+
+
+function LoginPage({ setUserProfile }) {
+  const { t } = useTranslation();
 const LoginSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
+  email: Yup.string()
+    .email(t("login.invalidEmail"))
+    .required(t("login.requiredEmail")),
+  password: Yup.string().required(t("login.requiredPassword")),
 });
 
 const defaultValues = {
@@ -28,7 +35,6 @@ const defaultValues = {
   remember: true,
 };
 
-function LoginPage({ setUserProfile }) {
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
@@ -78,17 +84,17 @@ function LoginPage({ setUserProfile }) {
             <Alert severity="error">{errors.responseError.message}</Alert>
           )}
           <Alert severity="info">
-            Don’t have an account?{" "}
+          {t("login.noAccount")}{" "}
             <Link variant="subtitle2" component={RouterLink} to="/register">
-              Get started
+            {t("login.getStarted")}
             </Link>
           </Alert>
 
-          <FTextField name="email" label="Email address" />
+          <FTextField name="email" label={t("login.email")} />
 
           <FTextField
             name="password"
-            label="Password"
+            label={t("login.password")}
             type={showPassword ? "text" : "password"}
             InputProps={{
               endAdornment: (
@@ -111,9 +117,9 @@ function LoginPage({ setUserProfile }) {
           justifyContent="space-between"
           sx={{ my: 2 }}
         >
-          <FCheckbox name="remember" label="Remember me" />
+          <FCheckbox name="remember" label={t("login.remember")}  />
           <Link component={RouterLink} variant="subtitle2" to="/forgot-password">
-            Forgot password?
+          {t("login.forgot")}
           </Link>
         </Stack>
 
@@ -124,7 +130,7 @@ function LoginPage({ setUserProfile }) {
           variant="contained"
           loading={isSubmitting}
         >
-          Login
+         {t("login.button")}
         </LoadingButton>
       </FormProvider>
     </Container>

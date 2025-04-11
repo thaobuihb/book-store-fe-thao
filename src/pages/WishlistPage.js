@@ -22,8 +22,10 @@ import {
   clearAllWishlistItems,
 } from "../features/wishlist/wishlistSlice";
 import { addToCart } from "../features/cart/cartSlice";
+import { useTranslation } from "react-i18next";
 
 const WishlistPage = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { detailedWishlist, isLoading } = useSelector(
@@ -61,21 +63,21 @@ const WishlistPage = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
-        Sách yêu thích ❤️
+        {t("wishlist.title")}
       </Typography>
-  
+
       {isLoading ? (
         <Typography
           variant="h6"
           color="textSecondary"
           sx={{ textAlign: "center" }}
         >
-          Loading your wishlist...
+          {t("wishlist.loading")}
         </Typography>
       ) : detailedWishlist.length === 0 ? (
         <Box sx={{ textAlign: "center", mt: 4 }}>
           <Typography variant="h6" color="textSecondary">
-            Không có sách nào trong danh sách yêu thích của bạn.
+            {t("wishlist.empty")}{" "}
           </Typography>
 
           {/* Nút Xem Tiếp */}
@@ -85,7 +87,7 @@ const WishlistPage = () => {
             sx={{ mt: 3 }}
             onClick={() => navigate("/")}
           >
-            Xem Tiếp
+            {t("wishlist.exploreMore")}{" "}
           </Button>
         </Box>
       ) : (
@@ -119,7 +121,7 @@ const WishlistPage = () => {
                   >
                     <DeleteIcon />
                   </IconButton>
-  
+
                   <CardMedia
                     component="img"
                     image={book.img || "/default-book.jpg"}
@@ -134,7 +136,7 @@ const WishlistPage = () => {
                     }}
                     onClick={() => handleNavigateToDetail(book._id)}
                   />
-  
+
                   <CardContent
                     sx={{
                       textAlign: "center",
@@ -147,9 +149,9 @@ const WishlistPage = () => {
                       {book.name}
                     </Typography>
                     <Typography variant="subtitle2" sx={{ color: "gray" }}>
-                      Tác giả: {book.author}
+                      {t("wishlist.author")}: {book.author}
                     </Typography>
-  
+
                     <Typography variant="body2" sx={{ mt: 1 }}>
                       {book.discountedPrice ? (
                         <>
@@ -166,10 +168,12 @@ const WishlistPage = () => {
                           </span>
                         </>
                       ) : (
-                        <span style={{ fontWeight: "bold" }}>${book.price}</span>
+                        <span style={{ fontWeight: "bold" }}>
+                          ${book.price}
+                        </span>
                       )}
                     </Typography>
-  
+
                     <Button
                       variant="contained"
                       color="primary"
@@ -185,14 +189,14 @@ const WishlistPage = () => {
                         handleAddToCart(book);
                       }}
                     >
-                      THÊM VÀO GIỎ HÀNG
+                      {t("wishlist.addToCart")}{" "}
                     </Button>
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
-  
+
           {/* Ẩn phần này nếu wishlist trống */}
           {detailedWishlist.length > 0 && (
             <>
@@ -206,12 +210,14 @@ const WishlistPage = () => {
                 }}
                 onClick={handleClearWishlist}
               >
-                XOÁ
+                {t("wishlist.clearAll")}{" "}
               </Typography>
-  
-              <Box sx={{ marginTop: 6, display: "flex", justifyContent: "center" }}>
+
+              <Box
+                sx={{ marginTop: 6, display: "flex", justifyContent: "center" }}
+              >
                 <Typography variant="h6" sx={{ marginRight: 2 }}>
-                  Chia sẻ danh sách của bạn:
+                  {t("wishlist.shareList")}
                 </Typography>
                 <IconButton
                   component="a"
@@ -252,5 +258,5 @@ const WishlistPage = () => {
       )}
     </Box>
   );
-}  
+};
 export default WishlistPage;

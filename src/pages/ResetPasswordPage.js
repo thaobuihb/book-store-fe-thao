@@ -14,11 +14,14 @@ import { resetPassword, resetAuthStatus } from "../features/user/userSlice";
 import { PasswordOnlySchema } from "../utils/validationSchemas";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
+
 
 function ResetPasswordPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token } = useParams();
+  const { t } = useTranslation();
 
   const { isLoading, error, isResetSuccess } = useSelector((state) => state.user);
 
@@ -57,18 +60,18 @@ function ResetPasswordPage() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={3} sx={{ mt: 4 }}>
           <Typography variant="h5" textAlign="center">
-            Reset Your Password
+          {t("resetPassword.title")}
           </Typography>
 
           {isResetSuccess && (
             <Alert severity="success">
-              Password reset successful! Redirecting to login...
+              {t("resetPassword.success")}
             </Alert>
           )}
           {error && <Alert severity="error">{error}</Alert>}
 
           <TextField
-            label="New Password"
+            label={t("resetPassword.newPassword")}
             type="password"
             fullWidth
             {...register("password")}
@@ -77,7 +80,7 @@ function ResetPasswordPage() {
           />
 
           <TextField
-            label="Confirm Password"
+            label={t("resetPassword.confirmPassword")}
             type="password"
             fullWidth
             {...register("confirmPassword")}
@@ -92,7 +95,7 @@ function ResetPasswordPage() {
             disabled={isSubmitting || isLoading}
             startIcon={(isSubmitting || isLoading) && <CircularProgress size={20} />}
           >
-            {isLoading ? "Resetting..." : "Reset Password"}
+            {isLoading ? t("resetPassword.loading") : t("resetPassword.button")}
           </Button>
         </Stack>
       </form>

@@ -82,11 +82,10 @@ const CartPage = () => {
   useEffect(() => {
     if (isAuthenticated && user?._id) {
       console.log("🔄 Fetching purchase history and cart...");
-      dispatch(loadCart()); 
-      dispatch(fetchPurchaseHistory(user._id)); 
+      dispatch(loadCart());
+      dispatch(fetchPurchaseHistory(user._id));
     }
   }, [isAuthenticated, user?._id, dispatch]);
-  
 
   useEffect(() => {
     if (cartReloadTrigger) {
@@ -98,7 +97,6 @@ const CartPage = () => {
     const allBookIds = cart.map((item) => item.bookId);
     setSelectedItems(allBookIds);
   }, [cart]);
-
 
   const cartItems = detailedCart.map((book) => {
     const cartItem = cart.find((item) => item.bookId === book._id);
@@ -142,7 +140,6 @@ const CartPage = () => {
       setSearchQuery("");
     }
   }, [isAuthenticated]);
-
 
   const handleProceedToCheckout = (useId) => {
     const selectedBooks = cartItems.filter((item) =>
@@ -254,19 +251,18 @@ const CartPage = () => {
     handleCloseModal();
   };
 
-  
   return (
     <Container id="cart-page-container" tabIndex="-1">
       <Typography variant="h4" gutterBottom>
-      {t('cartTitle')}
+        {t("cartTitle")}
       </Typography>
       <Tabs
         value={currentTab}
         onChange={handleTabChange}
         aria-label="Cart and Purchase History"
       >
-        <Tab label={t('cartTab')} id="tab-0" aria-controls="tabpanel-0" />
-        <Tab label={t('historyTab')} id="tab-1" aria-controls="tabpanel-1" />
+        <Tab label={t("cartTab")} id="tab-0" aria-controls="tabpanel-0" />
+        <Tab label={t("historyTab")} id="tab-1" aria-controls="tabpanel-1" />
       </Tabs>
 
       <Box
@@ -290,20 +286,20 @@ const CartPage = () => {
         <>
           {cartItems.length === 0 ? (
             <Box sx={{ textAlign: "center", mt: 4 }}>
-            <Typography variant="h6" color="textSecondary">
-            {t('emptyCart')}
-            </Typography>
-  
-            {/* Nút Xem Tiếp */}
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3 }}
-              onClick={() => navigate("/")}
-            >
-              {t('addMore')}
-            </Button>
-          </Box>
+              <Typography variant="h6" color="textSecondary">
+                {t("emptyCart")}
+              </Typography>
+
+              {/* Nút Xem Tiếp */}
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 3 }}
+                onClick={() => navigate("/")}
+              >
+                {t("addMore")}
+              </Button>
+            </Box>
           ) : (
             <Grid container spacing={2}>
               <Grid item xs={12} md={8}>
@@ -331,7 +327,7 @@ const CartPage = () => {
                           <CardContent>
                             <Typography variant="h6">{item.name}</Typography>
                             <Typography variant="body1">
-                            {t('price')}:${item.discountedPrice || item.price}
+                              {t("price")}:${item.discountedPrice || item.price}
                             </Typography>
                             <Box
                               sx={{
@@ -373,7 +369,7 @@ const CartPage = () => {
                               </IconButton>
                             </Box>
                             <Typography variant="body1" sx={{ marginTop: 1 }}>
-                            {t('total')}: $
+                              {t("total")}: $
                               {(item.discountedPrice || item.price) *
                                 item.quantity}
                             </Typography>
@@ -402,7 +398,7 @@ const CartPage = () => {
                   }}
                 >
                   <Typography variant="h5" gutterBottom>
-                  {t('total')}: ${totalPrice.toFixed(2)}
+                    {t("total")}: ${totalPrice.toFixed(2)}
                   </Typography>
                   <Button
                     variant="contained"
@@ -412,7 +408,7 @@ const CartPage = () => {
                     onClick={handleProceedToCheckout}
                     disabled={selectedItems.length === 0}
                   >
-                     {t('checkout')}
+                    {t("checkout")}
                   </Button>
                   <Typography
                     variant="body2"
@@ -423,7 +419,7 @@ const CartPage = () => {
                     }}
                     onClick={handleClearCart}
                   >
-                    {t('clearCart')}
+                    {t("clearCart")}
                   </Typography>
                 </Box>
               </Grid>
@@ -435,16 +431,18 @@ const CartPage = () => {
       {currentTab === 1 && (
         <Box>
           {/* Ô tìm kiếm đơn hàng */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, mt: 2 }}>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, mt: 2 }}
+          >
             <TextField
-              label={t('orderSearchPlaceholder')}
+              label={t("orderSearchPlaceholder")}
               variant="outlined"
               size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Button variant="contained" color="primary" onClick={handleSearch}>
-            {t('search')}
+              {t("search")}
             </Button>
             {searchResult && searchResult.orderCode && (
               <Button
@@ -452,7 +450,7 @@ const CartPage = () => {
                 color="secondary"
                 onClick={handleClearSearch}
               >
-                {t('clearSearch')}
+                {t("clearSearch")}
               </Button>
             )}
           </Box>
@@ -461,16 +459,17 @@ const CartPage = () => {
           {searchError && <Typography color="error">{searchError}</Typography>}
 
           {/* Hiển thị kết quả tìm kiếm nếu tìm thấy đơn hàng */}
-          {searchResult && searchResult.orderCode ?(
+          {searchResult && searchResult.orderCode ? (
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={4}>
                 <Card>
                   <CardContent>
                     <Typography variant="h8">
-                    {t('orderCode')}: <strong>{searchResult.orderCode}</strong>
+                      {t("orderCode")}:{" "}
+                      <strong>{searchResult.orderCode}</strong>
                     </Typography>
                     <Typography>
-                    {t('status')}:{" "}
+                      {t("status")}:{" "}
                       <strong
                         style={{
                           color: statusColors[searchResult.status] || "black",
@@ -480,11 +479,11 @@ const CartPage = () => {
                       </strong>
                     </Typography>
                     <Typography>
-                    {t('orderDate')}:{" "}
+                      {t("orderDate")}:{" "}
                       {new Date(searchResult.createdAt).toLocaleDateString()}
                     </Typography>
                     <Typography>
-                      Tổng: $
+                      {t("total")}: $
                       {searchResult?.totalAmount
                         ? searchResult.totalAmount.toFixed(2)
                         : "0.00"}
@@ -492,32 +491,30 @@ const CartPage = () => {
 
                     {/* Hiển thị sách trong đơn hàng */}
                     <Typography sx={{ mt: 2 }}>
-                      <strong>{t('address')}:</strong>
+                      <strong>{t("address")}:</strong>
                     </Typography>
                     <Typography>
-                      {searchResult?.shippingAddress?.fullName ||
-                        t('noName')}
+                      {searchResult?.shippingAddress?.fullName || t("noName")}
                     </Typography>
                     <Typography>
-                      {searchResult?.shippingAddress?.phone ||
-                        t('noPhone')}
+                      {searchResult?.shippingAddress?.phone || t("noPhone")}
                     </Typography>
                     <Typography>
                       {searchResult?.shippingAddress
                         ? `${
                             searchResult.shippingAddress.addressLine ||
-                            t('noAddress')
+                            t("noAddress")
                           }, 
-       ${searchResult.shippingAddress.city || t('noAddress')}, 
-       ${searchResult.shippingAddress.state || t('noAddress')}, 
-       ${searchResult.shippingAddress.zipcode || t('noZip')}, 
-       ${searchResult.shippingAddress.country || t('noCountry')}`
-                        : t('noAddress')}
+       ${searchResult.shippingAddress.city || t("noAddress")}, 
+       ${searchResult.shippingAddress.state || t("noAddress")}, 
+       ${searchResult.shippingAddress.zipcode || t("noZip")}, 
+       ${searchResult.shippingAddress.country || t("noCountry")}`
+                        : t("noAddress")}
                     </Typography>
                     {Array.isArray(searchResult?.books) &&
                     searchResult.books.length > 0 ? (
                       <>
-                        <Typography sx={{ mt: 2 }}>Book:</Typography>
+                        <Typography sx={{ mt: 2 }}>{t("cart.book")}:</Typography>
                         <Box
                           sx={{
                             display: "flex",
@@ -543,13 +540,14 @@ const CartPage = () => {
                                 "Không có tên"}
                             </Typography>
                             <Typography>
-                              Giá: $
+                              {t("order.price")}: $
                               {searchResult.books[0]?.price
                                 ? searchResult.books[0].price.toFixed(2)
                                 : "0.00"}
                             </Typography>
                             <Typography>
-                              Số lượng: {searchResult.books[0].quantity}
+                              {t("order.quantity")}:{" "}
+                              {searchResult.books[0].quantity}
                             </Typography>
                           </Box>
                         </Box>
@@ -565,8 +563,8 @@ const CartPage = () => {
                           onClick={() => toggleExpand(searchResult?._id)}
                         >
                           {expandedOrders[searchResult?._id]
-                            ? "Thu gọn"
-                            : "Xem thêm"}
+                            ? t("cart.showLess")
+                            : t("cart.showMore")}
                         </Button>
                       )}
 
@@ -591,9 +589,11 @@ const CartPage = () => {
                           <Box>
                             <Typography>{book.bookId?.name}</Typography>
                             <Typography>
-                              Giá: ${book.price.toFixed(2)}
+                              {t("order.price")}: ${book.price.toFixed(2)}
                             </Typography>
-                            <Typography>Số lượng: {book.quantity}</Typography>
+                            <Typography>
+                              {t("order.quantity")}: {book.quantity}
+                            </Typography>
                           </Box>
                         </Box>
                       ))}
@@ -611,27 +611,27 @@ const CartPage = () => {
                           )
                         }
                       >
-                        Huỷ đơn
+                        {t("cancelOrder")}
                       </Button>
                     )}
                     {/* Modal Xác Nhận Huỷ Đơn */}
                     <Dialog open={openModal} onClose={handleCloseModal}>
-                      <DialogTitle>{t('confirmCancel')}</DialogTitle>
+                      <DialogTitle>{t("confirmCancel")}</DialogTitle>
                       <DialogContent>
                         <DialogContentText>
-                        {t('confirmCancelText')}
+                          {t("confirmCancelText")}
                         </DialogContentText>
                       </DialogContent>
                       <DialogActions>
                         <Button onClick={handleCloseModal} color="primary">
-                        {t('no')}
+                          {t("no")}
                         </Button>
                         <Button
                           onClick={handleConfirmCancelOrder}
                           color="error"
                           variant="contained"
                         >
-                          {t('confirmCancel')}
+                          {t("confirmCancel")}
                         </Button>
                       </DialogActions>
                     </Dialog>
@@ -643,7 +643,7 @@ const CartPage = () => {
             /* Nếu không có kết quả tìm kiếm, hiển thị danh sách đơn hàng */
             <>
               {processedOrders.length === 0 ? (
-                <Typography>Bạn không có đơn hàng nào</Typography>
+                <Typography>{t("cart.noOrderHistory")}</Typography>
               ) : (
                 <Grid container spacing={2}>
                   {processedOrders.map((order) => (
@@ -651,10 +651,10 @@ const CartPage = () => {
                       <Card>
                         <CardContent>
                           <Typography variant="h8">
-                            Mã đơn hàng: <strong>{order.orderCode}</strong>
+                            {t("")}: <strong>{order.orderCode}</strong>
                           </Typography>
                           <Typography>
-                            Trạng thái:{" "}
+                            {t("status")}:{" "}
                             <strong
                               style={{
                                 color: statusColors[order.status] || "black",
@@ -664,17 +664,17 @@ const CartPage = () => {
                             </strong>
                           </Typography>
                           <Typography>
-                            Ngày đặt:{" "}
+                            {t("orderDate")}:{" "}
                             {new Date(order.createdAt).toLocaleDateString()}
                           </Typography>
                           <Typography>
-                            Tổng: $
+                            {t("total")}: $
                             {order?.totalAmount
                               ? order.totalAmount.toFixed(2)
                               : "0.00"}
                           </Typography>
                           <Typography sx={{ mt: 2 }}>
-                            <strong>Địa chỉ giao hàng:</strong>
+                            <strong>{t("address")}:</strong>
                           </Typography>
                           <Typography>
                             {order.shippingAddress.fullName}
@@ -688,7 +688,7 @@ const CartPage = () => {
                             {order.shippingAddress.country}
                           </Typography>
 
-                          <Typography sx={{ mt: 2 }}>Book:</Typography>
+                          <Typography sx={{ mt: 2 }}>{t("cart.book")}:</Typography>
                           {/* Hiển thị sách đầu tiên */}
                           <Box
                             sx={{
@@ -711,10 +711,10 @@ const CartPage = () => {
                                 {order.firstBook.bookId?.name}
                               </Typography>
                               <Typography>
-                                Giá: ${order.firstBook.price.toFixed(2)}
+                                {t("price")}: ${order.firstBook.price.toFixed(2)}
                               </Typography>
                               <Typography>
-                                Số lượng: {order.firstBook.quantity}
+                                {t("order.quantity")}: {order.firstBook.quantity}
                               </Typography>
                             </Box>
                           </Box>
@@ -728,8 +728,8 @@ const CartPage = () => {
                               onClick={() => toggleExpand(order._id)}
                             >
                               {expandedOrders[order._id]
-                                ? "Thu gọn"
-                                : "Xem thêm"}
+                                 ? t("cart.showLess")
+                                 : t("cart.showMore")}
                             </Button>
                           )}
 
@@ -756,10 +756,10 @@ const CartPage = () => {
                                 <Box>
                                   <Typography>{book.bookId?.name}</Typography>
                                   <Typography>
-                                    Giá: ${book.price.toFixed(2)}
+                                    {t("price")}: ${book.price.toFixed(2)}
                                   </Typography>
                                   <Typography>
-                                    Số lượng: {book.quantity}
+                                    {t("")}: {book.quantity}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -775,7 +775,7 @@ const CartPage = () => {
                                 handleOpenModal(order._id || order.orderCode)
                               }
                             >
-                              Huỷ đơn
+                              {t("cancelOrder")}
                             </Button>
                           )}
                         </CardContent>
@@ -790,23 +790,22 @@ const CartPage = () => {
       )}
       {/* Modal Xác Nhận Huỷ Đơn */}
       <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Xác nhận huỷ đơn hàng</DialogTitle>
+        <DialogTitle>{t("cart.deleteConfirmTitle")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Bạn có chắc chắn muốn huỷ đơn hàng này không? Hành động này không
-            thể hoàn tác.
+            {t("cart.deleteConfirmText")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal} color="primary">
-            Không
+            {t("no")}
           </Button>
           <Button
             onClick={handleConfirmCancelOrder}
             color="error"
             variant="contained"
           >
-            Xác nhận
+            {t("cart.confirm")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,9 +1,11 @@
 import React from "react";
 import { Container, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function UnauthorizedPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Container maxWidth="md" sx={{ textAlign: "center", mt: 4 }}>

@@ -30,11 +30,13 @@ import {
   updateOrderShippingStatus,
   updateShippingAddress,
 } from "../../features/admin/adminSlice";
+import { useTranslation } from "react-i18next";
 
 const OrdersPage = () => {
   const dispatch = useDispatch();
   const { orders = [], loading, error } = useSelector((state) => state.admin);
-  console.log("Orders from Redux Store:", orders);
+  // console.log("Orders from Redux Store:", orders);
+  const { t } = useTranslation();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCriteria, setSearchCriteria] = useState("customerName");
@@ -478,7 +480,7 @@ const OrdersPage = () => {
                 </Select>
               )}
               {/* 📍 Địa chỉ giao hàng (chỉ cập nhật khi đơn hàng đang xử lý) */}
-              <Typography sx={{ mt: 2 }}>Địa chỉ giao hàng</Typography>
+              <Typography sx={{ mt: 2 }}>{t("address")}</Typography>
               {selectedOrder?.status === "Đang xử lý" ? (
                 Object.keys(updatedShippingAddress).map((key, index) => (
                   <TextField
@@ -514,7 +516,7 @@ const OrdersPage = () => {
                       color="error"
                       onClick={handleCancelOrder}
                     >
-                      Hủy đơn hàng
+                      {t("cancelOrder")}
                     </Button>
                   )}
 
