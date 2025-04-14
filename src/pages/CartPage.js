@@ -186,6 +186,12 @@ const CartPage = () => {
     "Đã hủy": "red",
   };
 
+  const paymentStatusColors = {
+    "Đã thanh toán": "green",
+    "Đã hoàn tiền": "orange",
+    "Chưa thanh toán": "purple",
+  };
+
   //tim kiem
   const handleSearch = () => {
     if (!searchQuery.trim()) {
@@ -479,6 +485,21 @@ const CartPage = () => {
                       </strong>
                     </Typography>
                     <Typography>
+                      {t("order.paymentStatus")}:{" "}
+                      <strong
+                        style={{
+                          color:
+                            paymentStatusColors[searchResult.paymentStatus] ||
+                            "black",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {searchResult.paymentStatus ||
+                          t("order.noPaymentStatus")}
+                      </strong>
+                    </Typography>
+
+                    <Typography>
                       {t("orderDate")}:{" "}
                       {new Date(searchResult.createdAt).toLocaleDateString()}
                     </Typography>
@@ -514,7 +535,9 @@ const CartPage = () => {
                     {Array.isArray(searchResult?.books) &&
                     searchResult.books.length > 0 ? (
                       <>
-                        <Typography sx={{ mt: 2 }}>{t("cart.book")}:</Typography>
+                        <Typography sx={{ mt: 2 }}>
+                          {t("cart.book")}:
+                        </Typography>
                         <Box
                           sx={{
                             display: "flex",
@@ -651,7 +674,7 @@ const CartPage = () => {
                       <Card>
                         <CardContent>
                           <Typography variant="h8">
-                            {t("")}: <strong>{order.orderCode}</strong>
+                            {t("orderCode")}: <strong>{order.orderCode}</strong>
                           </Typography>
                           <Typography>
                             {t("status")}:{" "}
@@ -663,6 +686,21 @@ const CartPage = () => {
                               {order.status}
                             </strong>
                           </Typography>
+                          <Typography>
+                            {t("order.paymentStatus")}:{" "}
+                            <strong
+                              style={{
+                                color:
+                                  paymentStatusColors[order.paymentStatus] ||
+                                  "black",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {order.paymentStatus ||
+                                t("order.noPaymentStatus")}
+                            </strong>
+                          </Typography>
+
                           <Typography>
                             {t("orderDate")}:{" "}
                             {new Date(order.createdAt).toLocaleDateString()}
@@ -688,7 +726,9 @@ const CartPage = () => {
                             {order.shippingAddress.country}
                           </Typography>
 
-                          <Typography sx={{ mt: 2 }}>{t("cart.book")}:</Typography>
+                          <Typography sx={{ mt: 2 }}>
+                            {t("cart.book")}:
+                          </Typography>
                           {/* Hiển thị sách đầu tiên */}
                           <Box
                             sx={{
@@ -711,10 +751,12 @@ const CartPage = () => {
                                 {order.firstBook.bookId?.name}
                               </Typography>
                               <Typography>
-                                {t("price")}: ${order.firstBook.price.toFixed(2)}
+                                {t("price")}: $
+                                {order.firstBook.price.toFixed(2)}
                               </Typography>
                               <Typography>
-                                {t("order.quantity")}: {order.firstBook.quantity}
+                                {t("order.quantity")}:{" "}
+                                {order.firstBook.quantity}
                               </Typography>
                             </Box>
                           </Box>
@@ -728,8 +770,8 @@ const CartPage = () => {
                               onClick={() => toggleExpand(order._id)}
                             >
                               {expandedOrders[order._id]
-                                 ? t("cart.showLess")
-                                 : t("cart.showMore")}
+                                ? t("cart.showLess")
+                                : t("cart.showMore")}
                             </Button>
                           )}
 
@@ -742,7 +784,7 @@ const CartPage = () => {
                                   display: "flex",
                                   alignItems: "center",
                                   marginTop: 1,
-                                  paddingLeft: 2, // Tạo khoảng cách để phân biệt sách mở rộng
+                                  paddingLeft: 2,
                                 }}
                               >
                                 <CardMedia
@@ -792,9 +834,7 @@ const CartPage = () => {
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>{t("cart.deleteConfirmTitle")}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {t("cart.deleteConfirmText")}
-          </DialogContentText>
+          <DialogContentText>{t("cart.deleteConfirmText")}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal} color="primary">

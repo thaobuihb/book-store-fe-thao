@@ -34,6 +34,7 @@ import {
   updateBook,
 } from "../../features/admin/adminSlice";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 // Cắt ngắn mô tả
 const getFormattedDescription = (description, maxLength = 50, showFull) => {
@@ -54,6 +55,7 @@ const BooksPage = () => {
       loading: state.admin.loading,
       error: state.admin.error,
     }));
+  const { t } = useTranslation();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
@@ -360,8 +362,8 @@ const BooksPage = () => {
           value={tabValue}
           onChange={(e, newValue) => setTabValue(newValue)}
         >
-          <Tab label="Sách hiện tại" />
-          <Tab label="Sách đã xóa" />
+          <Tab label={t("adminBooks.tabs.active")} />
+          <Tab label={t("adminBooks.tabs.deleted")} />
         </Tabs>
         <Box display="flex" alignItems="center">
           <Select
@@ -370,7 +372,7 @@ const BooksPage = () => {
             sx={{ marginRight: "3px" }}
           >
             <MenuItem value="Isbn">ISBN</MenuItem>
-            <MenuItem value="name">Tên sách</MenuItem>
+            <MenuItem value="name"></MenuItem>
             <MenuItem value="author">Tác giả</MenuItem>
             <MenuItem value="price">Giá</MenuItem>
             <MenuItem value="categoryId">Danh mục</MenuItem>

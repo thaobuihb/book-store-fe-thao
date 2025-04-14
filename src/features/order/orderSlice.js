@@ -123,7 +123,6 @@ export const cancelOrder = createAsyncThunk(
   }
 );
 
-
 export const fetchGuestOrderDetails = createAsyncThunk(
   "orders/fetchGuestOrderDetails",
   async (orderCode, { rejectWithValue }) => {
@@ -131,7 +130,7 @@ export const fetchGuestOrderDetails = createAsyncThunk(
       console.log("📡 Fetching API:", `/orders/guest/${orderCode}`);
 
       const response = await apiService.get(`/orders/guest/${orderCode}`);
-      
+
       console.log("🔹 Full API Response:", response);
 
       if (!response || typeof response !== "object") {
@@ -143,11 +142,12 @@ export const fetchGuestOrderDetails = createAsyncThunk(
       return response; // Sửa lại chỗ này (đừng dùng `response.data`)
     } catch (error) {
       console.error("❌ Error Fetching Guest Order:", error.response);
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch guest order details");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch guest order details"
+      );
     }
   }
 );
-
 
 export const searchOrderByCode = createAsyncThunk(
   "order/searchOrderByCode",
@@ -155,7 +155,7 @@ export const searchOrderByCode = createAsyncThunk(
     try {
       const response = await apiService.get(`/orders/find/${orderCode}`);
       // console.log("🔹 API Response:", response.data);
-      return response.data; 
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Order not found");
     }
@@ -166,14 +166,34 @@ export const cancelGuestOrder = createAsyncThunk(
   "order/cancelGuestOrder",
   async ({ orderCode }, { rejectWithValue }) => {
     try {
-      const response = await apiService.put(`/orders/guest/cancel/${orderCode}`);
+      const response = await apiService.put(
+        `/orders/guest/cancel/${orderCode}`
+      );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to cancel guest order"
+      );      
     }
   }
 );
 
+export const updateTransactionId = createAsyncThunk(
+  "orders/updateTransactionId",
+  async ({ orderId, transactionId, isGuest }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.put(`/orders/${orderId}/transaction`, {
+        transactionId,
+        isGuest,
+      });
+      return response.data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Lỗi khi cập nhật transactionId";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
 // Khởi tạo slice
 const orderSlice = createSlice({
@@ -183,7 +203,7 @@ const orderSlice = createSlice({
     orderDetails: null,
     purchaseHistory: [],
     searchResult: null,
-    searchError: null, 
+    searchError: null,
     isLoading: false,
     error: null,
   },
@@ -314,7 +334,10 @@ const orderSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchGuestOrderDetails.fulfilled, (state, action) => {
-        console.log("🟢 Redux cập nhật state với đơn hàng khách:", action.payload);
+        console.log(
+          "🟢 Redux cập nhật state với đơn hàng khách:",
+          action.payload
+        );
         state.isLoading = false;
         state.orderDetails = action.payload;
       })
@@ -337,20 +360,29 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.searchError = action.payload || "Order not found";
       })
-      // .addCase(cancelOrder.fulfilled, (state, action) => {
-      //   state.purchaseHistory = state.purchaseHistory.map(order =>
-      //     order._id === action.payload.orderId ? { ...order, status: "Đã hủy" } : order
-      //   );
-      // })
       .addCase(cancelGuestOrder.fulfilled, (state, action) => {
-        state.purchaseHistory = state.purchaseHistory.map(order =>
-          order.orderCode === action.payload.orderCode ? { ...order, status: "Đã hủy" } : order
+        state.purchaseHistory = state.purchaseHistory.map((order) =>
+          order.orderCode === action.payload.orderCode
+            ? { ...order, status: "Đã hủy" }
+            : order
         );
+      })
+      .addCase(updateTransactionId.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateTransactionId.fulfilled, (state, action) => {
+        state.isLoading = false;
+        console.log("✅ Cập nhật transactionId thành công:", action.payload);
+      })
+      .addCase(updateTransactionId.rejected, (state, action) => {
+        state.isLoading = false;
+        console.error("❌ Lỗi cập nhật transactionId:", action.payload);
+        state.error = action.payload;
       });
   },
 });
 
-// Export reducers và actions
-export const { clearError, clearOrderDetails, clearSearchResult } = orderSlice.actions;
+export const { clearError, clearOrderDetails, clearSearchResult } =
+  orderSlice.actions;
 export const selectOrderDetails = (state) => state.order.orderDetails || null;
 export default orderSlice.reducer;

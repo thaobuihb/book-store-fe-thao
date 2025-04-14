@@ -15,6 +15,7 @@ import {
 import { Dashboard, Book, ShoppingCart, Group, Category, Logout } from "@mui/icons-material";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const drawerWidth = 240;
 
@@ -22,6 +23,7 @@ const AdminLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout(null, null, () => {
@@ -30,11 +32,11 @@ const AdminLayout = () => {
   };
 
   const menuItems = [
-    { text: "Dashboard", icon: <Dashboard />, link: "/admin/dashboard" },
-    { text: "Books", icon: <Book />, link: "/admin/books" },
-    { text: "Orders", icon: <ShoppingCart />, link: "/admin/orders" },
-    { text: "Users", icon: <Group />, link: "/admin/users" },
-    { text: "Categories", icon: <Category />, link: "/admin/categories" },
+    { text: t("admin.menu.dashboard"), icon: <Dashboard />, link: "/admin/dashboard" },
+    { text: t("admin.menu.books"), icon: <Book />, link: "/admin/books" },
+    { text: t("admin.menu.orders"), icon: <ShoppingCart />, link: "/admin/orders" },
+    { text: t("admin.menu.users"), icon: <Group />, link: "/admin/users" },
+    { text: t("admin.menu.categories"), icon: <Category />, link: "/admin/categories" },
   ];
 
   const pageTitle = useMemo(() => {
@@ -51,7 +53,7 @@ const AdminLayout = () => {
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" noWrap>
-            {pageTitle} {/* Tiêu đề động */}
+            {pageTitle} 
           </Typography>
           <Button
             variant="contained"
@@ -59,7 +61,7 @@ const AdminLayout = () => {
             startIcon={<Logout />}
             onClick={handleLogout}
           >
-            Logout
+             {t("admin.logout")}
           </Button>
         </Toolbar>
       </AppBar>

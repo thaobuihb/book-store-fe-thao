@@ -171,7 +171,8 @@
     "deleteConfirmTitle": "Xác nhận huỷ đơn hàng",
     "deleteConfirmText": "Bạn có chắc chắn muốn huỷ đơn hàng này không? Hành động này không thể hoàn tác.",
     "noOrderFound": "Không có kết quả đơn hàng.",
-    "noOrderHistory": "Bạn không có đơn hàng nào"
+    "noOrderHistory": "Bạn không có đơn hàng nào",
+    "paymentStatus": "Trạng thái thanh toán"
   },
   "profileUpdate": {
     "title": "Cập nhật thông tin cá nhân",
@@ -205,8 +206,51 @@
     "clearAll": "XOÁ",
     "shareList": "Chia sẻ danh sách của bạn:",
     "author": "Tác giả"
+  },
+  "admin": {
+    "logout": "Đăng xuất",
+    "menu": {
+      "dashboard": "Tổng quan",
+      "books": "Sách",
+      "orders": "Đơn hàng",
+      "users": "Người dùng",
+      "categories": "Danh mục"
+    }
+  },
+  "adminBooks": {
+    "tabs": {
+      "active": "Sách hiện tại",
+      "deleted": "Sách đã xóa"
+    },
+    "form": {
+      "name": "Tên sách *",
+      "author": "Tác giả",
+      "price": "Giá sách *",
+      "publicationDate": "Ngày xuất bản *",
+      "img": "Ảnh (URL)",
+      "description": "Mô tả",
+      "discountRate": "Tỉ lệ giảm giá (%)",
+      "category": "Danh mục",
+      "selectCategory": "Chọn danh mục"
+    },
+    "actions": {
+      "addBook": "Thêm sách",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận",
+      "update": "Cập nhật",
+      "delete": "Xóa"
+    },
+    "modal": {
+      "addTitle": "Thêm sách mới",
+      "updateTitle": "Cập nhật thông tin sách",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa sách này?"
+    },
+    "status": {
+      "loading": "Đang tải thêm sách...",
+      "noBooksFound": "Không có sách được tìm",
+      "allLoaded": "Đã tải hết danh sách sách.",
+      "noDeletedBooks": "Không có sách đã xóa."
+    }
   }
-  
-  
-  
+    
 }

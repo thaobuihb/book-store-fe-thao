@@ -18,7 +18,11 @@ import { PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder, createGuestOrder } from "../features/order/orderSlice";
+import {
+  createOrder,
+  createGuestOrder,
+  updateTransactionId,
+} from "../features/order/orderSlice";
 import { useTranslation } from "react-i18next";
 
 const OrderPage = () => {
@@ -318,7 +322,6 @@ const OrderPage = () => {
                 style={{
                   layout: "horizontal",
                   height: 40,
-                  width: "50%",
                   label: "paypal",
                   shape: "rect",
                 }}
@@ -341,7 +344,13 @@ const OrderPage = () => {
                 }}
                 onApprove={async (data, actions) => {
                   const details = await actions.order.capture();
-                  toast.success(t("order.paypalSuccess"));
+                  const transactionId =
+                    details?.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+
+                  console.log("✅ TransactionId (capture ID):", transactionId);
+
+                  console.log("📥 transactionId:", transactionId);
+                  console.log("💰 Chi tiết giao dịch PayPal:", details);
 
                   const orderData = {
                     books: orderDetails.items.map((item) => ({
@@ -363,14 +372,31 @@ const OrderPage = () => {
                   };
 
                   try {
+                    // ✅ 1. Gửi tạo đơn hàng
                     const res = isAuthenticated
                       ? await dispatch(
                           createOrder({ userId: user._id, orderData })
                         ).unwrap()
                       : await dispatch(createGuestOrder(orderData)).unwrap();
 
-                    const orderId = isAuthenticated ? res?._id : res?.orderCode;
+                    // ✅ 2. Lấy orderId đúng theo loại người dùng
+                    const orderId = isAuthenticated ? res._id : res.orderCode;
 
+                    console.log("📦 Gửi cập nhật transactionId %%%", {
+                      orderId: isAuthenticated ? res._id : res.orderCode,
+                      transactionId,
+                      isGuest: !isAuthenticated,
+                    });
+                    // ✅ 3. Cập nhật transactionId (đã sửa)
+                    await dispatch(
+                      updateTransactionId({
+                        orderId,
+                        transactionId,
+                        isGuest: !isAuthenticated, // true nếu khách vãng lai
+                      })
+                    ).unwrap();
+
+                    // ✅ 4. Điều hướng đến trang cảm ơn
                     navigate("/thank-you", {
                       state: {
                         message: t("order.paypalSuccess"),

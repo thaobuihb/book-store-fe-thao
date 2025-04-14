@@ -30,7 +30,8 @@
 ## 📦 Cài Đặt Dự Án
 
 ### Yêu cầu:
-- Node.js >= 16
+- Node.js: >=V22.1.0
+- NPM: >=10.8.1
 
 ### Bước 1: Clone project
 ```bash

@@ -198,7 +198,7 @@ const ThankYouPage = () => {
                 size="large"
                 onClick={() => navigate("/")}
               >
-                <Typography>{t("thankYou.noBooks")}</Typography>
+                <Typography>{t("thankYou.keepBuying")}</Typography>
               </Button>
             </Tooltip>
           </Box>

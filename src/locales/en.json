@@ -171,7 +171,8 @@
     "deleteConfirmTitle": "Confirm order cancellation",
     "deleteConfirmText": "Are you sure you want to cancel this order? This action cannot be undone.",
     "noOrderFound": "No order results found.",
-    "noOrderHistory": "You have no order history."
+    "noOrderHistory": "You have no order history.",
+    "paymentStatus": "Payment Status"
   },
   "profileUpdate": {
     "title": "Update Profile",
@@ -205,9 +206,52 @@
     "clearAll": "CLEAR",
     "shareList": "Share your list:",
     "author": "Author"
+  },
+  "admin": {
+    "logout": "Logout",
+    "menu": {
+      "dashboard": "Dashboard",
+      "books": "Books",
+      "orders": "Orders",
+      "users": "Users",
+      "categories": "Categories"
+    }
+  },
+  "adminBooks": {
+    "tabs": {
+      "active": "Current Books",
+      "deleted": "Deleted Books"
+    },
+    "form": {
+      "name": "Book Name *",
+      "author": "Author",
+      "price": "Book Price *",
+      "publicationDate": "Publication Date *",
+      "img": "Image (URL)",
+      "description": "Description",
+      "discountRate": "Discount Rate (%)",
+      "category": "Category",
+      "selectCategory": "Select category"
+    },
+    "actions": {
+      "addBook": "Add Book",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "update": "Update",
+      "delete": "Delete"
+    },
+    "modal": {
+      "addTitle": "Add New Book",
+      "updateTitle": "Update Book Information",
+      "confirmDelete": "Are you sure you want to delete this book?"
+    },
+    "status": {
+      "loading": "Loading more books...",
+      "noBooksFound": "No books found",
+      "allLoaded": "All books have been loaded.",
+      "noDeletedBooks": "No deleted books."
+    }
   }
   
-  
-    
   
 }
