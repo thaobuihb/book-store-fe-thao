@@ -241,7 +241,7 @@ export const updateCartQuantity = ({ bookId, quantity }) => async (dispatch, get
       await apiService.put("/carts/update", { userId: user._id, bookId, quantity });
     }
     dispatch(updateCartQuantitySuccess({ bookId, quantity }));
-    toast.success("Cart quantity updated successfully");
+    // toast.success("Cart quantity updated successfully");
   } catch (error) {
     dispatch(hasError(error.message));
     toast.error("Error updating cart quantity");
@@ -260,7 +260,7 @@ export const removeBookFromCart = (bookId) => async (dispatch, getState) => {
     }
   }
   dispatch(removeBookFromCartSuccess(bookId));
-  toast.success("Sách đã được xóa khỏi giỏ hàng");
+  // toast.success("Sách đã được xóa khỏi giỏ hàng");
 };
 
 
