@@ -145,7 +145,7 @@ export const toggleBookInWishlist = (bookId) => async (dispatch, getState) => {
         }
       });
       dispatch(removeBookFromWishlistSuccess(bookId));
-      toast.success("Đã xóa sách khỏi danh sách yêu thích");
+      // toast.success("Đã xóa sách khỏi danh sách yêu thích");
     } else {
       const response = await apiService.post(`/wishlist/add`, { userId: user._id, bookId });
       dispatch(addBookToWishlistSuccess(bookId));
