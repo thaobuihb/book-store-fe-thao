@@ -1,7 +1,9 @@
 import React from "react";
 import { Grid, Card, CardActionArea, CardMedia, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const CategoryList = ({ categories, onCategoryClick }) => {
+  const { t } = useTranslation();
   return (
     <Grid container spacing={2} justifyContent="center">
       {categories.map((category) => (
@@ -44,7 +46,7 @@ const CategoryList = ({ categories, onCategoryClick }) => {
                 color="text.secondary"
                 sx={{ mt: 1, fontSize: 14, fontWeight: "bold" }}
               >
-                {category.count} sách
+                {category.count} {t("book")}
               </Typography>
             </CardActionArea>
           </Card>

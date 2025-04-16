@@ -197,6 +197,7 @@ export const fetchOrders = createAsyncThunk(
       const orders = response.data.map((order) => ({
         ...order,
         orderCode: order.orderCode || "Không có mã đơn hàng",
+        customerEmail: order.userId?.email || order.guestEmail || "Không có email",
         books: order.books.map((book) => ({
           ...book,
           quantity: book.quantity || 1,
