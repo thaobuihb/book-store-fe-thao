@@ -11,7 +11,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetPassword, resetAuthStatus } from "../features/user/userSlice";
-import { PasswordOnlySchema } from "../utils/validationSchemas";
+import { buildChangePasswordSchema} from "../utils/validationSchemas";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
@@ -32,7 +32,7 @@ function ResetPasswordPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: yupResolver(PasswordOnlySchema),
+    resolver: yupResolver(buildChangePasswordSchema(t)),
     defaultValues: {
       password: "",
       confirmPassword: "",

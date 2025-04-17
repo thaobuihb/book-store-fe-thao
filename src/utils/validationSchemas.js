@@ -1,41 +1,82 @@
 import * as Yup from "yup";
 
-export const RegisterSchema = Yup.object().shape({
-  name: Yup.string()
-    .required("Name is required")
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be at most 50 characters"),
-    
-  email: Yup.string()
-    .email("Email không hợp lệ")
-    .required("Không thể để trống")
-    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Invalid email format"),
+// Đăng ký
+export const buildRegisterSchema = (t) =>
+  Yup.object().shape({
+    name: Yup.string()
+      .required(t("register.nameRequired"))
+      .min(2, t("register.nameMin"))
+      .max(50, t("register.nameMax")),
 
-  password: Yup.string()
-    .required("Không thể để trống")
-    .min(8, "Mật khẩu phải tối thiểu 8 ký tự")
-    .max(100, "Mật khẩu không dài quá 10 ký tự")
-    .matches(/[A-Z]/, "Mật khẩu phải có ít nhất một chữ cái viết hoa")
-    .matches(/[a-z]/, "Mật khẩu phải có ít nhất một chữ cái thường")
-    .matches(/[0-9]/, "Mật khẩu phải có ít nhất một số")
-    .matches(/[@$!%*?&]/, "Mật khẩu phải có ít nhất một ký tự đặc biệt (@$!%*?&)"),
+    email: Yup.string()
+      .email(t("register.invalidEmail"))
+      .required(t("register.emailRequired"))
+      .matches(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        t("register.invalidEmailFormat")
+      ),
 
-  passwordConfirmation: Yup.string()
-    .required("Vui lòng xác nhận mật khẩu của bạn")
-    .oneOf([Yup.ref("password")], "Mật khẩu phải trùng khớp"),
-});
+    password: Yup.string()
+      .required(t("register.passwordRequired"))
+      .min(8, t("register.passwordMin"))
+      .max(100, t("register.passwordMax"))
+      .matches(/[A-Z]/, t("register.passwordUppercase"))
+      .matches(/[a-z]/, t("register.passwordLowercase"))
+      .matches(/[0-9]/, t("register.passwordDigit"))
+      .matches(/[@$!%*?&]/, t("register.passwordSpecial")),
 
-export const PasswordOnlySchema = Yup.object().shape({
-  password: Yup.string()
-    .required("Không thể để trống")
-    .min(8, "Mật khẩu phải tối thiểu 8 ký tự")
-    .max(100, "Mật khẩu không dài quá 100 ký tự")
-    .matches(/[A-Z]/, "Mật khẩu phải có ít nhất một chữ cái viết hoa")
-    .matches(/[a-z]/, "Mật khẩu phải có ít nhất một chữ cái thường")
-    .matches(/[0-9]/, "Mật khẩu phải có ít nhất một số")
-    .matches(/[@$!%*?&]/, "Mật khẩu phải có ít nhất một ký tự đặc biệt (@$!%*?&)"),
+    passwordConfirmation: Yup.string()
+      .required(t("register.confirmPasswordRequired"))
+      .oneOf([Yup.ref("password")], t("register.passwordMismatch")),
+  });
 
-  confirmPassword: Yup.string()
-    .required("Vui lòng xác nhận mật khẩu của bạn")
-    .oneOf([Yup.ref("password")], "Mật khẩu phải trùng khớp"),
-});
+// Đổi mật khẩu
+export const buildChangePasswordSchema = (t) =>
+  Yup.object().shape({
+    currentPassword: Yup.string().required(t("profileUpdate.currentPasswordRequired")),
+
+    newPassword: Yup.string()
+      .required(t("profileUpdate.passwordRequired"))
+      .min(8, t("profileUpdate.passwordMin"))
+      .matches(/[A-Z]/, t("profileUpdate.passwordUppercase"))
+      .matches(/[a-z]/, t("profileUpdate.passwordLowercase"))
+      .matches(/[0-9]/, t("profileUpdate.passwordDigit"))
+      .matches(/[@$!%*?&]/, t("profileUpdate.passwordSpecial"))
+      .test(
+        "not-same-as-current",
+        t("profileUpdate.passwordMustBeDifferent"),
+        function (value) {
+          const { currentPassword } = this.parent;
+          if (!value || !currentPassword) return true;
+          return value !== currentPassword;
+        }
+      ),
+
+    confirmNewPassword: Yup.string()
+      .required(t("profileUpdate.confirmPasswordRequired"))
+      .oneOf([Yup.ref("newPassword")], t("profileUpdate.passwordMismatch")),
+  });
+
+// Cập nhật thông tin
+export const buildUpdateProfileSchema = (t) =>
+  Yup.object().shape({
+    name: Yup.string().required(t("profileUpdate.required")),
+
+    birthday: Yup.string()
+      .nullable()
+      .transform((v) => (v === "" ? null : v))
+      .test("is-valid-birthday", t("profileUpdate.invalidBirthday"), (value) => {
+        if (!value) return true;
+        return new Date(value) <= new Date();
+      }),
+
+    phone: Yup.string()
+      .nullable()
+      .transform((v) => (v === "" ? null : v))
+      .test("is-valid-phone", t("profileUpdate.invalidPhone"), (value) => {
+        if (!value) return true;
+        return /^[0-9]{9,11}$/.test(value);
+      }),
+
+    password: Yup.mixed().notRequired(),
+  });

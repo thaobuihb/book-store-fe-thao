@@ -194,9 +194,17 @@
     "houseNumber": "House Number",
     "phone": "Phone Number",
     "zipcode": "Postal Code",
-    "newPassword": "New Password (optional)",
+    "newPassword": "New Password",
     "submit": "Update",
-    "invalidBirthday": "Invalid birthday."
+    "invalidBirthday": "Invalid birthday.",
+    "invalidPhone": "Invalid phone number.",
+    "cancel": "Cancel",
+    "profileUpdate":"Profile Update",
+    "changePassword": "Change Password",
+    "passwordMustBeDifferent": "New password must be different from current password",
+    "currentPassword": "Current Password",
+    "confirmNewPassword": "Confirm Password",
+    "passwordMismatch": "Passwords do not match"
   },
   "wishlist": {
     "title": "Wishlist ❤️",

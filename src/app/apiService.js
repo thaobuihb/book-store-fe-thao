@@ -7,11 +7,6 @@ const apiService = axios.create({
     "Content-Type": "application/json", 
     "Accept": "application/json" 
   },
-  // withCredentials: false,
-  // validateStatus: function (status) {
-  //   console.log("🔥 HTTP Status Code:", status);
-  //   return status >= 200 && status < 500; 
-  // }
 });
 
 apiService.interceptors.request.use(

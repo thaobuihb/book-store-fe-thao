@@ -18,7 +18,7 @@ import { FormProvider, FTextField } from "../components/form";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { RegisterSchema } from "../utils/validationSchemas";
+import {buildRegisterSchema} from "../utils/validationSchemas";
 import store from "../app/store";
 import { useTranslation } from "react-i18next";
 
@@ -40,7 +40,7 @@ function RegisterPage() {
   const { t } = useTranslation();
 
   const methods = useForm({
-    resolver: yupResolver(RegisterSchema),
+    resolver: yupResolver(buildRegisterSchema),
     defaultValues,
   });
   const {

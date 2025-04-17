@@ -194,9 +194,17 @@
     "houseNumber": "Số nhà",
     "phone": "Số điện thoại",
     "zipcode": "Mã bưu điện",
-    "newPassword": "Mật khẩu mới (nếu muốn thay đổi)",
+    "newPassword": "Mật khẩu mới",
     "submit": "Cập nhật",
-    "invalidBirthday": "Ngày sinh không hợp lệ."
+    "invalidBirthday": "Ngày sinh không hợp lệ.",
+    "invalidPhone": "Số điện thoại không hợp lệ.",
+    "cancel": "Huỷ",
+    "profileUpdate": "Cập nhật hồ sơ",
+    "changePassword": "Đổi mật khẩu",
+    "passwordMustBeDifferent": "Mật khẩu mới không được trùng với mật khẩu hiện tại",
+    "currentPassword": "Mật khẩu hiện tại",
+    "confirmNewPassword": "Xác nhận mật khẩu",
+    "passwordMismatch": "Mật khẩu không khớp"
   },
   "wishlist": {
     "title": "Sách yêu thích ❤️",

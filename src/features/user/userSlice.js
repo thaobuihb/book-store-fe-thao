@@ -64,6 +64,34 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+export const updateProfileByUser = createAsyncThunk(
+  "user/updateProfileByUser",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await apiService.put("/users/me", data);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Cập nhật thất bại");
+    }
+  }
+);
+
+export const updatePassword = createAsyncThunk(
+  "user/updatePassword",
+  async ({ currentPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      const res = await apiService.put("/users/change-password", {
+        currentPassword,
+        newPassword,
+      });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Lỗi đổi mật khẩu");
+    }
+  }
+);
+
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -156,6 +184,21 @@ const userSlice = createSlice({
     } else {
       state.error = action.error?.message || "Unknown Error";
     }
+  })
+  .addCase(updateProfileByUser.pending, (state) => {
+    state.isLoading = true;
+    state.error = null;
+    state.isUpdateSuccess = false;
+  })
+  .addCase(updateProfileByUser.fulfilled, (state, action) => {
+    state.user = { ...state.user, ...action.payload };
+    state.isLoading = false;
+    state.isUpdateSuccess = true;
+  })
+  .addCase(updateProfileByUser.rejected, (state, action) => {
+    state.isLoading = false;
+    state.error = action.payload;
+    state.isUpdateSuccess = false;
   });
   
   },

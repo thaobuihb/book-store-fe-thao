@@ -228,10 +228,22 @@ function MainHeader() {
                   open={Boolean(anchorEl)}
                   onClose={() => setAnchorEl(null)}
                 >
-                  <MenuItem onClick={() => navigate(`/user/${user._id}`)}>
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null); 
+                      navigate(`/user/${user._id}`);
+                    }}
+                  >
                     {t("profile")}
                   </MenuItem>
-                  <MenuItem onClick={handleLogout}>{t("logout")}</MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null); 
+                      handleLogout();
+                    }}
+                  >
+                    {t("logout")}
+                  </MenuItem>
                 </Menu>
               </Box>
             )}
