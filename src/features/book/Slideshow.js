@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 const SlideshowContainer = styled(Box)(({ theme }) => ({
   width: "100%",
-  backgroundImage: `url('/slideshowBooksBI.jpg')`,
+  backgroundColor: "#ffe4e1",
   backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
@@ -24,12 +24,10 @@ const SlideshowContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(1),
-  },
   height: 300,
   [theme.breakpoints.down("sm")]: {
     height: 260,
+    padding: theme.spacing(1),
   },
 }));
 
@@ -38,12 +36,13 @@ const Slideshow = ({ books }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const displayBooks = isMobile ? books.slice(0, 1) : books.slice(0, 3);
+  if (!books || books.length === 0) return null;
+
+  const displayBooks = isMobile ? [books[0]] : books.slice(0, 3);
 
   return (
     <SlideshowContainer>
       {isMobile ? (
-        // 👉 MOBILE: hiển thị duy nhất 1 sách
         <Box
           sx={{
             width: "90%",
@@ -59,6 +58,7 @@ const Slideshow = ({ books }) => {
               height: 230,
               boxShadow: 3,
               borderRadius: 2,
+              overflow: "hidden",
             }}
           >
             <CardActionArea onClick={() => navigate(`/book/${displayBooks[0]._id}`)}>
@@ -66,11 +66,7 @@ const Slideshow = ({ books }) => {
                 component="img"
                 image={displayBooks[0].img}
                 alt={displayBooks[0].name}
-                sx={{
-                  width: "100%",
-                  height: 160,
-                  objectFit: "contain",
-                }}
+                sx={{ width: "100%", height: 160, objectFit: "contain" }}
               />
               <Typography
                 variant="body2"
@@ -89,7 +85,6 @@ const Slideshow = ({ books }) => {
           </Card>
         </Box>
       ) : (
-        // 👉 DESKTOP: dùng Grid bình thường
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {displayBooks.map((book) => (
             <Grid item key={book._id}>
@@ -99,6 +94,7 @@ const Slideshow = ({ books }) => {
                   height: 300,
                   boxShadow: 3,
                   borderRadius: 2,
+                  overflow: "hidden",
                 }}
               >
                 <CardActionArea onClick={() => navigate(`/book/${book._id}`)}>
@@ -106,11 +102,7 @@ const Slideshow = ({ books }) => {
                     component="img"
                     image={book.img}
                     alt={book.name}
-                    sx={{
-                      width: "100%",
-                      height: 200,
-                      objectFit: "contain",
-                    }}
+                    sx={{ width: "100%", height: 200, objectFit: "contain" }}
                   />
                   <Typography
                     variant="body1"
@@ -132,7 +124,7 @@ const Slideshow = ({ books }) => {
         </Grid>
       )}
     </SlideshowContainer>
-  );  
+  );
 };
 
 export default Slideshow;
