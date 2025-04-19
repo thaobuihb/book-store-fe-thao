@@ -38,6 +38,8 @@ const Home = () => {
   });
 
   const [slideshowBooks, setSlideshowBooks] = useState([]);
+  console.log("Slideshow books:@@@@@", slideshowBooks);
+
 
   const totalPages = {
     discounted: Math.ceil(discountedBooks.length / booksPerPage),
