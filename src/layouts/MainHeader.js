@@ -95,29 +95,29 @@ function MainHeader() {
   return (
     <Box>
       <AppBar position="fixed" color="primary" sx={{ zIndex: 1200 }}>
-        <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap" }}>
-          {/* Mobile: Hamburger menu */}
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ display: { sm: "none" } }}
-          >
-            <MenuIcon />
-          </IconButton>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          {/* Left: Logo + menu icon */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ display: { sm: "none" }, mr: 1 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <IconButton color="inherit">
+              <LogoB sx={{ width: 60, height: 60 }} />
+            </IconButton>
+          </Box>
 
-          {/* Logo */}
-          <IconButton color="inherit">
-            <LogoB sx={{ width: 60, height: 60 }} />
-          </IconButton>
-
-          {/* Desktop: menu links */}
+          {/* Center: Navigation links (only show on sm+) */}
           <Box
             sx={{
               display: { xs: "none", sm: "flex" },
               alignItems: "center",
-              flexGrow: 1,
               justifyContent: "center",
+              flexGrow: 1,
             }}
           >
             <Typography
@@ -157,26 +157,26 @@ function MainHeader() {
             </RouterLink>
           </Box>
 
-          {/* Search (desktop only) */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              width: 300,
-              mx: 2,
-              backgroundColor: "white",
-              borderRadius: 1,
-            }}
-          >
-            <SearchInput
-              handleSubmit={(query) =>
-                navigate(`/books?search=${query.trim()}`)
-              }
-            />
-          </Box>
-
-          {/* Icons: wishlist, cart, login/user (visible on all screens) */}
+          {/* Right: Search (md+), wishlist, cart, user (always show) */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
+            {/* Search */}
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                width: 300,
+                mx: 1,
+                backgroundColor: "white",
+                borderRadius: 1,
+              }}
+            >
+              <SearchInput
+                handleSubmit={(query) =>
+                  navigate(`/books?search=${query.trim()}`)
+                }
+              />
+            </Box>
+
             {/* Wishlist */}
             <RouterLink to="/wishlist">
               <IconButton color="inherit" sx={{ mx: 0.5 }}>
@@ -191,19 +191,22 @@ function MainHeader() {
               id="cart-icon"
               color="inherit"
               sx={{ mx: 0.5 }}
-              onClick={() =>
-                navigate("/cart", { state: { activeTab: "yourCart" } })
-              }
+              onClick={() => navigate("/cart", { state: { activeTab: "yourCart" } })}
             >
               <Badge badgeContent={cartItemCount} color="secondary">
                 <ShoppingCartOutlinedIcon />
               </Badge>
             </IconButton>
 
-            {/* Language (desktop only) */}
+            {/* Language (only sm+) */}
             <Typography
               onClick={(e) => setLangAnchorEl(e.currentTarget)}
-              sx={{ color: "white", cursor: "pointer", mx: 0.5, display: { xs: "none", sm: "inline" } }}
+              sx={{
+                color: "white",
+                cursor: "pointer",
+                mx: 0.5,
+                display: { xs: "none", sm: "inline" },
+              }}
             >
               {t("language")}
             </Typography>
@@ -220,7 +223,7 @@ function MainHeader() {
               </MenuItem>
             </Menu>
 
-            {/* User / Login */}
+            {/* Login/User */}
             {!isAuthenticated ? (
               <Typography
                 sx={{ color: "white", cursor: "pointer", mx: 0.5 }}
@@ -245,20 +248,10 @@ function MainHeader() {
                   open={Boolean(anchorEl)}
                   onClose={() => setAnchorEl(null)}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      setAnchorEl(null);
-                      navigate(`/user/${user._id}`);
-                    }}
-                  >
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate(`/user/${user._id}`); }}>
                     {t("profile")}
                   </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      setAnchorEl(null);
-                      handleLogout();
-                    }}
-                  >
+                  <MenuItem onClick={() => { setAnchorEl(null); handleLogout(); }}>
                     {t("logout")}
                   </MenuItem>
                 </Menu>
