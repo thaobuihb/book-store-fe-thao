@@ -96,7 +96,7 @@ function MainHeader() {
     <Box>
       <AppBar position="fixed" color="primary" sx={{ zIndex: 1200 }}>
         <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap" }}>
-          {/* Hamburger menu icon (mobile only) */}
+          {/* Mobile: Hamburger menu */}
           <IconButton
             color="inherit"
             edge="start"
@@ -107,19 +107,17 @@ function MainHeader() {
           </IconButton>
 
           {/* Logo */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <IconButton color="inherit">
-              <LogoB sx={{ width: 60, height: 60 }} />
-            </IconButton>
-          </Box>
+          <IconButton color="inherit">
+            <LogoB sx={{ width: 60, height: 60 }} />
+          </IconButton>
 
-          {/* Nav Links (only >= sm) */}
+          {/* Desktop: menu links */}
           <Box
             sx={{
               display: { xs: "none", sm: "flex" },
               alignItems: "center",
-              justifyContent: "center",
               flexGrow: 1,
+              justifyContent: "center",
             }}
           >
             <Typography
@@ -159,7 +157,7 @@ function MainHeader() {
             </RouterLink>
           </Box>
 
-          {/* Search box (only >= md) */}
+          {/* Search (desktop only) */}
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
@@ -177,11 +175,35 @@ function MainHeader() {
             />
           </Box>
 
-          {/* Language and User (only >= sm) */}
-          <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}>
+          {/* Icons: wishlist, cart, login/user (visible on all screens) */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {/* Wishlist */}
+            <RouterLink to="/wishlist">
+              <IconButton color="inherit" sx={{ mx: 0.5 }}>
+                <Badge badgeContent={wishlistCount} color="secondary">
+                  <FavoriteBorderIcon />
+                </Badge>
+              </IconButton>
+            </RouterLink>
+
+            {/* Cart */}
+            <IconButton
+              id="cart-icon"
+              color="inherit"
+              sx={{ mx: 0.5 }}
+              onClick={() =>
+                navigate("/cart", { state: { activeTab: "yourCart" } })
+              }
+            >
+              <Badge badgeContent={cartItemCount} color="secondary">
+                <ShoppingCartOutlinedIcon />
+              </Badge>
+            </IconButton>
+
+            {/* Language (desktop only) */}
             <Typography
               onClick={(e) => setLangAnchorEl(e.currentTarget)}
-              sx={{ color: "white", cursor: "pointer", mx: 1 }}
+              sx={{ color: "white", cursor: "pointer", mx: 0.5, display: { xs: "none", sm: "inline" } }}
             >
               {t("language")}
             </Typography>
@@ -190,46 +212,18 @@ function MainHeader() {
               open={openLangMenu}
               onClose={() => setLangAnchorEl(null)}
             >
-              <MenuItem
-                onClick={() => {
-                  changeLanguage("vi");
-                  setLangAnchorEl(null);
-                }}
-              >
+              <MenuItem onClick={() => { changeLanguage("vi"); setLangAnchorEl(null); }}>
                 🇻🇳 Tiếng Việt
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  changeLanguage("en");
-                  setLangAnchorEl(null);
-                }}
-              >
+              <MenuItem onClick={() => { changeLanguage("en"); setLangAnchorEl(null); }}>
                 🇬🇧 English
               </MenuItem>
             </Menu>
 
-            <RouterLink to="/wishlist">
-              <IconButton color="inherit" sx={{ mx: 1 }}>
-                <Badge badgeContent={wishlistCount} color="secondary">
-                  <FavoriteBorderIcon />
-                </Badge>
-              </IconButton>
-            </RouterLink>
-
-            <IconButton
-              id="cart-icon"
-              color="inherit"
-              sx={{ mx: 1 }}
-              onClick={() => navigate("/cart", { state: { activeTab: "yourCart" } })}
-            >
-              <Badge badgeContent={cartItemCount} color="secondary">
-                <ShoppingCartOutlinedIcon />
-              </Badge>
-            </IconButton>
-
+            {/* User / Login */}
             {!isAuthenticated ? (
               <Typography
-                sx={{ color: "white", cursor: "pointer", mx: 1 }}
+                sx={{ color: "white", cursor: "pointer", mx: 0.5 }}
                 onClick={() =>
                   navigate("/login", {
                     state: { from: window.location.pathname },
@@ -242,7 +236,7 @@ function MainHeader() {
               <Box>
                 <Typography
                   onClick={(e) => setAnchorEl(e.currentTarget)}
-                  sx={{ cursor: "pointer", color: "white", mx: 1 }}
+                  sx={{ cursor: "pointer", color: "white", mx: 0.5 }}
                 >
                   {user.name || "User"}
                 </Typography>
