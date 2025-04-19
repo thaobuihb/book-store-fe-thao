@@ -8,7 +8,13 @@ import {
   Typography,
   Menu,
   MenuItem,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LogoB from "../components/LogoB";
@@ -25,23 +31,31 @@ function MainHeader() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [categoryAnchorEl, setCategoryAnchorEl] = useState(null);
-  const categories = useSelector((state) => state.category.categories) || [];
-
-  const { isAuthenticated, user } = useSelector((state) => state.user);
-  const { logout } = useAuth();
-
-  const cart = useSelector((state) => state.cart.cart);
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
-
-  const wishlist = useSelector((state) => state.wishlist.wishlist);
-  const wishlistCount = wishlist.length;
-
   const [anchorEl, setAnchorEl] = useState(null);
-
   const [langAnchorEl, setLangAnchorEl] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const categories = useSelector((state) => state.category.categories) || [];
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const cart = useSelector((state) => state.cart.cart);
+  const wishlist = useSelector((state) => state.wishlist.wishlist);
+
+  const { logout } = useAuth();
+  const { t, i18n } = useTranslation();
+
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const wishlistCount = wishlist.length;
   const openLangMenu = Boolean(langAnchorEl);
 
-  const { t, i18n } = useTranslation();
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
+  const handleLogout = () => {
+    logout(wishlist, user, () => {
+      dispatch(logoutSuccess());
+      dispatch(clearWishlistOnLogout());
+      navigate("/");
+    });
+  };
 
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
@@ -52,41 +66,64 @@ function MainHeader() {
     dispatch(getCategories());
   }, [dispatch]);
 
-  const handleLogout = () => {
-    logout(wishlist, user, () => {
-      dispatch(logoutSuccess());
-      dispatch(clearWishlistOnLogout());
-      navigate("/");
-    });
-  };
+  const drawer = (
+    <Box sx={{ width: 240 }} onClick={handleDrawerToggle}>
+      <Typography variant="h6" sx={{ m: 2 }}>
+        {t("menu")}
+      </Typography>
+      <Divider />
+      <List>
+        <ListItem button onClick={() => navigate("/best-seller")}>
+          <ListItemText primary={t("bestSeller")} />
+        </ListItem>
+        <ListItem button onClick={() => navigate("/help")}>
+          <ListItemText primary={t("helpCenter")} />
+        </ListItem>
+        {categories.map((cat) => (
+          <ListItem
+            button
+            key={cat._id}
+            onClick={() => navigate(`/books?category=${cat._id}`)}
+          >
+            <ListItemText primary={cat.categoryName} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
 
   return (
     <Box>
       <AppBar position="fixed" color="primary" sx={{ zIndex: 1200 }}>
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            height: "80px",
-          }}
-        >
-          {/* Logo */}
-          <IconButton color="inherit" sx={{ ml: 2 }}>
-            <LogoB sx={{ width: 100, height: 100, mt: 4 }} />
+        <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap" }}>
+          {/* Hamburger menu icon (mobile only) */}
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ display: { sm: "none" } }}
+          >
+            <MenuIcon />
           </IconButton>
 
-          {/* Navigation Links */}
+          {/* Logo */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton color="inherit">
+              <LogoB sx={{ width: 60, height: 60 }} />
+            </IconButton>
+          </Box>
+
+          {/* Nav Links (only >= sm) */}
           <Box
             sx={{
-              display: "flex",
+              display: { xs: "none", sm: "flex" },
               alignItems: "center",
-              flexGrow: 1,
               justifyContent: "center",
+              flexGrow: 1,
             }}
           >
             <Typography
-              variant="h7"
+              variant="body1"
               sx={{ cursor: "pointer", color: "#ffffff", mx: 2 }}
               onMouseEnter={(e) => setCategoryAnchorEl(e.currentTarget)}
             >
@@ -110,34 +147,44 @@ function MainHeader() {
 
             <RouterLink
               to="/best-seller"
-              style={{
-                textDecoration: "none",
-                color: "white",
-                margin: "0 16px",
-              }}
+              style={{ textDecoration: "none", color: "white", margin: "0 16px" }}
             >
               {t("bestSeller")}
             </RouterLink>
             <RouterLink
               to="/help"
-              style={{
-                textDecoration: "none",
-                color: "white",
-                margin: "0 16px",
-              }}
+              style={{ textDecoration: "none", color: "white", margin: "0 16px" }}
             >
               {t("helpCenter")}
             </RouterLink>
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", ml: 2, mr: 10 }}>
+          {/* Search box (only >= md) */}
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+              width: 300,
+              mx: 2,
+              backgroundColor: "white",
+              borderRadius: 1,
+            }}
+          >
+            <SearchInput
+              handleSubmit={(query) =>
+                navigate(`/books?search=${query.trim()}`)
+              }
+            />
+          </Box>
+
+          {/* Language and User (only >= sm) */}
+          <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}>
             <Typography
               onClick={(e) => setLangAnchorEl(e.currentTarget)}
               sx={{ color: "white", cursor: "pointer", mx: 1 }}
             >
               {t("language")}
             </Typography>
-
             <Menu
               anchorEl={langAnchorEl}
               open={openLangMenu}
@@ -160,30 +207,9 @@ function MainHeader() {
                 🇬🇧 English
               </MenuItem>
             </Menu>
-          </Box>
 
-          {/* Search Box */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              width: "500px !important",
-              mx: 2,
-              backgroundColor: "white",
-              borderRadius: 1,
-            }}
-          >
-            <SearchInput
-              handleSubmit={(query) =>
-                navigate(`/books?search=${query.trim()}`)
-              }
-            />
-          </Box>
-
-          {/* User, Wishlist, Cart */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
             <RouterLink to="/wishlist">
-              <IconButton color="inherit" sx={{ mr: 2 }}>
+              <IconButton color="inherit" sx={{ mx: 1 }}>
                 <Badge badgeContent={wishlistCount} color="secondary">
                   <FavoriteBorderIcon />
                 </Badge>
@@ -193,10 +219,8 @@ function MainHeader() {
             <IconButton
               id="cart-icon"
               color="inherit"
-              sx={{ color: "blue", mr: 2 }}
-              onClick={() =>
-                navigate("/cart", { state: { activeTab: "yourCart" } })
-              }
+              sx={{ mx: 1 }}
+              onClick={() => navigate("/cart", { state: { activeTab: "yourCart" } })}
             >
               <Badge badgeContent={cartItemCount} color="secondary">
                 <ShoppingCartOutlinedIcon />
@@ -205,7 +229,7 @@ function MainHeader() {
 
             {!isAuthenticated ? (
               <Typography
-                sx={{ color: "white", cursor: "pointer" }}
+                sx={{ color: "white", cursor: "pointer", mx: 1 }}
                 onClick={() =>
                   navigate("/login", {
                     state: { from: window.location.pathname },
@@ -218,11 +242,10 @@ function MainHeader() {
               <Box>
                 <Typography
                   onClick={(e) => setAnchorEl(e.currentTarget)}
-                  sx={{ cursor: "pointer", color: "white" }}
+                  sx={{ cursor: "pointer", color: "white", mx: 1 }}
                 >
                   {user.name || "User"}
                 </Typography>
-
                 <Menu
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
@@ -230,7 +253,7 @@ function MainHeader() {
                 >
                   <MenuItem
                     onClick={() => {
-                      setAnchorEl(null); 
+                      setAnchorEl(null);
                       navigate(`/user/${user._id}`);
                     }}
                   >
@@ -238,7 +261,7 @@ function MainHeader() {
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
-                      setAnchorEl(null); 
+                      setAnchorEl(null);
                       handleLogout();
                     }}
                   >
@@ -250,6 +273,19 @@ function MainHeader() {
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Drawer for mobile */}
+      <Drawer
+        anchor="left"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        sx={{
+          display: { xs: "block", sm: "none" },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 240 },
+        }}
+      >
+        {drawer}
+      </Drawer>
     </Box>
   );
 }

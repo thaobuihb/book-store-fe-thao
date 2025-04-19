@@ -43,7 +43,7 @@ function BookPage() {
   
 
   return (
-    <Container>
+    <Container maxWidth="lg">
       {search ? (
         <BookItem
           title={t("searchResults", { search })}
