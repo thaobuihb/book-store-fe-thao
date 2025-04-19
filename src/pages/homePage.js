@@ -1,3 +1,6 @@
+
+console.log("🔥 File HomePage.jsx đã được import");
+
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,6 +23,11 @@ const categoryIdForKids = "66ee3a6f1191f821c77c5708";
 
 const Home = () => {
   console.log("🏁 Component Home đã được render!");
+
+  useEffect(() => {
+    console.log("📦 useEffect của HomePage chạy!");
+  }, []);
+  
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
