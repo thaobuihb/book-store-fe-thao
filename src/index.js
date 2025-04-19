@@ -1,14 +1,17 @@
 import React from "react";
-import ReactDOM from "react-dom/client"; 
-import App from "./App";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom"; // 👈 import thêm
 import { Provider } from "react-redux";
+import App from "./App";
 import store from "./app/store";
-import './i18n';
+import "./i18n";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <Provider store={store}>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </Provider>
 );
