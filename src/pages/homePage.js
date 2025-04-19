@@ -19,6 +19,8 @@ const booksPerPage = 7;
 const categoryIdForKids = "66ee3a6f1191f821c77c5708";
 
 const Home = () => {
+  console.log("🏁 Component Home đã được render!");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
