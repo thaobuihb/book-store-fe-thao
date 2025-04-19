@@ -90,7 +90,16 @@ const Home = () => {
 
   return (
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
-      <Slideshow books={slideshowBooks} />
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          minHeight: { xs: 200, sm: 300, md: 400 },
+          mb: 4,
+        }}
+      >
+        <Slideshow books={slideshowBooks} />
+      </Box>
 
       <BookSection
         title={t("home.newBooks")}
@@ -112,11 +121,18 @@ const Home = () => {
         onPageChange={handlePageChange}
       />
 
-      <Typography component="h4" sx={{ fontSize: 25, fontWeight: "bold", mt: 3 }} gutterBottom>
+      <Typography
+        component="h4"
+        sx={{ fontSize: 25, fontWeight: "bold", mt: 3 }}
+        gutterBottom
+      >
         {t("home.popularCategories")}
       </Typography>
 
-      <CategoryList categories={categoryOfBooks.slice(0, 6)} onCategoryClick={handleCategoryOfBookClick} />
+      <CategoryList
+        categories={categoryOfBooks.slice(0, 6)}
+        onCategoryClick={handleCategoryOfBookClick}
+      />
 
       <BookSection
         title={t("home.kidsBooks")}
