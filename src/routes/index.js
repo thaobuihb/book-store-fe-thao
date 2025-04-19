@@ -10,7 +10,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import OrderPage from "../pages/OrderPage";
 import RegisterPage from "../pages/RegisterPage";
 import UserProfilePage from "../pages/UserProfilePage";
-import Home from "../pages/homePage";
+import Home from "../pages/homePage.js";
 import WishlistPage from "../pages/WishlistPage";
 import BookPage from "../pages/BookPage";
 import ThankYouPage from "../pages/ThankYouPage";
