@@ -26,6 +26,14 @@ const SlideshowContainer = styled("div")(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(1),
   },
+  minHeight: 320,
+  [theme.breakpoints.down("md")]: {
+    minHeight: 280,
+  },
+  [theme.breakpoints.down("sm")]: {
+    minHeight: 240,
+    padding: theme.spacing(1),
+  },
 }));
 
 const Slideshow = ({ books }) => {

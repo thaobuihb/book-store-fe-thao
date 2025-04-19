@@ -94,7 +94,6 @@ const Home = () => {
         sx={{
           position: "relative",
           width: "100%",
-          minHeight: { xs: 200, sm: 300, md: 400 },
           mb: 4,
         }}
       >
