@@ -47,14 +47,22 @@ const Home = () => {
     category: Math.ceil(booksByCategory.length / booksPerPage),
   };
 
+  // const getRandomBooks = useCallback(() => {
+  //   const selected = new Set();
+  //   while (selected.size < 3 && books.length > 0) {
+  //     const randomIndex = Math.floor(Math.random() * books.length);
+  //     selected.add(books[randomIndex]);
+  //   }
+  //   setSlideshowBooks(Array.from(selected));
+  // }, [books]);
+
   const getRandomBooks = useCallback(() => {
-    const selected = new Set();
-    while (selected.size < 3 && books.length > 0) {
-      const randomIndex = Math.floor(Math.random() * books.length);
-      selected.add(books[randomIndex]);
-    }
-    setSlideshowBooks(Array.from(selected));
+    if (books.length === 0) return;
+    const selectedBook = books[Math.floor(Math.random() * books.length)];
+    setSlideshowBooks([selectedBook]);
+    console.log("Đã cập nhật slideshowBooks:@@@@@", [selectedBook]);
   }, [books]);
+  
 
   const handlePageChange = (category, direction) => {
     setCurrentPage((prev) => {
@@ -82,10 +90,12 @@ const Home = () => {
     dispatch(getCategoryOfBooks());
     dispatch(getBooksByCategory(categoryIdForKids));
   }, [dispatch]);
+  
 
   useEffect(() => {
     if (books.length === 0) return;
     getRandomBooks();
+    console.log("Books cập nhật:@@@@@", books);
     const interval = setInterval(getRandomBooks, 2000);
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
