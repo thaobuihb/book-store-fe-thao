@@ -84,6 +84,7 @@
   "login.invalidEmail": "Email không hợp lệ",
   "login.requiredEmail": "Vui lòng nhập email",
   "login.requiredPassword": "Vui lòng nhập mật khẩu",
+  "login.invalidCredentials": "Email hoặc mật khẩu không đúng",
   "notFound.title": "Không tìm thấy sách",
   "notFound.description": "Trang bạn đang tìm không tồn tại hoặc đã bị di chuyển.",
   "notFound.backHome": "Quay về trang chủ",

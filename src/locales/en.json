@@ -84,6 +84,7 @@
   "login.invalidEmail": "Invalid email",
   "login.requiredEmail": "Email is required",
   "login.requiredPassword": "Password is required",
+  "login.invalidCredentials": "Invalid email or password",
   "notFound.title": "Book Not Found",
   "notFound.description": "The page you're looking for doesn't exist or has been moved.",
   "notFound.backHome": "Back to Home",

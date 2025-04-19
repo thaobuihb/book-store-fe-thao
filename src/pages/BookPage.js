@@ -29,20 +29,18 @@ function BookPage() {
   }, [dispatch, categories.length]);
 
   useEffect(() => {
-    const fetchBooks = () => {
-      if (search) {
-        dispatch(getBooks(page, search, "", "", ""));
-      } else if (category) {
-        dispatch(getBooks(page, "", "", "", category));
-
-        const selectedCategory = categories.find((cat) => cat._id === category);
-        setCategoryName(
-          selectedCategory ? selectedCategory.categoryName : "Unknown Category"
-        );
-      }
-    };
-    fetchBooks();
-  }, [dispatch, page, search, category, categories]);
+    if (search) {
+      dispatch(getBooks(page, search));
+    } else if (category) {
+      dispatch(getBooks(page, "", "", "", category));
+  
+      const selectedCategory = categories.find((cat) => cat._id === category);
+      setCategoryName(
+        selectedCategory ? selectedCategory.categoryName : "Unknown Category"
+      );
+    }
+  }, [dispatch, search, category, page]);
+  
 
   return (
     <Container>
