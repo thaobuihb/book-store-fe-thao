@@ -48,7 +48,15 @@ function Router() {
           )
         }
       >
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={
+            <>
+              <h1>Trang Home</h1>
+              <HomePage />
+            </>
+          }
+        />
         <Route path="book/:bookId" element={<DetailPage />} />
         <Route path="/books" element={<BookPage />} />
         <Route path="cart" element={<CartPage />} />
