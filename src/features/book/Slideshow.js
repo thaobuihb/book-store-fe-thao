@@ -23,9 +23,8 @@ const SlideshowContainer = styled("div")(({ theme }) => ({
   justifyContent: "center",
   padding: theme.spacing(2),
   borderRadius: theme.shape.borderRadius,
-  [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(1),
-  },
+  overflow: "hidden",
+
   minHeight: 320,
   [theme.breakpoints.down("md")]: {
     minHeight: 280,
@@ -41,16 +40,18 @@ const Slideshow = ({ books }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const displayBooks = isMobile ? books.slice(0, 1) : books.slice(0, 3);
+
   return (
     <SlideshowContainer>
       <Grid container spacing={2} justifyContent="center">
-        {books.map((book) => (
-          <Grid item xs={10} sm={6} md={4} lg={3.5} key={book._id}>
+        {displayBooks.map((book) => (
+          <Grid item xs={10} sm={6} md={4} key={book._id}>
             <Card
               sx={{
-                width: isMobile ? 180 : 280,
+                width: isMobile ? 200 : 280,
                 height: isMobile ? 260 : 370,
-                m: isMobile ? 1 : 2,
+                m: 1,
                 p: 1,
                 boxShadow: 3,
                 borderRadius: 2,
