@@ -88,16 +88,11 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
 
-  const sampleBooks = [
-    { _id: "1", name: "Book One", img: "https://via.placeholder.com/150" },
-    { _id: "2", name: "Book Two", img: "https://via.placeholder.com/150" },
-    { _id: "3", name: "Book Three", img: "https://via.placeholder.com/150" },
-  ];
 
   return (
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
       <Box sx={{ width: "100%", mb: 4 }}>
-        <Slideshow books={sampleBooks} />
+        <Slideshow books={slideshowBooks} />
       </Box>
 
       <BookSection

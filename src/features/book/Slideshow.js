@@ -13,34 +13,49 @@ import {
 const Slideshow = ({ books }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const displayBooks = isMobile ? books.slice(0, 1) : books.slice(0, 3);
+
+  if (!books || books.length === 0) return null;
+
+  const displayBooks = isMobile ? [books[0]] : books.slice(0, 3);
 
   return (
     <Box
       sx={{
         width: "100%",
-        height: { xs: 260, sm: 320, md: 400 },
-        backgroundColor: "#fce4ec",
-        backgroundImage: `url('/slideshowBooksBI.jpg')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        height: isMobile ? 260 : 400,
+        backgroundColor: "#f0f0f0",
         display: "flex",
-        justifyContent: "center",
         alignItems: "center",
+        justifyContent: "center",
         overflow: "hidden",
         borderRadius: 2,
         px: 2,
+        position: "relative",
+        zIndex: 2,
       }}
     >
       {isMobile ? (
-        <Card sx={{ width: "90%", height: 230, boxShadow: 3 }}>
+        <Card
+          sx={{
+            width: "90%",
+            height: 220,
+            boxShadow: 3,
+            borderRadius: 2,
+            overflow: "hidden",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
           <CardActionArea>
             <CardMedia
               component="img"
               image={displayBooks[0].img}
               alt={displayBooks[0].name}
-              sx={{ height: 160, objectFit: "contain" }}
+              sx={{
+                width: "100%",
+                height: 160,
+                objectFit: "contain",
+              }}
             />
             <Typography
               align="center"
