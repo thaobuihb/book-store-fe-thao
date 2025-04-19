@@ -43,6 +43,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "prebuild": "npx update-browserslist-db@latest",
     "lint": "eslint .",
     "build": "react-scripts build --no-eslint",
     "test": "react-scripts test",
