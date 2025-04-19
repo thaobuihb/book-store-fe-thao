@@ -94,7 +94,9 @@ const Home = () => {
         sx={{
           position: "relative",
           width: "100%",
+          overflow: "hidden",
           mb: 4,
+          height: { xs: 260, sm: 320, md: 400 },
         }}
       >
         <Slideshow books={slideshowBooks} />
