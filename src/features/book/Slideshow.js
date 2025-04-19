@@ -43,61 +43,53 @@ const Slideshow = ({ books }) => {
   return (
     <SlideshowContainer>
       {isMobile ? (
-        displayBooks.map((book) => (
+        // 👉 MOBILE: hiển thị duy nhất 1 sách
+        <Box
+          sx={{
+            width: "90%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Card
-            key={book._id}
             sx={{
-              width: "90%",
+              width: "100%",
               height: 230,
               boxShadow: 3,
               borderRadius: 2,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              alignItems: "center",
             }}
           >
-            <CardActionArea
-              onClick={() => navigate(`/book/${book._id}`)}
-              sx={{ height: "100%" }}
-            >
-              <Box
+            <CardActionArea onClick={() => navigate(`/book/${displayBooks[0]._id}`)}>
+              <CardMedia
+                component="img"
+                image={displayBooks[0].img}
+                alt={displayBooks[0].name}
                 sx={{
+                  width: "100%",
                   height: 160,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 1,
+                  objectFit: "contain",
                 }}
-              >
-                <CardMedia
-                  component="img"
-                  image={book.img}
-                  alt={book.name}
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                  }}
-                />
-              </Box>
+              />
               <Typography
                 variant="body2"
                 align="center"
                 sx={{
-                  px: 1,
                   fontWeight: "bold",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  mt: 1,
                 }}
               >
-                {book.name}
+                {displayBooks[0].name}
               </Typography>
             </CardActionArea>
           </Card>
-        ))
+        </Box>
       ) : (
+        // 👉 DESKTOP: dùng Grid bình thường
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {displayBooks.map((book) => (
             <Grid item key={book._id}>
@@ -107,45 +99,28 @@ const Slideshow = ({ books }) => {
                   height: 300,
                   boxShadow: 3,
                   borderRadius: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  alignItems: "center",
                 }}
               >
-                <CardActionArea
-                  onClick={() => navigate(`/book/${book._id}`)}
-                  sx={{ height: "100%" }}
-                >
-                  <Box
+                <CardActionArea onClick={() => navigate(`/book/${book._id}`)}>
+                  <CardMedia
+                    component="img"
+                    image={book.img}
+                    alt={book.name}
                     sx={{
+                      width: "100%",
                       height: 200,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      p: 1,
+                      objectFit: "contain",
                     }}
-                  >
-                    <CardMedia
-                      component="img"
-                      image={book.img}
-                      alt={book.name}
-                      sx={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </Box>
+                  />
                   <Typography
                     variant="body1"
                     align="center"
                     sx={{
-                      px: 1,
                       fontWeight: "bold",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
+                      mt: 1,
                     }}
                   >
                     {book.name}
@@ -157,7 +132,7 @@ const Slideshow = ({ books }) => {
         </Grid>
       )}
     </SlideshowContainer>
-  );
+  );  
 };
 
 export default Slideshow;
