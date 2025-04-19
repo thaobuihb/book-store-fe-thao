@@ -90,6 +90,9 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
 
+  useEffect(() => {
+    console.log("Slideshow books cập nhật:@@@@@", slideshowBooks);
+  }, [slideshowBooks]);
 
   return (
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
