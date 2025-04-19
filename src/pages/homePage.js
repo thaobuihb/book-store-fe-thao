@@ -30,6 +30,8 @@ const Home = () => {
     booksByCategory,
     categoryOfBooks,
   } = useSelector((state) => state.book);
+  console.log("Dữ liệu từ Redux:@@@@@", books);
+
 
   const [currentPage, setCurrentPage] = useState({
     discounted: 1,
@@ -93,12 +95,14 @@ const Home = () => {
   
 
   useEffect(() => {
+    console.log("useEffect chạy với books:@@@@@", books);
     if (books.length === 0) return;
     getRandomBooks();
     console.log("Books cập nhật:@@@@@", books);
     const interval = setInterval(getRandomBooks, 2000);
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
+  
 
   useEffect(() => {
     console.log("Slideshow books cập nhật:@@@@@", slideshowBooks);
