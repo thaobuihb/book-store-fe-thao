@@ -1,118 +1,85 @@
 import React from "react";
 import {
+  Box,
   Card,
   CardMedia,
   CardActionArea,
   Typography,
-  Box,
-  Grid,
-  useMediaQuery,
   useTheme,
+  useMediaQuery,
+  Grid,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
-
-const SlideshowContainer = styled(Box)(({ theme }) => ({
-  width: "100%",
-  backgroundColor: "#ffe4e1",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  borderRadius: theme.shape.borderRadius,
-  overflow: "hidden",
-  padding: theme.spacing(2),
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  height: 300,
-  [theme.breakpoints.down("sm")]: {
-    height: 260,
-    padding: theme.spacing(1),
-  },
-}));
 
 const Slideshow = ({ books }) => {
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  if (!books || books.length === 0) return null;
-
-  const displayBooks = isMobile ? [books[0]] : books.slice(0, 3);
+  const displayBooks = isMobile ? books.slice(0, 1) : books.slice(0, 3);
 
   return (
-    <SlideshowContainer>
+    <Box
+      sx={{
+        width: "100%",
+        height: { xs: 260, sm: 320, md: 400 },
+        backgroundColor: "#fce4ec",
+        backgroundImage: `url('/slideshowBooksBI.jpg')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "hidden",
+        borderRadius: 2,
+        px: 2,
+      }}
+    >
       {isMobile ? (
-        <Box
-          sx={{
-            width: "90%",
-            height: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            sx={{
-              width: "100%",
-              height: 230,
-              boxShadow: 3,
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <CardActionArea onClick={() => navigate(`/book/${displayBooks[0]._id}`)}>
-              <CardMedia
-                component="img"
-                image={displayBooks[0].img}
-                alt={displayBooks[0].name}
-                sx={{ width: "100%", height: 160, objectFit: "contain" }}
-              />
-              <Typography
-                variant="body2"
-                align="center"
-                sx={{
-                  fontWeight: "bold",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  mt: 1,
-                }}
-              >
-                {displayBooks[0].name}
-              </Typography>
-            </CardActionArea>
-          </Card>
-        </Box>
+        <Card sx={{ width: "90%", height: 230, boxShadow: 3 }}>
+          <CardActionArea>
+            <CardMedia
+              component="img"
+              image={displayBooks[0].img}
+              alt={displayBooks[0].name}
+              sx={{ height: 160, objectFit: "contain" }}
+            />
+            <Typography
+              align="center"
+              sx={{
+                mt: 1,
+                px: 1,
+                fontSize: 14,
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {displayBooks[0].name}
+            </Typography>
+          </CardActionArea>
+        </Card>
       ) : (
-        <Grid container spacing={2} justifyContent="center" alignItems="center">
+        <Grid container spacing={2} justifyContent="center">
           {displayBooks.map((book) => (
             <Grid item key={book._id}>
-              <Card
-                sx={{
-                  width: 240,
-                  height: 300,
-                  boxShadow: 3,
-                  borderRadius: 2,
-                  overflow: "hidden",
-                }}
-              >
-                <CardActionArea onClick={() => navigate(`/book/${book._id}`)}>
+              <Card sx={{ width: 240, height: 300, boxShadow: 3 }}>
+                <CardActionArea>
                   <CardMedia
                     component="img"
                     image={book.img}
                     alt={book.name}
-                    sx={{ width: "100%", height: 200, objectFit: "contain" }}
+                    sx={{ height: 200, objectFit: "contain" }}
                   />
                   <Typography
-                    variant="body1"
                     align="center"
                     sx={{
+                      mt: 1,
+                      px: 1,
+                      fontSize: 16,
                       fontWeight: "bold",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      mt: 1,
                     }}
                   >
                     {book.name}
@@ -123,7 +90,7 @@ const Slideshow = ({ books }) => {
           ))}
         </Grid>
       )}
-    </SlideshowContainer>
+    </Box>
   );
 };
 
