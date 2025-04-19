@@ -92,11 +92,11 @@ const Home = () => {
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
       <Box
         sx={{
-          position: "relative",
+          aspectRatio: "4 / 3",
           width: "100%",
-          overflow: "hidden",
           mb: 4,
-          height: { xs: 260, sm: 320, md: 400 },
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         <Slideshow books={slideshowBooks} />
