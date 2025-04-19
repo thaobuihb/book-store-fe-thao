@@ -93,6 +93,9 @@ const Home = () => {
     dispatch(getBooksByCategory(categoryIdForKids));
   }, [dispatch]);
   
+  useEffect(() => {
+    console.log("useEffect được kích hoạt! Books:", books);
+  }, [books]);
 
   useEffect(() => {
     console.log("useEffect chạy với books:@@@@@", books);
