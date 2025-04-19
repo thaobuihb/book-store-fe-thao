@@ -10,7 +10,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import OrderPage from "../pages/OrderPage";
 import RegisterPage from "../pages/RegisterPage";
 import UserProfilePage from "../pages/UserProfilePage";
-import HomePage from "../pages/homePage";
+import Home from "../pages/homePage";
 import WishlistPage from "../pages/WishlistPage";
 import BookPage from "../pages/BookPage";
 import ThankYouPage from "../pages/ThankYouPage";
@@ -53,7 +53,7 @@ function Router() {
           element={
             <>
               <h1>Trang Home</h1>
-              <HomePage />
+              <Home />
             </>
           }
         />
