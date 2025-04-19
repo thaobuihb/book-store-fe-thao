@@ -21,6 +21,9 @@ const SlideshowContainer = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   overflow: "hidden",
   padding: theme.spacing(2),
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(1),
   },
@@ -40,71 +43,61 @@ const Slideshow = ({ books }) => {
   return (
     <SlideshowContainer>
       {isMobile ? (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-          }}
-        >
-          {displayBooks.map((book) => (
-            <Card
-              key={book._id}
-              sx={{
-                width: 180,
-                height: 240,
-                boxShadow: 3,
-                borderRadius: 2,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+        displayBooks.map((book) => (
+          <Card
+            key={book._id}
+            sx={{
+              width: "90%",
+              height: 230,
+              boxShadow: 3,
+              borderRadius: 2,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <CardActionArea
+              onClick={() => navigate(`/book/${book._id}`)}
+              sx={{ height: "100%" }}
             >
-              <CardActionArea
-                onClick={() => navigate(`/book/${book._id}`)}
-                sx={{ height: "100%" }}
+              <Box
+                sx={{
+                  height: 160,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1,
+                }}
               >
-                <Box
+                <CardMedia
+                  component="img"
+                  image={book.img}
+                  alt={book.name}
                   sx={{
-                    height: 160,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    p: 1,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
                   }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={book.img}
-                    alt={book.name}
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                    }}
-                  />
-                </Box>
-                <Typography
-                  variant="body2"
-                  align="center"
-                  sx={{
-                    px: 1,
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {book.name}
-                </Typography>
-              </CardActionArea>
-            </Card>
-          ))}
-        </Box>
+                />
+              </Box>
+              <Typography
+                variant="body2"
+                align="center"
+                sx={{
+                  px: 1,
+                  fontWeight: "bold",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {book.name}
+              </Typography>
+            </CardActionArea>
+          </Card>
+        ))
       ) : (
-        // ✅ DESKTOP: hiển thị 3 sách bằng Grid
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {displayBooks.map((book) => (
             <Grid item key={book._id}>
