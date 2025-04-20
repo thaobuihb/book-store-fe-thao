@@ -53,7 +53,7 @@ const Home = () => {
   console.log("Slideshow books:@@@@@", slideshowBooks);
 
 
-  const totalPages = {
+  const totalPages = {  
     discounted: Math.ceil(discountedBooks.length / booksPerPage),
     newReleases: Math.ceil(newlyReleasedBooks.length / booksPerPage),
     category: Math.ceil(booksByCategory.length / booksPerPage),
