@@ -20,7 +20,7 @@ const Slideshow = ({ books }) => {
 
   if (!books || books.length === 0) return null;
 
-  const displayBooks = isMobile ? books.slice(0, 3) : books.slice(0, 3);
+  const displayBooks = books.slice(0, 3); 
 
   return (
     <Box
@@ -41,49 +41,60 @@ const Slideshow = ({ books }) => {
       {isMobile ? (
         <Swiper
           modules={[Autoplay, Pagination]}
-          autoplay={{ delay: 3000 }}
+          autoplay={{ delay: 4000 }}
           pagination={{ clickable: true }}
-          style={{ width: "100%", height: "100%" }}
+          slidesPerView={1}
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
         >
           {displayBooks.map((book) => (
             <SwiperSlide key={book._id}>
-              <Card
+              <Box
                 sx={{
-                  width: "90%",
-                  height: 220,
-                  boxShadow: 3,
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  mx: "auto",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
                 }}
               >
-                <CardActionArea>
-                  <CardMedia
-                    component="img"
-                    image={book.img}
-                    alt={book.name}
-                    sx={{
-                      width: "100%",
-                      height: 160,
-                      objectFit: "contain",
-                    }}
-                  />
-                  <Typography
-                    align="center"
-                    sx={{
-                      mt: 1,
-                      px: 1,
-                      fontSize: 14,
-                      fontWeight: "bold",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {book.name}
-                  </Typography>
-                </CardActionArea>
-              </Card>
+                <Card
+                  sx={{
+                    width: "90%",
+                    height: 220,
+                    boxShadow: 3,
+                    borderRadius: 2,
+                    overflow: "hidden",
+                  }}
+                >
+                  <CardActionArea>
+                    <CardMedia
+                      component="img"
+                      image={book.img}
+                      alt={book.name}
+                      sx={{
+                        width: "100%",
+                        height: 160,
+                        objectFit: "contain",
+                      }}
+                    />
+                    <Typography
+                      align="center"
+                      sx={{
+                        mt: 1,
+                        px: 1,
+                        fontSize: 14,
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {book.name}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Box>
             </SwiperSlide>
           ))}
         </Swiper>

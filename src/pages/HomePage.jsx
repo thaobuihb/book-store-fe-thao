@@ -1,4 +1,3 @@
-
 console.log("🔥 File HomePage.jsx đã được import");
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -27,7 +26,6 @@ const Home = () => {
   useEffect(() => {
     console.log("📦 useEffect của HomePage chạy!");
   }, []);
-  
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -42,7 +40,6 @@ const Home = () => {
   } = useSelector((state) => state.book);
   console.log("Dữ liệu từ Redux:@@@@@", books);
 
-
   const [currentPage, setCurrentPage] = useState({
     discounted: 1,
     newReleases: 1,
@@ -52,8 +49,7 @@ const Home = () => {
   const [slideshowBooks, setSlideshowBooks] = useState([]);
   console.log("Slideshow books:@@@@@", slideshowBooks);
 
-
-  const totalPages = {  
+  const totalPages = {
     discounted: Math.ceil(discountedBooks.length / booksPerPage),
     newReleases: Math.ceil(newlyReleasedBooks.length / booksPerPage),
     category: Math.ceil(booksByCategory.length / booksPerPage),
@@ -74,7 +70,6 @@ const Home = () => {
     setSlideshowBooks([selectedBook]);
     console.log("Đã cập nhật slideshowBooks:@@@@@", [selectedBook]);
   }, [books]);
-  
 
   const handlePageChange = (category, direction) => {
     setCurrentPage((prev) => {
@@ -102,7 +97,7 @@ const Home = () => {
     dispatch(getCategoryOfBooks());
     dispatch(getBooksByCategory(categoryIdForKids));
   }, [dispatch]);
-  
+
   useEffect(() => {
     console.log("useEffect được kích hoạt! Books:", books);
   }, [books]);
@@ -115,7 +110,6 @@ const Home = () => {
     const interval = setInterval(getRandomBooks, 2000);
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
-  
 
   useEffect(() => {
     console.log("Slideshow books cập nhật:@@@@@", slideshowBooks);
@@ -123,11 +117,12 @@ const Home = () => {
 
   return (
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
-      <Box sx={{ width: "100%", mb: 4 }}>
+      <Box sx={{ width: "100%", mb: 4, mt: 2 }}>
         <Slideshow books={slideshowBooks} />
       </Box>
 
       <BookSection
+        sx={{ mt: 5 }}
         title={t("home.newBooks")}
         category="newReleases"
         books={newlyReleasedBooks}
@@ -175,5 +170,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
