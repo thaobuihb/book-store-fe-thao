@@ -35,7 +35,6 @@ import { useTranslation } from "react-i18next";
 const OrdersPage = () => {
   const dispatch = useDispatch();
   const { orders = [], loading, error } = useSelector((state) => state.admin);
-  // console.log("Orders from Redux Store:", orders);
   const { t } = useTranslation();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -416,7 +415,7 @@ const OrdersPage = () => {
             Cập nhật đơn hàng
           </Typography>
 
-          {/* 🛑 Nếu đơn hàng đã trả hàng hoặc đã hủy, chỉ hiển thị thông báo lỗi */}
+          {/* Nếu đơn hàng đã trả hàng hoặc đã hủy, chỉ hiển thị thông báo lỗi */}
           {["Trả hàng", "Đã hủy"].includes(selectedOrder?.status) ? (
             <>
               <Typography
@@ -432,7 +431,7 @@ const OrdersPage = () => {
             </>
           ) : (
             <>
-              {/* 🚚 Trạng thái giao hàng */}
+              {/* Trạng thái giao hàng */}
               <Typography sx={{ mt: 2 }}>Trạng thái giao hàng</Typography>
               <Select
                 fullWidth
@@ -449,7 +448,7 @@ const OrdersPage = () => {
                 )}
               </Select>
 
-              {/* 🔄 Nếu không thể cập nhật trạng thái giao hàng */}
+              {/* Nếu không thể cập nhật trạng thái giao hàng */}
               {getAvailableShippingStatus(selectedOrder?.status).length ===
                 0 && (
                 <Typography color="error" sx={{ mt: 1 }}>

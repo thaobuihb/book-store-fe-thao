@@ -78,18 +78,18 @@ const BooksPage = () => {
 
   const [errors, setErrors] = useState({});
 
-  const validateForm = () => {
-    let tempErrors = {};
+  // const validateForm = () => {
+  //   let tempErrors = {};
 
-    if (!newBook.name.trim()) tempErrors.name = "Không được để trống";
-    if (!newBook.price) tempErrors.price = "Không được để trống";
-    if (!newBook.publicationDate)
-      tempErrors.publicationDate = "Không được để trống";
-    if (!newBook.categoryId) tempErrors.categoryId = "Không được để trống";
+  //   if (!newBook.name.trim()) tempErrors.name = "Không được để trống";
+  //   if (!newBook.price) tempErrors.price = "Không được để trống";
+  //   if (!newBook.publicationDate)
+  //     tempErrors.publicationDate = "Không được để trống";
+  //   if (!newBook.categoryId) tempErrors.categoryId = "Không được để trống";
 
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
+  //   setErrors(tempErrors);
+  //   return Object.keys(tempErrors).length === 0;
+  // };
 
   const [bookToUpdate, setBookToUpdate] = useState({});
 
@@ -143,9 +143,9 @@ const BooksPage = () => {
     });
   };
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+  // const handleTabChange = (event, newValue) => {
+  //   setTabValue(newValue);
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -248,11 +248,11 @@ const BooksPage = () => {
   const handleCloseUpdateModal = () => setOpenUpdateModal(false);
 
   //xoá sách
-  const handleOpen = () => setOpen(true);
+  // const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
 
-    // 👉 Reset dữ liệu form và lỗi khi đóng modal
+    // Reset dữ liệu form và lỗi khi đóng modal
     setNewBook({
       name: "",
       author: "",
@@ -267,10 +267,10 @@ const BooksPage = () => {
     setErrors({});
   };
 
-  const handleOpenDeleteModal = (bookId) => {
-    setBookToDelete(bookId);
-    setOpenDeleteModal(true);
-  };
+  // const handleOpenDeleteModal = (bookId) => {
+  //   setBookToDelete(bookId);
+  //   setOpenDeleteModal(true);
+  // };
 
   const handleCloseDeleteModal = () => {
     setOpenDeleteModal(false);
@@ -372,7 +372,7 @@ const BooksPage = () => {
             sx={{ marginRight: "3px" }}
           >
             <MenuItem value="Isbn">ISBN</MenuItem>
-            <MenuItem value="name"></MenuItem>
+            <MenuItem value="name">Tên sách</MenuItem>
             <MenuItem value="author">Tác giả</MenuItem>
             <MenuItem value="price">Giá</MenuItem>
             <MenuItem value="categoryId">Danh mục</MenuItem>
@@ -399,8 +399,20 @@ const BooksPage = () => {
           <Grid container spacing={2} mt={2}>
             {filteredBooks.length > 0 ? (
               filteredBooks.map((book) => (
-                <Grid item xs={12} sm={6} md={4} key={book._id}>
-                  <Card>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  key={book._id}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Card
+                    sx={{
+                      width: "100%",
+                      maxWidth: { xs: 280, sm: "100%" },
+                    }}
+                  >
                     <CardMedia
                       component="img"
                       height="140"

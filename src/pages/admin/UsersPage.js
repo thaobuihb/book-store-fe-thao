@@ -107,10 +107,10 @@ const UsersPage = () => {
       newErrors.confirmPassword = "Mật khẩu không khớp";
     }  
 
-    // ✅ Kiểm tra tên
+    // Kiểm tra tên
     if (!newManager.name.trim()) newErrors.name = "Vui lòng nhập tên.";
 
-    // ✅ Kiểm tra email
+    // Kiểm tra email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!newManager.email.trim()) {
       newErrors.email = "Vui lòng nhập email.";
@@ -120,7 +120,7 @@ const UsersPage = () => {
       newErrors.email = "Email đã tồn tại, vui lòng chọn email khác.";
     }
 
-    // ✅ Kiểm tra mật khẩu
+    // Kiểm tra mật khẩu
     const password = newManager.password.trim();
     const passwordRegex =
       /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;

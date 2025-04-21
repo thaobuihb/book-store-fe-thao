@@ -18,7 +18,6 @@ const DashboardPage = () => {
     console.log("Dashboard state:", { dashboard, loading, error });
   }, [dashboard, loading, error]);
 
-  // Hiển thị trạng thái loading khi dữ liệu đang được tải
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", marginTop: 4 }}>
@@ -27,7 +26,6 @@ const DashboardPage = () => {
     );
   }
 
-  // Hiển thị lỗi nếu có lỗi xảy ra
   if (error) {
     return (
       <Box sx={{ textAlign: "center", marginTop: 4 }}>
@@ -38,7 +36,6 @@ const DashboardPage = () => {
     );
   }
 
-  // Kiểm tra nếu dashboard không có dữ liệu
   if (!dashboard) {
     return (
       <Box sx={{ textAlign: "center", marginTop: 4 }}>
