@@ -20,10 +20,76 @@
 - Material UI (MUI)
 - Axios (REST API communication)
 - React Router DOM
-- Formik + Yup (form validation)
-- Dayjs (xử lý thời gian)
+- React Hook Form + Yup (form validation)
 - React Toastify (thông báo)
 - LocalStorage + Sync hóa dữ liệu
+
+---
+
+## 📦 Các thư viện sử dụng
+
+### ⚛️ React & Core
+- react
+- react-dom
+- react-router-dom
+- react-scripts
+
+### 🎨 UI Framework – Material UI (MUI)
+- @mui/material
+- @mui/icons-material
+- @mui/lab
+- @emotion/react
+- @emotion/styled
+
+### 🌐 Đa ngôn ngữ (i18n)
+- i18next
+- react-i18next
+- i18next-browser-languagedetector
+
+### 🧠 Form & Validation
+- react-hook-form
+- @hookform/resolvers
+- yup
+
+### 🧰 Redux & State Management
+- @reduxjs/toolkit
+- react-redux
+- redux-thunk
+- redux-persist
+- redux-mock-store
+
+### 🌐 HTTP & Token
+- axios
+- jwt-decode
+- js-cookie
+
+### 💸 Thanh toán – PayPal
+- @paypal/paypal-js
+- @paypal/react-paypal-js
+
+### 📦 Tải tệp & Upload
+- react-dropzone
+- cloudinary
+
+### 🔢 Format & Hiệu suất
+- numeral
+- web-vitals
+
+### 🎞️ Animation
+- @react-spring/web
+
+### 🛠 Khác
+- swiper
+- react-toastify
+- ajv, ajv-keywords
+
+### 🧪 Dev Dependencies
+- @babel/core
+- @babel/preset-env
+- @babel/preset-react
+- @babel/plugin-proposal-private-property-in-object
+- babel-jest
+- typescript
 
 ---
 
@@ -50,6 +116,7 @@ Tạo file `.env` trong thư mục `client`:
 
 ```env
 REACT_APP_BACKEND_API = http://localhost:5001/api
+REACT_APP_BACKEND_API = https://final-project-be-zsty.onrender.com
 ```
 
 ### Bước 4: Khởi chạy frontend
@@ -57,7 +124,7 @@ REACT_APP_BACKEND_API = http://localhost:5001/api
 npm start
 ```
 
-Truy cập tại: [http://localhost:3000](http://localhost:3000)
+Truy cập tại: [http://localhost:5001](http://localhost:5001)
 
 ---
 
@@ -115,6 +182,7 @@ client/
 ## Lộ trình phát triển (Roadmap)
 
 - [ ] Hỗ trợ giao diện Dark Mode
+- [ ] Đáp ứng trang trên di động
 - [ ] Thêm chức năng đánh giá & bình luận sách
 - [ ] Gợi ý sách theo hành vi và lịch sử người dùng
 - [ ] Đọc sách trực tuyến ngay trên website
@@ -125,4 +193,3 @@ client/
 - [ ] Xuất hóa đơn điện tử PDF sau khi mua hàng
 - [ ] Trang dashboard nâng cao (thống kê doanh thu, lượt truy cập...)
 ---
-
