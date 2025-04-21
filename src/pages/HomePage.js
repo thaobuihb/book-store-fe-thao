@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,7 +7,7 @@ import {
   getBooksByCategory,
   getCategoryOfBooks,
 } from "../features/book/bookSlice";
-import { Container, Typography, Box } from "@mui/material";
+import { Container, Typography, Box, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -16,19 +15,15 @@ import Slideshow from "../features/book/Slideshow";
 import BookSection from "../features/book/BookSection";
 import CategoryList from "../features/category/CategoryList";
 
-const booksPerPage = 7;
 const categoryIdForKids = "66ee3a6f1191f821c77c5708";
 
 const Home = () => {
-  console.log("🏁 Component Home đã được render!");
-
-  useEffect(() => {
-    console.log("📦 useEffect của HomePage chạy!");
-  }, []);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const booksPerPage = isMobile ? 4 : 7;
 
   const {
     books,
@@ -37,7 +32,6 @@ const Home = () => {
     booksByCategory,
     categoryOfBooks,
   } = useSelector((state) => state.book);
-  console.log("Dữ liệu từ Redux:@@@@@", books);
 
   const [currentPage, setCurrentPage] = useState({
     discounted: 1,
@@ -46,7 +40,6 @@ const Home = () => {
   });
 
   const [slideshowBooks, setSlideshowBooks] = useState([]);
-  console.log("Slideshow books:@@@@@", slideshowBooks);
 
   const totalPages = {
     discounted: Math.ceil(discountedBooks.length / booksPerPage),
@@ -91,21 +84,11 @@ const Home = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("useEffect được kích hoạt! Books:", books);
-  }, [books]);
-
-  useEffect(() => {
-    console.log("useEffect chạy với books:@@@@@", books);
     if (books.length === 0) return;
     getRandomBooks();
-    console.log("Books cập nhật:@@@@@", books);
     const interval = setInterval(getRandomBooks, 2000);
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
-
-  useEffect(() => {
-    console.log("Slideshow books cập nhật:@@@@@", slideshowBooks);
-  }, [slideshowBooks]);
 
   return (
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
@@ -118,6 +101,7 @@ const Home = () => {
         title={t("home.newBooks")}
         category="newReleases"
         books={newlyReleasedBooks}
+        booksPerPage={booksPerPage}
         getCurrentBooks={getCurrentBooks}
         currentPage={currentPage.newReleases}
         totalPages={totalPages.newReleases}
@@ -128,6 +112,7 @@ const Home = () => {
         title={t("home.discountedBooks")}
         category="discounted"
         books={discountedBooks}
+        booksPerPage={booksPerPage}
         getCurrentBooks={getCurrentBooks}
         currentPage={currentPage.discounted}
         totalPages={totalPages.discounted}
@@ -151,6 +136,7 @@ const Home = () => {
         title={t("home.kidsBooks")}
         category="category"
         books={booksByCategory}
+        booksPerPage={booksPerPage}
         getCurrentBooks={getCurrentBooks}
         currentPage={currentPage.category}
         totalPages={totalPages.category}
