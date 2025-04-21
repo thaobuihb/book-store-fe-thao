@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -9,106 +10,76 @@ import {
   useMediaQuery,
   Grid,
 } from "@mui/material";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
 
 const Slideshow = ({ books }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  if (!books || books.length === 0) return null;
-
-  const displayBooks = books.slice(0, 3); 
+  const displayBooks = isMobile
+    ? books.slice(0, 1)
+    : books.length >= 5
+    ? books.slice(0, 5)
+    : books;
+  const navigate = useNavigate();
+  const handleClick = (bookId) => {
+    navigate(`/book/${bookId}`);
+  };
 
   return (
     <Box
       sx={{
         width: "100%",
-        height: isMobile ? 260 : 400,
-        backgroundColor: "#f0f0f0",
+        height: { xs: 260, sm: 320, md: 400 },
+        backgroundColor: "#fce4ec",
+        backgroundImage: `url('/slideshowBooksBI.jpg')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
         overflow: "hidden",
         borderRadius: 2,
         px: 2,
-        position: "relative",
-        zIndex: 2,
       }}
     >
       {isMobile ? (
-        <Swiper
-          modules={[Autoplay, Pagination]}
-          autoplay={{ delay: 4000 }}
-          pagination={{ clickable: true }}
-          slidesPerView={1}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          {displayBooks.map((book) => (
-            <SwiperSlide key={book._id}>
-              <Box
+        displayBooks.length > 0 && (
+          <Card sx={{ width: "90%", height: 230, boxShadow: 3 }}>
+            <CardActionArea onClick={() => handleClick(displayBooks[0]._id)}>
+              <CardMedia
+                component="img"
+                image={displayBooks[0].img}
+                alt={displayBooks[0].name}
+                sx={{ height: 160, objectFit: "contain", mt: 4 }}
+              />
+              <Typography
+                align="center"
                 sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
+                  mt: 1,
+                  px: 1,
+                  fontSize: 14,
+                  fontWeight: "bold",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
-                <Card
-                  sx={{
-                    width: "90%",
-                    height: 220,
-                    boxShadow: 3,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                  }}
-                >
-                  <CardActionArea>
-                    <CardMedia
-                      component="img"
-                      image={book.img}
-                      alt={book.name}
-                      sx={{
-                        width: "100%",
-                        height: 160,
-                        objectFit: "contain",
-                      }}
-                    />
-                    <Typography
-                      align="center"
-                      sx={{
-                        mt: 1,
-                        px: 1,
-                        fontSize: 14,
-                        fontWeight: "bold",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {book.name}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Box>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+                {displayBooks[0].name}
+              </Typography>
+            </CardActionArea>
+          </Card>
+        )
       ) : (
         <Grid container spacing={2} justifyContent="center">
           {displayBooks.map((book) => (
             <Grid item key={book._id}>
               <Card sx={{ width: 240, height: 300, boxShadow: 3 }}>
-                <CardActionArea>
+                <CardActionArea onClick={() => handleClick(book._id)} a>
                   <CardMedia
                     component="img"
                     image={book.img}
                     alt={book.name}
-                    sx={{ height: 200, objectFit: "contain" }}
+                    sx={{ height: 200, objectFit: "contain", mt: 4 }}
                   />
                   <Typography
                     align="center"

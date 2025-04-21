@@ -3,7 +3,6 @@ import apiService from "../app/apiService";
 import { isValidToken } from "../utils/jwt";
 import {
   syncWishlistAfterLogin,
-  clearWishlist,
 } from "../features/wishlist/wishlistSlice";
 import {
   syncCartAfterLogin,

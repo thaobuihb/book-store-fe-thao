@@ -1,4 +1,3 @@
-console.log("🔥 File HomePage.jsx đã được import");
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,7 +8,7 @@ import {
   getBooksByCategory,
   getCategoryOfBooks,
 } from "../features/book/bookSlice";
-import { Container, Typography } from "@mui/material";
+import { Container, Typography, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -55,20 +54,13 @@ const Home = () => {
     category: Math.ceil(booksByCategory.length / booksPerPage),
   };
 
-  // const getRandomBooks = useCallback(() => {
-  //   const selected = new Set();
-  //   while (selected.size < 3 && books.length > 0) {
-  //     const randomIndex = Math.floor(Math.random() * books.length);
-  //     selected.add(books[randomIndex]);
-  //   }
-  //   setSlideshowBooks(Array.from(selected));
-  // }, [books]);
-
   const getRandomBooks = useCallback(() => {
-    if (books.length === 0) return;
-    const selectedBook = books[Math.floor(Math.random() * books.length)];
-    setSlideshowBooks([selectedBook]);
-    console.log("Đã cập nhật slideshowBooks:@@@@@", [selectedBook]);
+    const selected = new Set();
+    while (selected.size < 5 && books.length > 0) {
+      const randomIndex = Math.floor(Math.random() * books.length);
+      selected.add(books[randomIndex]);
+    }
+    setSlideshowBooks(Array.from(selected));
   }, [books]);
 
   const handlePageChange = (category, direction) => {

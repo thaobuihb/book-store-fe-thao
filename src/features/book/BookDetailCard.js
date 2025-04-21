@@ -4,6 +4,9 @@ import {
   Typography,
   IconButton,
   TextField,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -23,103 +26,125 @@ const BookDetailCard = ({
   isInWishlist,
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  if (!book) return null;
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between", m: 10 }}>
-      <Box sx={{ display: "flex", flexDirection: "column", width: "50%" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        gap: 4,
+        px: { xs: 2, md: 6 },
+        py: 4,
+      }}
+    >
+      {/* Hình ảnh & mô tả */}
+      <Box sx={{ flex: 1 }}>
         <Box
           component="img"
-          src={book?.img}
-          alt={book?.name}
-          sx={{ width: "100%", maxHeight: "400px", objectFit: "contain" }}
-        />
-        <Box component="a" sx={{ mt: 2 }}>
-          <Typography variant="h5">{book?.name}</Typography>
-          <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-            {t("author")} {book?.author}
-          </Typography>
-          <Typography sx={{ fontSize: "1.1rem" }} variant="body2">
-            {t("description")}: {book?.description}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          background: "#B2EBF2",
-          width: "30%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          borderRadius: 1,
-        }}
-      >
-        <Box sx={{ m: 3 }}>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("price")}: ${book?.price}
-          </Typography>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("discount")}: {book?.discountRate ? `${book.discountRate} %` : "0%"}
-          </Typography>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("discountedPrice")}: ${book?.discountedPrice}
-          </Typography>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("publisher")}: {book?.publisher}
-          </Typography>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("publicationDate")}: {book?.publicationDate}
-          </Typography>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("isbn")}: {book?.Isbn}
-          </Typography>
-          <Typography sx={{ m: 2 }} variant="h6">
-            {t("category")}: {book?.categoryName}
-          </Typography>
-        </Box>
-
-        <Box
+          src={book.img}
+          alt={book.name}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            m: 5,
+            width: "100%",
+            maxHeight: 400,
+            objectFit: "contain",
+            mb: 2,
+          }}
+        />
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          {book.name}
+        </Typography>
+        <Typography variant="body1" fontWeight="bold">
+          {t("author")} {book.author}
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            mt: 1,
+            maxHeight: isMobile ? 120 : "none",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: isMobile ? 4 : "unset",
+            WebkitBoxOrient: "vertical",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
-            }}
-          >
-            <IconButton sx={{ color: "black" }} onClick={() => onQuantityChange("dec")}>
-              <RemoveIcon />
+          {t("description")}: {book.description}
+        </Typography>
+      </Box>
+
+      {/* Thông tin chi tiết */}
+      <Box
+        sx={{
+          flex: { xs: 1, md: 0.5 },
+          backgroundColor: "#B2EBF2",
+          p: 3,
+          borderRadius: 2,
+          minWidth: { md: 250 },
+        }}
+      >
+        <Stack spacing={1} sx={{ pl: 5 }}>
+          <Typography variant="body1">
+            <strong>{t("price")}:</strong> ${book.price}
+          </Typography>
+          <Typography variant="body1">
+            <strong>{t("discount")}:</strong>{" "}
+            {book.discountRate ? `${book.discountRate}%` : "0%"}
+          </Typography>
+          <Typography variant="body1">
+            <strong>{t("discountedPrice")}:</strong> ${book.discountedPrice}
+          </Typography>
+          <Typography variant="body1">
+            <strong>{t("publisher")}:</strong> {book.publisher}
+          </Typography>
+          <Typography variant="body1">
+            <strong>{t("publicationDate")}:</strong> {book.publicationDate}
+          </Typography>
+          <Typography variant="body1">
+            <strong>{t("isbn")}:</strong> {book.Isbn}
+          </Typography>
+          <Typography variant="body1">
+            <strong>{t("category")}:</strong> {book.categoryName}
+          </Typography>
+        </Stack>
+
+        {/* Số lượng + nút hành động */}
+        <Stack spacing={2} alignItems="center" sx={{ mt: 10 }}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <IconButton onClick={() => onQuantityChange("dec")}>
+              <RemoveIcon sx={{ color: "black" }} />
             </IconButton>
             <TextField
               value={quantity}
-              sx={{ width: "50px", "& input": { textAlign: "center" } }}
+              sx={{ width: 60, "& input": { textAlign: "center" } }}
               inputProps={{ readOnly: true }}
             />
-            <IconButton sx={{ color: "black" }} onClick={() => onQuantityChange("inc")}>
-              <AddIcon />
+            <IconButton onClick={() => onQuantityChange("inc")}>
+              <AddIcon sx={{ color: "black" }} />
             </IconButton>
           </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2 }}>
-            <IconButton onClick={onAddToCart} sx={{ color: isInCart ? "orange" : "#0000FF" }}>
+          <Box display="flex" justifyContent="center" gap={2}>
+            <IconButton
+              onClick={onAddToCart}
+              sx={{ color: isInCart ? "orange" : "#0000FF" }}
+            >
               <ShoppingCartOutlinedIcon />
             </IconButton>
             <IconButton onClick={onBuyNow} sx={{ color: "#0000FF" }}>
               <MonetizationOnIcon />
             </IconButton>
-            <IconButton onClick={onToggleWishlist} sx={{ color: isInWishlist ? "secondary.main" : "#0000FF" }}>
+            <IconButton
+              onClick={onToggleWishlist}
+              sx={{ color: isInWishlist ? "secondary.main" : "#0000FF" }}
+            >
               <FavoriteIcon />
             </IconButton>
           </Box>
-        </Box>
+        </Stack>
       </Box>
     </Box>
   );
