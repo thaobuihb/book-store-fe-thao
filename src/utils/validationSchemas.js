@@ -78,5 +78,5 @@ export const buildUpdateProfileSchema = (t) =>
         return /^[0-9]{9,11}$/.test(value);
       }),
 
-    password: Yup.mixed().notRequired(),
+    password: Yup.string().notRequired(),
   });

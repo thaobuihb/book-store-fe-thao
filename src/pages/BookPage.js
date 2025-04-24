@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getBooks } from "../features/book/bookSlice";
 import { getCategories } from "../features/category/categorySlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Container } from "@mui/material";
+import { Container, Box } from "@mui/material";
 import BookItem from "../features/book/bookItem";
+import PaginationControls from "../components/PaginationControls";
 import { useTranslation } from "react-i18next";
 
 function BookPage() {
@@ -14,6 +15,10 @@ function BookPage() {
   const { t } = useTranslation();
 
   const { books, totalPages, currentPage } = useSelector((state) => state.book);
+  console.log("📦 Redux books:", books);
+  console.log("📘 Redux currentPage:", currentPage, typeof currentPage);
+  console.log("📄 Redux totalPages:", totalPages, typeof totalPages);
+
   const categories = useSelector((state) => state.category.categories);
 
   const category = searchParams.get("category") || "";
@@ -21,6 +26,21 @@ function BookPage() {
   const page = parseInt(searchParams.get("page")) || 1;
 
   const [categoryName, setCategoryName] = useState("");
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage);
+    navigate(`?${params.toString()}`);
+  };
+
+  useEffect(() => {
+    const rawQuery = searchParams.get("search");
+    const isQueryEmpty = rawQuery !== null && rawQuery.trim() === "";
+
+    if (isQueryEmpty && !category) {
+      navigate("/", { replace: true, state: { fromSearchClear: true } });
+    }
+  }, [searchParams, category, navigate]);
 
   useEffect(() => {
     if (categories.length === 0) {
@@ -33,40 +53,66 @@ function BookPage() {
       dispatch(getBooks(page, search));
     } else if (category) {
       dispatch(getBooks(page, "", "", "", category));
-  
+
       const selectedCategory = categories.find((cat) => cat._id === category);
       setCategoryName(
         selectedCategory ? selectedCategory.categoryName : "Unknown Category"
       );
+    } else {
+      dispatch(getBooks(page));
     }
-  }, [dispatch, search, category, page]);
-  
+  }, [dispatch, search, category, page, categories]);
+
+  const getTitle = () => {
+    if (search) return t("searchResults", { search });
+    if (category) return t("booksInCategory", { category: categoryName });
+    return t("allBooks");
+  };
 
   return (
     <Container maxWidth="lg">
-      {search ? (
-        <BookItem
-          title={t("searchResults", { search })}
-          books={books}
+      <BookItem
+        title={getTitle()}
+        books={books}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        handleNextPage={() => handlePageChange(page + 1)}
+        handlePrevPage={() => handlePageChange(page - 1)}
+      />
+      <Box
+        sx={{
+          position: "fixed",
+          top: "50%",
+          left: 20,
+          transform: "translateY(-50%)",
+          zIndex: 1500,
+        }}
+      >
+        <PaginationControls
+          category={category || search ? "filtered" : "all"}
+          position="left"
           currentPage={currentPage}
           totalPages={totalPages}
-          handleNextPage={() => navigate(`?page=${page + 1}&search=${search}`)}
-          handlePrevPage={() => navigate(`?page=${page - 1}&search=${search}`)}
+          onPageChange={(cat, direction) => handlePageChange(page + direction)}
         />
-      ) : (
-        <BookItem
-          title={t("booksInCategory", { category: categoryName })}
-          books={books}
+      </Box>
+      <Box
+        sx={{
+          position: "fixed",
+          top: "50%",
+          right: 20,
+          transform: "translateY(-50%)",
+          zIndex: 1500,
+        }}
+      >
+        <PaginationControls
+          category={category || search ? "filtered" : "all"}
+          position="right"
           currentPage={currentPage}
           totalPages={totalPages}
-          handleNextPage={() =>
-            navigate(`?page=${page + 1}&category=${category}`)
-          }
-          handlePrevPage={() =>
-            navigate(`?page=${page - 1}&category=${category}`)
-          }
+          onPageChange={(cat, direction) => handlePageChange(page + direction)}
         />
-      )}
+      </Box>
     </Container>
   );
 }

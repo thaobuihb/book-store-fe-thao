@@ -3,6 +3,7 @@
   "no": "No",
   "category": "Category",
   "book": "Book",
+  "allBooks": "All Books",
   "bestSeller": "Best Seller",
   "helpCenter": "Help Center",
   "login": "Login",
@@ -89,6 +90,7 @@
   "notFound.description": "The page you're looking for doesn't exist or has been moved.",
   "notFound.backHome": "Back to Home",
   "order": {
+    "invalidPhone": "Invalid phone number. Please enter 10 digits starting with 0.",
     "shippingAddress": "Shipping Address",
     "reviewOrder": "Review Your Order",
     "paymentMethod": "Payment Method",

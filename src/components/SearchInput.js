@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
-
+import React, { useEffect } from "react";
 import {
   TextField,
   InputAdornment,
@@ -7,57 +6,61 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 
 function SearchInput({ handleSubmit }) {
-  const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const hasNavigatedRef = useRef(false);
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const searchQuery = searchParams.get("search") || "";
 
   const onSubmit = (e) => {
     e.preventDefault();
-    const trimmedQuery = searchQuery.trim();
-    if (trimmedQuery) {
-      handleSubmit(trimmedQuery);
+    const trimmed = searchQuery.trim();
+
+    if (trimmed) {
+      handleSubmit(trimmed); 
+    } else {
+      navigate("/", { replace: true, state: { fromSearchClear: true } });
     }
   };
 
-  const handleChange = (event) => {
-    const value = event.target.value;
-    setSearchQuery(value);
-    console.log("searchQuery:******", value);
-  
-    if (value.trim() === "" && location.pathname !== "/") {
-      console.log("🔁 Navigating to /");
-      navigate("/");
-    }
-  };
-
-  // Reset cờ khi người dùng gõ lại
   useEffect(() => {
-    if (searchQuery.trim() !== "") {
-      hasNavigatedRef.current = false;
+    const raw = searchParams.get("search");
+    if (
+      location.pathname === "/books" &&
+      raw !== null &&
+      raw.trim() === ""
+    ) {
+      navigate("/", { replace: true, state: { fromSearchClear: true } });
     }
-  }, [searchQuery]);
+  }, [searchParams, location, navigate]);
 
   return (
     <form onSubmit={onSubmit} style={{ width: "100%" }}>
       <TextField
         value={searchQuery}
         placeholder={t("searchByName")}
-        onChange={handleChange}
+        onChange={(e) => {
+          const value = e.target.value;
+          setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            if (value.trim()) {
+              next.set("search", value);
+            } else {
+              next.delete("search"); 
+            }
+            return next;
+          });
+        }}
         sx={{ width: "100%" }}
         size="small"
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton
-                type="submit"
-                color="primary"
-                aria-label="search by name"
-              >
+              <IconButton type="submit" color="primary">
                 <SearchIcon />
               </IconButton>
             </InputAdornment>

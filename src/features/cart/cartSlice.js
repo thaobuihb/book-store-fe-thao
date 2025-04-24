@@ -197,7 +197,7 @@ export const clearAllCartItems = () => async (dispatch, getState) => {
     }
 
     dispatch(clearAllCartItemsSuccess());
-    toast.success("Coá giỏ hàng thành công");
+    toast.success("xoá giỏ hàng thành công");
   } catch (error) {
     console.error("Error clearing cart:", error.message);
     dispatch(hasError(error.message));

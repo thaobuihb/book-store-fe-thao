@@ -145,13 +145,21 @@ function MainHeader() {
 
             <RouterLink
               to="/best-seller"
-              style={{ textDecoration: "none", color: "white", margin: "0 16px" }}
+              style={{
+                textDecoration: "none",
+                color: "white",
+                margin: "0 16px",
+              }}
             >
               {t("bestSeller")}
             </RouterLink>
             <RouterLink
               to="/help"
-              style={{ textDecoration: "none", color: "white", margin: "0 16px" }}
+              style={{
+                textDecoration: "none",
+                color: "white",
+                margin: "0 16px",
+              }}
             >
               {t("helpCenter")}
             </RouterLink>
@@ -171,9 +179,13 @@ function MainHeader() {
               }}
             >
               <SearchInput
-                handleSubmit={(query) =>
-                  navigate(`/books?search=${query.trim()}`)
-                }
+                handleSubmit={(query) => {
+                  if (query) {
+                    navigate(`/books?search=${query}`);
+                  } else {
+                    navigate("/", { state: { fromSearchClear: true } });
+                  }
+                }}
               />
             </Box>
 
@@ -191,7 +203,9 @@ function MainHeader() {
               id="cart-icon"
               color="inherit"
               sx={{ mx: 0.5 }}
-              onClick={() => navigate("/cart", { state: { activeTab: "yourCart" } })}
+              onClick={() =>
+                navigate("/cart", { state: { activeTab: "yourCart" } })
+              }
             >
               <Badge badgeContent={cartItemCount} color="secondary">
                 <ShoppingCartOutlinedIcon />
@@ -215,10 +229,20 @@ function MainHeader() {
               open={openLangMenu}
               onClose={() => setLangAnchorEl(null)}
             >
-              <MenuItem onClick={() => { changeLanguage("vi"); setLangAnchorEl(null); }}>
+              <MenuItem
+                onClick={() => {
+                  changeLanguage("vi");
+                  setLangAnchorEl(null);
+                }}
+              >
                 🇻🇳 Tiếng Việt
               </MenuItem>
-              <MenuItem onClick={() => { changeLanguage("en"); setLangAnchorEl(null); }}>
+              <MenuItem
+                onClick={() => {
+                  changeLanguage("en");
+                  setLangAnchorEl(null);
+                }}
+              >
                 🇬🇧 English
               </MenuItem>
             </Menu>
@@ -248,10 +272,20 @@ function MainHeader() {
                   open={Boolean(anchorEl)}
                   onClose={() => setAnchorEl(null)}
                 >
-                  <MenuItem onClick={() => { setAnchorEl(null); navigate(`/user/${user._id}`); }}>
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      navigate(`/user/${user._id}`);
+                    }}
+                  >
                     {t("profile")}
                   </MenuItem>
-                  <MenuItem onClick={() => { setAnchorEl(null); handleLogout(); }}>
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      handleLogout();
+                    }}
+                  >
                     {t("logout")}
                   </MenuItem>
                 </Menu>

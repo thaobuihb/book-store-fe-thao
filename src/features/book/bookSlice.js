@@ -48,6 +48,7 @@ const bookSlice = createSlice({
       state.errors = null;
       state.books = action.payload.books;
       state.totalPages = action.payload.totalPages;
+      state.currentPage = action.payload.currentPage;
     },
     getDiscountedBooksSuccess(state, action) {
       state.discountedBooks = action.payload;
@@ -125,6 +126,7 @@ export const getBooks = (page, search, minPrice, maxPrice, category) => async (d
   try {
     const queryParams = new URLSearchParams({
       page: page || 1,
+      limit: 14,
       search: search || "",
       minPrice: minPrice || 0,
       maxPrice: maxPrice || Number.MAX_SAFE_INTEGER,

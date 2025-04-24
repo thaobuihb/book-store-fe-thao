@@ -8,7 +8,7 @@ import {
   getCategoryOfBooks,
 } from "../features/book/bookSlice";
 import { Container, Typography, Box, useMediaQuery } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import Slideshow from "../features/book/Slideshow";
@@ -17,10 +17,13 @@ import CategoryList from "../features/category/CategoryList";
 
 const categoryIdForKids = "66ee3a6f1191f821c77c5708";
 
+
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const location = useLocation();
+
 
   const isMobile = useMediaQuery("(max-width:600px)");
   const booksPerPage = isMobile ? 4 : 7;
@@ -90,6 +93,19 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [books, getRandomBooks]);
 
+  useEffect(() => {
+    if (location.state?.fromSearchClear) {
+      console.log("🧹 Xoá tìm kiếm → về Home");
+  
+      window.scrollTo(0, 0);
+  
+      setTimeout(() => {
+        dispatch(getBooks()); 
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 0);
+    }
+  }, [location, navigate, dispatch]);
+  
   return (
     <Container maxWidth={false} sx={{ width: "95%", mx: "auto" }}>
       <Box sx={{ width: "100%", mb: 4, mt: 2 }}>

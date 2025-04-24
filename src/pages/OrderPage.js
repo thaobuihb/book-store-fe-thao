@@ -101,13 +101,23 @@ const OrderPage = () => {
       "houseNumber",
     ];
     const newErrors = {};
+  
     required.forEach((field) => {
-      if (!formData[field]) newErrors[field] = true;
+      if (!formData[field]) {
+        newErrors[field] = true;
+      }
     });
+  
+    const phoneRegex = /^0\d{9}$/;
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      newErrors.phone = true;
+      toast.error(t("order.invalidPhone")); 
+    }
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  
   const buildOrderData = (method = paymentMethod) => {
     const baseData = {
       books: orderDetails.items.map((item) => ({

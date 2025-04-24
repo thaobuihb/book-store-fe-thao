@@ -2,6 +2,7 @@
   "yes": "Có",
   "no": "Không",
   "book": "Sách",
+  "allBooks": "Tất cả sách",
   "category": "Danh mục",
   "bestSeller": "Sách bán chạy",
   "helpCenter": "Trung tâm hỗ trợ",
@@ -89,6 +90,7 @@
   "notFound.description": "Trang bạn đang tìm không tồn tại hoặc đã bị di chuyển.",
   "notFound.backHome": "Quay về trang chủ",
   "order": {
+    "invalidPhone": "Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số và bắt đầu bằng 0.",
     "shippingAddress": "Địa chỉ giao hàng",
     "reviewOrder": "Kiểm tra lại đơn hàng",
     "paymentMethod": "Phương thức thanh toán",

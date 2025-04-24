@@ -40,7 +40,7 @@ function RegisterPage() {
   const { t } = useTranslation();
 
   const methods = useForm({
-    resolver: yupResolver(buildRegisterSchema),
+    resolver: yupResolver(buildRegisterSchema(t)),
     defaultValues,
   });
   const {
