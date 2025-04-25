@@ -54,6 +54,7 @@ export const syncWishlistAfterLogin = createAsyncThunk("wishlist/sync", async (u
       userId,
       localWishlist: sessionWishlist,
     });
+    sessionStorage.removeItem("wishlist");
     return response.data.books || [];
   } catch (error) {
     return rejectWithValue(error.message);

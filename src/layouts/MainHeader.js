@@ -281,6 +281,7 @@ function MainHeader() {
                     {t("profile")}
                   </MenuItem>
                   <MenuItem
+                    autoFocus={false}
                     onClick={() => {
                       setAnchorEl(null);
                       handleLogout();

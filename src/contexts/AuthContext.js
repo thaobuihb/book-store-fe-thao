@@ -5,8 +5,9 @@ import {
   syncWishlistAfterLogin,
 } from "../features/wishlist/wishlistSlice";
 import {
-  syncCartAfterLogin,clearCart
+  syncCartAfterLogin,clearCart, 
 } from "../features/cart/cartSlice";
+import { clearWishlist } from "../features/wishlist/wishlistSlice";
 
 import { loginSuccess, logoutSuccess } from "../features/user/userSlice";
 import { clearSearchResult } from "../features/order/orderSlice";
@@ -225,14 +226,11 @@ function AuthProvider({ children }) {
           console.error("Error syncing wishlist:", error.message);
         }
         reduxDispatch(clearCart());
+        reduxDispatch(clearWishlist());
+        sessionStorage.removeItem("wishlist");
+        sessionStorage.removeItem("cart");
       }
-
-      try {
-        await apiService.post(`/auth/logout`);
-      } catch (error) {
-        console.warn("Server logout failed:", error.message);
-      }
-
+      setSession(null);
       reduxDispatch(logoutSuccess());
       reduxDispatch(clearSearchResult());
       await initialize();

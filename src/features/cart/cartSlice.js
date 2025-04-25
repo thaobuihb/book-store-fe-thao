@@ -57,6 +57,7 @@ export const syncCartAfterLogin = createAsyncThunk("cart/syncAfterLogin", async 
   const sessionCart = loadCartFromSessionStorage();
   try {
     const response = await apiService.post(`/carts/sync`, { userId, cart: sessionCart });
+    sessionStorage.removeItem("cart");
     return response.data;
   } catch (error) {
     return rejectWithValue(error.message);
