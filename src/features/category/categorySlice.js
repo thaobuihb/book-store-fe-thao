@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import apiService from "../../app/apiService";
 
@@ -12,79 +12,90 @@ const initialState = {
   limit: 9,
 };
 
+export const getCategories = createAsyncThunk(
+  "category/getCategories",
+  async (_, thunkAPI) => {
+    try {
+      const response = await apiService.get(`/categories`);
+      return response.data;
+    } catch (error) {
+      toast.error(error.message);
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getPopularCategories = createAsyncThunk(
+  "category/getPopularCategories",
+  async (_, thunkAPI) => {
+    try {
+      const response = await apiService.get(`/categories/popular`);
+      return response.data;
+    } catch (error) {
+      toast.error(error.message);
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getCategoryDetail = createAsyncThunk(
+  "category/getCategoryDetail",
+  async (id, thunkAPI) => {
+    try {
+      const response = await apiService.get(`/categories/${id}`);
+      return response.data;
+    } catch (error) {
+      toast.error(error.message);
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 const categorySlice = createSlice({
   name: "category",
   initialState,
   reducers: {
-    startLoading(state) {
-      state.isLoading = true;
-      state.categories = [];
-    },
-    endLoading(state) {
-      state.isLoading = false;
-    },
-    hasError(state, action) {
-      state.isLoading = false;
-      state.errors = action.payload;
-    },
-    getCategoriesSuccess(state, action) {
-      state.errors = null;
-      state.categories = action.payload; 
-    },
-    getPopularCategoriesSuccess(state, action) {
-      state.errors = null;
-      state.popularCategories = action.payload; 
-    },
-    getCategoryDetailSuccess(state, action) {
-      state.isLoading = false;
-      state.errors = null;
-      state.selectedCategory = action.payload; 
-    },
     changePage(state, action) {
-      state.page = action.payload; // Thay đổi trang
+      state.page = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getCategories.pending, (state) => {
+        state.isLoading = true;
+        state.categories = [];
+      })
+      .addCase(getCategories.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.errors = null;
+        state.categories = action.payload;
+      })
+      .addCase(getCategories.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errors = action.payload;
+      })
+
+      .addCase(getPopularCategories.fulfilled, (state, action) => {
+        state.popularCategories = action.payload;
+        state.errors = null;
+      })
+
+      .addCase(getPopularCategories.rejected, (state, action) => {
+        state.errors = action.payload;
+      })
+
+      .addCase(getCategoryDetail.fulfilled, (state, action) => {
+        state.selectedCategory = action.payload;
+        state.isLoading = false;
+        state.errors = null;
+      })
+
+      .addCase(getCategoryDetail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errors = action.payload;
+      });
   },
 });
 
-// Action creators
-export const getCategories = () => async (dispatch) => {
-  dispatch(categorySlice.actions.startLoading());
-  try {
-    const response = await apiService.get(`/categories`);
-    console.log("Categories loaded:", response.data); // Kiểm tra dữ liệu từ API
-    dispatch(categorySlice.actions.getCategoriesSuccess(response.data));
-    dispatch(categorySlice.actions.endLoading());
-  } catch (error) {
-    dispatch(categorySlice.actions.hasError(error));
-    toast.error(error.message);
-  }
-};
-
-export const getPopularCategories = () => async (dispatch) => {
-  dispatch(categorySlice.actions.startLoading());
-  try {
-    const response = await apiService.get(`/categories/popular`);
-    dispatch(categorySlice.actions.getPopularCategoriesSuccess(response.data));
-    dispatch(categorySlice.actions.endLoading());
-  } catch (error) {
-    dispatch(categorySlice.actions.hasError(error));
-    toast.error(error.message);
-  }
-};
-
-export const getCategoryDetail = (id) => async (dispatch) => {
-  dispatch(categorySlice.actions.startLoading());
-  try {
-    const response = await apiService.get(`/categories/${id}`);
-    dispatch(categorySlice.actions.getCategoryDetailSuccess(response.data));
-  } catch (error) {
-    dispatch(categorySlice.actions.hasError(error));
-    toast.error(error.message);
-  }
-};
-
-export const changePage = (page) => (dispatch) => {
-  dispatch(categorySlice.actions.changePage(page));
-};
-
+export const { changePage } = categorySlice.actions;
 export default categorySlice.reducer;

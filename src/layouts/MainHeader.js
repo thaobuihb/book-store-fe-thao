@@ -22,7 +22,7 @@ import SearchInput from "../components/SearchInput";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useSelector, useDispatch } from "react-redux";
-import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
+// import { clearWishlistOnLogout } from "../features/wishlist/wishlistSlice";
 import { logoutSuccess } from "../features/user/userSlice";
 import { getCategories } from "../features/category/categorySlice";
 import { useTranslation } from "react-i18next";
@@ -52,7 +52,7 @@ function MainHeader() {
   const handleLogout = () => {
     logout(wishlist, user, () => {
       dispatch(logoutSuccess());
-      dispatch(clearWishlistOnLogout());
+      // dispatch(clearWishlistOnLogout());
       navigate("/");
     });
   };

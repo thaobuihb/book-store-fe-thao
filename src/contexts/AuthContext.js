@@ -5,9 +5,9 @@ import {
   syncWishlistAfterLogin,
 } from "../features/wishlist/wishlistSlice";
 import {
-  syncCartAfterLogin,
-  clearCartOnLogout,
+  syncCartAfterLogin,clearCart
 } from "../features/cart/cartSlice";
+
 import { loginSuccess, logoutSuccess } from "../features/user/userSlice";
 import { clearSearchResult } from "../features/order/orderSlice";
 import { fetchPurchaseHistory } from "../features/order/orderSlice";
@@ -224,7 +224,7 @@ function AuthProvider({ children }) {
         } catch (error) {
           console.error("Error syncing wishlist:", error.message);
         }
-        reduxDispatch(clearCartOnLogout());
+        reduxDispatch(clearCart());
       }
 
       try {

@@ -79,7 +79,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    dispatch(getBooks());
+    dispatch(getBooks({ page: 1 }));
     dispatch(getDiscountedBooks());
     dispatch(getNewlyReleasedBooks());
     dispatch(getCategoryOfBooks());

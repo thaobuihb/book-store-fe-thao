@@ -51,31 +51,6 @@ const defaultValues = {
     formState: { errors, isSubmitting },
   } = methods;
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     const user = await auth.login(data);
-
-  //     // Điều hướng dựa trên vai trò
-  //     if (user.role === "admin") {
-  //       navigate("/admin/dashboard", { replace: true });
-  //     } else {
-  //       const from = location.state?.from || "/";
-  //       navigate(from, { replace: true });
-  //     }
-
-  //     // Cập nhật thông tin người dùng nếu cần
-  //     if (setUserProfile) {
-  //       setUserProfile({
-  //         name: user.name,
-  //         avatar: user.avatar || null,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     reset();
-  //     setError("responseError", error);
-  //   }
-  // };
-
   const onSubmit = async (data) => {
     try {
       const user = await auth.login(data);

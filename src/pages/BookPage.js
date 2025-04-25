@@ -49,17 +49,16 @@ function BookPage() {
   }, [dispatch, categories.length]);
 
   useEffect(() => {
-    if (search) {
-      dispatch(getBooks(page, search));
-    } else if (category) {
-      dispatch(getBooks(page, "", "", "", category));
+    const minPrice = 0;
+    const maxPrice = 1000000;
 
+    dispatch(getBooks({ page, search, minPrice, maxPrice, category }));
+
+    if (category) {
       const selectedCategory = categories.find((cat) => cat._id === category);
       setCategoryName(
         selectedCategory ? selectedCategory.categoryName : "Unknown Category"
       );
-    } else {
-      dispatch(getBooks(page));
     }
   }, [dispatch, search, category, page, categories]);
 
