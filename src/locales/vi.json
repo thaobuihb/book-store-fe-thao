@@ -139,7 +139,8 @@
     "password": "Mật khẩu",
     "passwordConfirmation": "Xác nhận mật khẩu",
     "button": "Đăng ký",
-    "errorMessage": "Đăng ký thất bại. Vui lòng thử lại."
+    "errorMessage": "Đăng ký thất bại. Vui lòng thử lại.",
+    "passwordMismatch": "Mật khẩu không khớp"
   },
   "resetPassword": {
     "title": "Đặt lại mật khẩu",

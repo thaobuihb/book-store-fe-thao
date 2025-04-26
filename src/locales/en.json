@@ -139,7 +139,8 @@
     "password": "Password",
     "passwordConfirmation": "Password Confirmation",
     "button": "Register",
-    "errorMessage": "Registration failed. Please try again."
+    "errorMessage": "Registration failed. Please try again.",
+    "passwordMismatch": "Passwords do not match"
   },
   "resetPassword": {
     "title": "Reset Your Password",
