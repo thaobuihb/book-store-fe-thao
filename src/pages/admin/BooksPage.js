@@ -77,25 +77,12 @@ const BooksPage = () => {
   });
 
   const [errors, setErrors] = useState({});
-
-  // const validateForm = () => {
-  //   let tempErrors = {};
-
-  //   if (!newBook.name.trim()) tempErrors.name = "Không được để trống";
-  //   if (!newBook.price) tempErrors.price = "Không được để trống";
-  //   if (!newBook.publicationDate)
-  //     tempErrors.publicationDate = "Không được để trống";
-  //   if (!newBook.categoryId) tempErrors.categoryId = "Không được để trống";
-
-  //   setErrors(tempErrors);
-  //   return Object.keys(tempErrors).length === 0;
-  // };
-
   const [bookToUpdate, setBookToUpdate] = useState({});
 
   const [currentPage, setCurrentPage] = useState(1);
   const [tabValue, setTabValue] = useState(0);
   const [showFullDescriptions, setShowFullDescriptions] = useState({});
+  const booksToShow = tabValue === 0 ? books : deletedBooks;
 
   // Fetch data
   useEffect(() => {
@@ -133,6 +120,17 @@ const BooksPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [dispatch, currentPage, hasMore, loading, tabValue]);
 
+  useEffect(() => {
+    if (tabValue === 0) {
+      const delayDebounce = setTimeout(() => {
+        dispatch(fetchBooks({ page: 1, search: searchTerm }));
+        setCurrentPage(1);
+      }, 500);
+
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [searchTerm, dispatch, tabValue]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewBook((prev) => ({ ...prev, [name]: value }));
@@ -142,10 +140,6 @@ const BooksPage = () => {
       return newErrors;
     });
   };
-
-  // const handleTabChange = (event, newValue) => {
-  //   setTabValue(newValue);
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -159,7 +153,7 @@ const BooksPage = () => {
       categoryId: newBook.categoryId?.trim(),
     };
 
-    console.log("🚀 GỬI LÊN BACKEND:", sanitizedBook);
+    // console.log("🚀 GỬI LÊN BACKEND:", sanitizedBook);
 
     try {
       await dispatch(createBook(sanitizedBook)).unwrap();
@@ -267,11 +261,6 @@ const BooksPage = () => {
     setErrors({});
   };
 
-  // const handleOpenDeleteModal = (bookId) => {
-  //   setBookToDelete(bookId);
-  //   setOpenDeleteModal(true);
-  // };
-
   const handleCloseDeleteModal = () => {
     setOpenDeleteModal(false);
     setBookToDelete(null);
@@ -332,28 +321,28 @@ const BooksPage = () => {
     setSearchCriteria(e.target.value);
   };
 
-  const filteredBooks = (tabValue === 0 ? books : deletedBooks).filter(
-    (book) => {
-      if (!searchTerm) return true;
-      if (searchCriteria === "categoryId") {
-        const category = categories.find((cat) => cat._id === book.category);
-        return category
-          ? category.categoryName
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
-          : false;
-      }
+  // const filteredBooks = (tabValue === 0 ? books : deletedBooks).filter(
+  //   (book) => {
+  //     if (!searchTerm) return true;
+  //     if (searchCriteria === "categoryId") {
+  //       const category = categories.find((cat) => cat._id === book.category);
+  //       return category
+  //         ? category.categoryName
+  //             .toLowerCase()
+  //             .includes(searchTerm.toLowerCase())
+  //         : false;
+  //     }
 
-      const value = book[searchCriteria];
-      if (typeof value === "string") {
-        return value.toLowerCase().includes(searchTerm.toLowerCase());
-      }
-      if (typeof value === "number") {
-        return value.toString().includes(searchTerm);
-      }
-      return false;
-    }
-  );
+  //     const value = book[searchCriteria];
+  //     if (typeof value === "string") {
+  //       return value.toLowerCase().includes(searchTerm.toLowerCase());
+  //     }
+  //     if (typeof value === "number") {
+  //       return value.toString().includes(searchTerm);
+  //     }
+  //     return false;
+  //   }
+  // );
 
   return (
     <Container>
@@ -397,8 +386,8 @@ const BooksPage = () => {
       {tabValue === 0 && (
         <>
           <Grid container spacing={2} mt={2}>
-            {filteredBooks.length > 0 ? (
-              filteredBooks.map((book) => (
+            {booksToShow.length > 0 ? (
+              booksToShow.map((book) => (
                 <Grid
                   item
                   xs={12}
