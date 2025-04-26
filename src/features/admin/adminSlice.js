@@ -83,11 +83,11 @@ export const createBook = createAsyncThunk(
 // Lấy danh sách sách
 export const fetchBooks = createAsyncThunk(
   "admin/fetchBooks",
-  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, search = "" }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(
-        `/admin/books?page=${page}&limit=${limit}`
-      );
+      const response = await apiService.get(`/admin/books`, {
+        params: { page, limit, search },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(

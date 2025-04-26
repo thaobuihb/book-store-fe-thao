@@ -82,17 +82,15 @@ const BooksPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [tabValue, setTabValue] = useState(0);
   const [showFullDescriptions, setShowFullDescriptions] = useState({});
-  const booksToShow = tabValue === 0 ? books : deletedBooks;
 
   // Fetch data
   useEffect(() => {
     if (tabValue === 0) {
-      dispatch(fetchBooks({ page: 1 }));
+      dispatch(fetchBooks({ page: 1, }));
       dispatch(fetchCategories());
     } else {
       dispatch(fetchDeletedBooks());
     }
-    setSearchTerm("");
   }, [dispatch, tabValue]);
 
   // Handle scroll for infinite scroll
@@ -321,28 +319,27 @@ const BooksPage = () => {
     setSearchCriteria(e.target.value);
   };
 
-  // const filteredBooks = (tabValue === 0 ? books : deletedBooks).filter(
-  //   (book) => {
-  //     if (!searchTerm) return true;
-  //     if (searchCriteria === "categoryId") {
-  //       const category = categories.find((cat) => cat._id === book.category);
-  //       return category
-  //         ? category.categoryName
-  //             .toLowerCase()
-  //             .includes(searchTerm.toLowerCase())
-  //         : false;
-  //     }
+  const booksToShow = tabValue === 0 ? books : deletedBooks;
 
-  //     const value = book[searchCriteria];
-  //     if (typeof value === "string") {
-  //       return value.toLowerCase().includes(searchTerm.toLowerCase());
-  //     }
-  //     if (typeof value === "number") {
-  //       return value.toString().includes(searchTerm);
-  //     }
-  //     return false;
-  //   }
-  // );
+  const filteredBooks = booksToShow.filter((book) => {
+    if (!searchTerm.trim()) return true;
+
+    let value = book[searchCriteria];
+    if (searchCriteria === "Isbn" && book.Isbn) value = book.Isbn;
+    if (searchCriteria === "categoryId") {
+      const category = categories.find((cat) => cat._id === book.category);
+      value = category ? category.categoryName : "";
+    }
+    if (typeof value === "string") {
+      const pattern = searchTerm.trim().split(/\s+/).join(".*");
+      const regex = new RegExp(pattern, "i");
+      return regex.test(value);
+    }
+    if (typeof value === "number") {
+      return value.toString().includes(searchTerm);
+    }
+    return false;
+  });
 
   return (
     <Container>
@@ -386,8 +383,8 @@ const BooksPage = () => {
       {tabValue === 0 && (
         <>
           <Grid container spacing={2} mt={2}>
-            {booksToShow.length > 0 ? (
-              booksToShow.map((book) => (
+            {filteredBooks.length > 0 ? (
+              filteredBooks.map((book) => (
                 <Grid
                   item
                   xs={12}
