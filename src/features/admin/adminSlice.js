@@ -229,23 +229,6 @@ export const updateOrderShippingStatus = createAsyncThunk(
   }
 );
 
-// Cập nhật trạng thái thanh toán
-export const updateOrderPaymentStatus = createAsyncThunk(
-  "admin/updateOrderPaymentStatus",
-  async ({ orderId, paymentStatus }, { rejectWithValue }) => {
-    try {
-      const response = await apiService.put(
-        `/orders/${orderId}/payment-status`,
-        { paymentStatus }
-      );
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to update payment status"
-      );
-    }
-  }
-);
 
 // Cập nhật địa chỉ giao hàng
 export const updateShippingAddress = createAsyncThunk(
@@ -702,22 +685,6 @@ const adminSlice = createSlice({
         );
       })
       .addCase(updateOrderShippingStatus.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Xử lý trạng thái thanh toán
-      .addCase(updateOrderPaymentStatus.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateOrderPaymentStatus.fulfilled, (state, action) => {
-        state.loading = false;
-        const updatedOrder = action.payload;
-        state.orders = state.orders.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
-        );
-      })
-      .addCase(updateOrderPaymentStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

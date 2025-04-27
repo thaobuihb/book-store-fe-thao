@@ -26,7 +26,6 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   fetchOrders,
   //   updateOrderStatus,
-  updateOrderPaymentStatus,
   updateOrderShippingStatus,
   updateShippingAddress,
 } from "../../features/admin/adminSlice";
@@ -42,7 +41,6 @@ const OrdersPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [updatedPaymentStatus, setUpdatedPaymentStatus] = useState("");
   const [updatedOrderStatus, setUpdatedOrderStatus] = useState("");
   const [cancelOrder, setCancelOrder] = useState(false);
   const [updatedShippingAddress, setUpdatedShippingAddress] = useState({});
@@ -64,33 +62,16 @@ const OrdersPage = () => {
     }
   };
 
-  const getAvailablePaymentStatus = (
-    currentPaymentStatus,
-    currentOrderStatus
-  ) => {
-    if (
-      ["Trả hàng", "Đã hủy"].includes(currentOrderStatus) &&
-      currentPaymentStatus === "Đã thanh toán"
-    ) {
-      return ["Đã hoàn tiền"];
-    }
-    if (
-      currentOrderStatus === "Đã nhận hàng" &&
-      currentPaymentStatus === "Đã thanh toán"
-    ) {
-      return ["Đã hoàn tiền"];
-    }
+  const getAvailablePaymentStatus = (currentPaymentStatus) => {
     if (currentPaymentStatus === "Chưa thanh toán") {
       return ["Đã thanh toán"];
     }
-
-    return [];
+    if (currentPaymentStatus === "Đã thanh toán") {
+      return ["Đã hoàn tiền"];
+    }
+    return []; 
   };
 
-  const availablePaymentStatus = getAvailablePaymentStatus(
-    selectedOrder?.paymentStatus,
-    selectedOrder?.status
-  );
 
   const cannotUpdateOrder =
     getAvailableShippingStatus(selectedOrder?.status).length === 0 &&
@@ -110,7 +91,6 @@ const OrdersPage = () => {
   const handleOpenModal = (order) => {
     setSelectedOrder(order);
     setUpdatedShippingStatus(order.shippingAddress);
-    setUpdatedPaymentStatus(order.paymentStatus);
     setUpdatedShippingAddress(order.shippingAddress);
     setUpdatedOrderStatus(order.status);
     setCancelOrder(order.status === "Đã hủy");
@@ -139,25 +119,6 @@ const OrdersPage = () => {
     }
   };
 
-  const handleUpdateOrderPaymentStatus = () => {
-    if (selectedOrder) {
-      dispatch(
-        updateOrderPaymentStatus({
-          orderId: selectedOrder._id,
-          paymentStatus: updatedPaymentStatus,
-        })
-      )
-        .unwrap()
-        .then(() => {
-          console.log("Payment status updated successfully");
-          dispatch(fetchOrders());
-          handleCloseModal();
-        })
-        .catch((error) => {
-          console.error("Failed to update payment status:", error);
-        });
-    }
-  };
 
   const handleUpdateShippingAddress = () => {
     if (selectedOrder && updatedShippingAddress) {
@@ -456,28 +417,6 @@ const OrdersPage = () => {
                   hoặc trả lại.
                 </Typography>
               )}
-
-              <Typography sx={{ mt: 2 }}>Trạng thái thanh toán</Typography>
-              {availablePaymentStatus.length === 0 ? (
-                <Typography color="error">
-                  {selectedOrder?.status === "Đã hủy" ||
-                  selectedOrder?.status === "Trả hàng"
-                    ? "Trạng thái thanh toán đã được cập nhật tự động do đơn hàng bị hủy hoặc trả hàng."
-                    : "Không có trạng thái thanh toán nào có thể cập nhật."}
-                </Typography>
-              ) : (
-                <Select
-                  fullWidth
-                  value={updatedPaymentStatus}
-                  onChange={(e) => setUpdatedPaymentStatus(e.target.value)}
-                >
-                  {availablePaymentStatus.map((status, index) => (
-                    <MenuItem key={index} value={status}>
-                      {status}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
               {/* 📍 Địa chỉ giao hàng (chỉ cập nhật khi đơn hàng đang xử lý) */}
               <Typography sx={{ mt: 2 }}>{t("address")}</Typography>
               {selectedOrder?.status === "Đang xử lý" ? (
@@ -533,17 +472,6 @@ const OrdersPage = () => {
                       )
                     ) {
                       handleUpdateOrderShippingStatus();
-                    }
-
-                    if (
-                      updatedPaymentStatus &&
-                      updatedPaymentStatus !== selectedOrder.paymentStatus &&
-                      getAvailablePaymentStatus(
-                        selectedOrder.paymentStatus,
-                        selectedOrder.status
-                      ).includes(updatedPaymentStatus)
-                    ) {
-                      handleUpdateOrderPaymentStatus();
                     }
 
                     if (
